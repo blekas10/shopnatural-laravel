@@ -16,62 +16,65 @@ import {
     CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
-
-const navigationLinks = [
-    { label: 'Home', href: '/' },
-    { label: 'Products', href: '/products' },
-    { label: 'About', href: '/about' },
-];
-
-const categorySections = [
-    {
-        title: 'Face Care',
-        items: [
-            { label: 'Cleansers', href: '/categories/cleansers' },
-            { label: 'Moisturizers', href: '/categories/moisturizers' },
-            { label: 'Serums', href: '/categories/serums' },
-            { label: 'Face Masks', href: '/categories/face-masks' },
-        ],
-    },
-    {
-        title: 'Body Care',
-        items: [
-            { label: 'Body Lotions', href: '/categories/body-lotions' },
-            { label: 'Body Wash', href: '/categories/body-wash' },
-            { label: 'Body Scrubs', href: '/categories/body-scrubs' },
-            { label: 'Hand Care', href: '/categories/hand-care' },
-        ],
-    },
-    {
-        title: 'Hair Care',
-        items: [
-            { label: 'Shampoo', href: '/categories/shampoo' },
-            { label: 'Conditioner', href: '/categories/conditioner' },
-            { label: 'Hair Masks', href: '/categories/hair-masks' },
-            { label: 'Styling', href: '/categories/styling' },
-        ],
-    },
-    {
-        title: 'Makeup',
-        items: [
-            { label: 'Foundation', href: '/categories/foundation' },
-            { label: 'Lipstick', href: '/categories/lipstick' },
-            { label: 'Mascara', href: '/categories/mascara' },
-            { label: 'Eyeshadow', href: '/categories/eyeshadow' },
-        ],
-    },
-];
+import LocaleSwitcher from '@/components/locale-switcher';
+import { useTranslation } from '@/hooks/use-translation';
 
 interface MainHeaderProps {
     className?: string;
 }
 
 export default function MainHeader({ className }: MainHeaderProps) {
+    const { t, route } = useTranslation();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [mobileCategoriesOpen, setMobileCategoriesOpen] = useState(false);
     const [desktopCategoriesOpen, setDesktopCategoriesOpen] = useState(false);
     const [mobileSectionsOpen, setMobileSectionsOpen] = useState<Record<string, boolean>>({});
     const dropdownRef = useRef<HTMLDivElement>(null);
+
+    const navigationLinks = [
+        { label: t('nav.home'), href: route('home') },
+        { label: t('nav.shop'), href: route('products.index') },
+        { label: t('nav.about'), href: route('about') },
+    ];
+
+    const categorySections = [
+        {
+            title: 'Face Care',
+            items: [
+                { label: 'Cleansers', href: '/categories/cleansers' },
+                { label: 'Moisturizers', href: '/categories/moisturizers' },
+                { label: 'Serums', href: '/categories/serums' },
+                { label: 'Face Masks', href: '/categories/face-masks' },
+            ],
+        },
+        {
+            title: 'Body Care',
+            items: [
+                { label: 'Body Lotions', href: '/categories/body-lotions' },
+                { label: 'Body Wash', href: '/categories/body-wash' },
+                { label: 'Body Scrubs', href: '/categories/body-scrubs' },
+                { label: 'Hand Care', href: '/categories/hand-care' },
+            ],
+        },
+        {
+            title: 'Hair Care',
+            items: [
+                { label: 'Shampoo', href: '/categories/shampoo' },
+                { label: 'Conditioner', href: '/categories/conditioner' },
+                { label: 'Hair Masks', href: '/categories/hair-masks' },
+                { label: 'Styling', href: '/categories/styling' },
+            ],
+        },
+        {
+            title: 'Makeup',
+            items: [
+                { label: 'Foundation', href: '/categories/foundation' },
+                { label: 'Lipstick', href: '/categories/lipstick' },
+                { label: 'Mascara', href: '/categories/mascara' },
+                { label: 'Eyeshadow', href: '/categories/eyeshadow' },
+            ],
+        },
+    ];
 
     // Click-outside detection for desktop categories dropdown
     useEffect(() => {
@@ -142,7 +145,7 @@ export default function MainHeader({ className }: MainHeaderProps) {
                             aria-expanded={desktopCategoriesOpen}
                             aria-haspopup="true"
                         >
-                            Categories
+                            {t('nav.categories')}
                             <ChevronDown
                                 className={cn(
                                     'size-4 transition-transform duration-300',
@@ -151,18 +154,23 @@ export default function MainHeader({ className }: MainHeaderProps) {
                             />
                         </button>
                     </div>
+
+                    {/* Desktop Locale Switcher */}
+                    <LocaleSwitcher />
                 </nav>
 
-                {/* Mobile Menu Button */}
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="md:hidden"
-                    onClick={() => setMobileMenuOpen(true)}
-                    aria-label="Open menu"
-                >
-                    <Menu className="size-6" />
-                </Button>
+                {/* Mobile Actions */}
+                <div className="flex items-center gap-2 md:hidden">
+                    <LocaleSwitcher />
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setMobileMenuOpen(true)}
+                        aria-label="Open menu"
+                    >
+                        <Menu className="size-6" />
+                    </Button>
+                </div>
             </div>
 
             {/* Full-width categories mega menu */}
@@ -248,7 +256,7 @@ export default function MainHeader({ className }: MainHeaderProps) {
                                         : 'text-foreground hover:text-gold after:w-0 hover:after:w-0'
                                 )}
                             >
-                                <span>Categories</span>
+                                <span>{t('nav.categories')}</span>
                                 <ChevronDown
                                     className={cn(
                                         'size-4 transition-transform duration-300',

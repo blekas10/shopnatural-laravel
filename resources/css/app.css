@@ -144,6 +144,10 @@
         @apply border-border;
     }
 
+    html {
+        overflow-y: scroll; /* Prevent layout shift from scrollbar */
+    }
+
     body {
         @apply bg-background text-foreground;
     }

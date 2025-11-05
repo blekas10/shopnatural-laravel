@@ -6,11 +6,24 @@ import FeaturesSection from '@/components/features-section';
 import ProductsSection from '@/components/products-section';
 import Footer from '@/components/footer';
 
-interface HomeProps {
-    canRegister?: boolean;
+interface Product {
+    id: number;
+    name: string;
+    title: string | null;
+    slug: string;
+    price: number;
+    compareAtPrice: number | null;
+    image: string;
+    isOnSale: boolean;
+    salePercentage: number | null;
 }
 
-export default function Home({ canRegister }: HomeProps) {
+interface HomeProps {
+    canRegister?: boolean;
+    products: Product[];
+}
+
+export default function Home({ canRegister, products }: HomeProps) {
     return (
         <>
             <Head title="Home" />
@@ -20,7 +33,7 @@ export default function Home({ canRegister }: HomeProps) {
                 <HeroSection />
                 <FeaturesSection />
                 <PromisesSection />
-                <ProductsSection />
+                <ProductsSection products={products} />
                 <Footer />
             </div>
         </>

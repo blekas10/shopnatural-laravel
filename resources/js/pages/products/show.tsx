@@ -1,0 +1,508 @@
+import { Head, Link, router } from '@inertiajs/react';
+import MainHeader from '@/components/main-header';
+import Footer from '@/components/footer';
+import { useTranslation } from '@/hooks/use-translation';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronRight, ShoppingCart, Check, X, Heart } from 'lucide-react';
+import { useState } from 'react';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import type { ProductDetail, ProductVariant, ProductImage, Category, BaseProduct } from '@/types/product';
+
+
+interface ProductShowProps {
+    product: ProductDetail;
+    relatedProducts: BaseProduct[];
+}
+
+export default function ProductShow({ product, relatedProducts }: ProductShowProps) {
+    const { t, route } = useTranslation();
+    const [selectedImage, setSelectedImage] = useState(product.images?.[0]);
+    const [activeTab, setActiveTab] = useState<'description' | 'additional' | 'ingredients'>('description');
+
+    // Variant selection state
+    const hasVariants = product.variants && product.variants.length > 0;
+    const defaultVariant = hasVariants
+        ? product.variants.find(v => v.isDefault) || product.variants[0]
+        : null;
+    const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(defaultVariant);
+
+    // Get current product data based on variant selection
+    const currentPrice = selectedVariant?.price ?? product.price;
+    const currentCompareAtPrice = selectedVariant?.compareAtPrice ?? product.compareAtPrice;
+    const currentSku = selectedVariant?.sku ?? product.sku;
+    const currentInStock = selectedVariant?.inStock ?? product.inStock;
+    const currentStock = selectedVariant?.stock ?? 0;
+
+    // Calculate if on sale
+    const isOnSale = currentCompareAtPrice !== null && currentCompareAtPrice > currentPrice;
+    const salePercentage = isOnSale
+        ? Math.round(((currentCompareAtPrice - currentPrice) / currentCompareAtPrice) * 100)
+        : null;
+
+    const handleAddToCart = () => {
+        // Add to cart logic here
+        console.log('Add to cart:', {
+            productId: product.id,
+            variantId: selectedVariant?.id,
+        });
+    };
+
+    return (
+        <>
+            <Head title={product.name} />
+
+            <div className="min-h-screen bg-background pb-24 lg:pb-0">
+                <MainHeader />
+
+                {/* Breadcrumb */}
+                <div className="border-b border-border">
+                    <div className="container mx-auto px-4 py-4 md:px-6 lg:px-8">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <Link href={route('home')} className="hover:text-foreground transition-colors">
+                                {t('nav.home', 'Home')}
+                            </Link>
+                            <ChevronRight className="size-4" />
+                            <Link href={route('products.index')} className="hover:text-foreground transition-colors">
+                                {t('products.title', 'Products')}
+                            </Link>
+                            <ChevronRight className="size-4" />
+                            <span className="text-foreground">{product.name}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="container mx-auto px-4 py-8 md:px-6 md:py-12 lg:px-8">
+                    {/* Product Section */}
+                    <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
+                        {/* Image Gallery */}
+                        <div className="space-y-4">
+                            {/* Main Image */}
+                            <motion.div
+                                key={selectedImage?.id || 0}
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ duration: 0.3 }}
+                                className="relative overflow-hidden rounded-2xl border-2 border-border bg-background p-6 md:p-8"
+                            >
+                                <div className="aspect-square w-full">
+                                    {selectedImage && (
+                                        <img
+                                            src={selectedImage.url}
+                                            alt={selectedImage.altText || product.name}
+                                            className="h-full w-full object-contain"
+                                        />
+                                    )}
+                                </div>
+
+                                {/* Sale Badge */}
+                                {isOnSale && salePercentage && (
+                                    <div className="absolute right-3 top-3 md:right-4 md:top-4">
+                                        <span className="rounded-full bg-gold px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm font-bold uppercase tracking-wide text-white shadow-lg shadow-gold/30">
+                                            -{salePercentage}%
+                                        </span>
+                                    </div>
+                                )}
+
+                                {/* Mobile Image Dots */}
+                                {product.images?.length > 1 && (
+                                    <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 lg:hidden">
+                                        {product.images.map((image) => (
+                                            <button
+                                                key={image.id}
+                                                onClick={() => setSelectedImage(image)}
+                                                className={cn(
+                                                    'h-1.5 rounded-full transition-all duration-300',
+                                                    selectedImage?.id === image.id
+                                                        ? 'w-6 bg-gold'
+                                                        : 'w-1.5 bg-muted-foreground/30 hover:bg-gold/50'
+                                                )}
+                                                aria-label={`View image ${image.id}`}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
+                            </motion.div>
+
+                            {/* Thumbnail Images - Desktop Only */}
+                            {product.images?.length > 1 && (
+                                <div className="hidden lg:grid grid-cols-4 gap-3">
+                                    {product.images.map((image) => (
+                                        <button
+                                            key={image.id}
+                                            onClick={() => setSelectedImage(image)}
+                                            className={cn(
+                                                'overflow-hidden rounded-xl border-2 p-2 transition-all duration-300',
+                                                selectedImage?.id === image.id
+                                                    ? 'border-gold shadow-md shadow-gold/20'
+                                                    : 'border-border hover:border-gold/40'
+                                            )}
+                                        >
+                                            <img
+                                                src={image.url}
+                                                alt={image.altText || product.name}
+                                                className="aspect-square w-full object-contain"
+                                            />
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Product Info */}
+                        <div className="space-y-6">
+                            {/* Categories */}
+                            {product.categories.length > 0 && (
+                                <div className="flex flex-wrap gap-2">
+                                    {product.categories.map((category) => (
+                                        <Link
+                                            key={category.id}
+                                            href={route('products.index') + `?category=${category.id}`}
+                                            className="rounded-full border border-muted-foreground/30 bg-background/95 px-3 py-1 text-xs font-medium uppercase tracking-wide text-muted-foreground backdrop-blur-sm transition-all duration-300 hover:border-gold hover:text-gold hover:shadow-sm hover:shadow-gold/20"
+                                        >
+                                            {category.name}
+                                        </Link>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Product Title */}
+                            <div className="space-y-2">
+                                <h1 className="text-3xl font-bold uppercase tracking-wide text-foreground md:text-4xl">
+                                    {product.name}
+                                </h1>
+                                {product.title && (
+                                    <p className="text-lg text-muted-foreground">{product.title}</p>
+                                )}
+                            </div>
+
+                            {/* Price */}
+                            <div className="flex items-baseline gap-3">
+                                <motion.p
+                                    key={currentPrice}
+                                    initial={{ scale: 0.95, opacity: 0 }}
+                                    animate={{ scale: 1, opacity: 1 }}
+                                    className={cn(
+                                        "text-4xl font-bold transition-colors",
+                                        isOnSale ? "text-gold" : "text-foreground"
+                                    )}
+                                >
+                                    €{currentPrice.toFixed(2)}
+                                </motion.p>
+                                {currentCompareAtPrice && (
+                                    <motion.p
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        className="text-xl font-medium text-muted-foreground line-through"
+                                    >
+                                        €{currentCompareAtPrice.toFixed(2)}
+                                    </motion.p>
+                                )}
+                            </div>
+
+                            {/* Short Description */}
+                            {product.shortDescription && (
+                                <p className="text-base leading-relaxed text-muted-foreground">
+                                    {product.shortDescription}
+                                </p>
+                            )}
+
+                            {/* Variant Selection */}
+                            {hasVariants && product.variants && (
+                                <div className="space-y-3">
+                                    <h3 className="text-sm font-bold uppercase tracking-wide text-foreground">
+                                        {t('product.select_size', 'Select Size')}
+                                    </h3>
+                                    <div className="flex flex-wrap gap-2">
+                                        {product.variants.map((variant) => (
+                                            <button
+                                                key={variant.id}
+                                                onClick={() => setSelectedVariant(variant)}
+                                                disabled={!variant.inStock}
+                                                className={cn(
+                                                    'rounded-lg border-2 px-4 py-2.5 text-sm font-bold uppercase tracking-wide transition-all duration-300 cursor-pointer',
+                                                    selectedVariant?.id === variant.id
+                                                        ? 'border-gold bg-gold/10 text-foreground ring-2 ring-gold/20 shadow-sm'
+                                                        : variant.inStock
+                                                        ? 'border-muted/80 bg-muted/50 text-foreground hover:border-gold hover:bg-gold/5'
+                                                        : 'border-border bg-muted text-muted-foreground opacity-50 cursor-not-allowed line-through'
+                                                )}
+                                            >
+                                                {variant.size}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* SKU & Stock Status */}
+                            <div className="flex flex-wrap items-center gap-4 text-sm">
+                                <div className="flex items-center gap-2">
+                                    <span className="text-muted-foreground">{t('product.sku', 'SKU')}:</span>
+                                    <motion.span
+                                        key={currentSku}
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        className="font-medium text-foreground"
+                                    >
+                                        {currentSku}
+                                    </motion.span>
+                                </div>
+
+                                <div className="h-4 w-px bg-border" />
+
+                                <AnimatePresence mode="wait">
+                                    <motion.div
+                                        key={currentInStock ? 'in-stock' : 'out-of-stock'}
+                                        initial={{ opacity: 0, x: -10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        exit={{ opacity: 0, x: 10 }}
+                                        className="flex items-center gap-2"
+                                    >
+                                        {currentInStock ? (
+                                            <>
+                                                <div className="rounded-full bg-green-500/10 p-1">
+                                                    <Check className="size-3.5 text-green-500" />
+                                                </div>
+                                                <span className="font-medium text-green-500">
+                                                    {t('product.in_stock', 'In Stock')}
+                                                    {currentStock > 0 && ` (${currentStock})`}
+                                                </span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <div className="rounded-full bg-red-500/10 p-1">
+                                                    <X className="size-3.5 text-red-500" />
+                                                </div>
+                                                <span className="font-medium text-red-500">
+                                                    {t('product.out_of_stock', 'Out of Stock')}
+                                                </span>
+                                            </>
+                                        )}
+                                    </motion.div>
+                                </AnimatePresence>
+                            </div>
+
+                            {/* Desktop Actions */}
+                            <div className="hidden lg:flex gap-3 items-center">
+                                <Button
+                                    size="icon"
+                                    variant="outline"
+                                    className="h-14 w-14 rounded-lg border-2 border-border transition-all duration-300 hover:border-gold hover:text-gold"
+                                >
+                                    <Heart className="size-5" />
+                                </Button>
+
+                                <Button
+                                    size="lg"
+                                    disabled={!currentInStock}
+                                    onClick={handleAddToCart}
+                                    className="h-14 rounded-lg border-2 border-gold bg-gold px-8 text-base font-bold uppercase tracking-wide text-white transition-all duration-300 hover:bg-gold/90 hover:shadow-lg hover:shadow-gold/50 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:shadow-none"
+                                >
+                                    <ShoppingCart className="mr-2 size-5" />
+                                    {t('shop.add_to_cart', 'Add to Cart')}
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Product Details Tabs */}
+                    <div className="mt-12 lg:mt-16">
+                        <div className="border-b border-border">
+                            <div className="flex gap-6 md:gap-8 overflow-x-auto scrollbar-hide">
+                                <button
+                                    onClick={() => setActiveTab('description')}
+                                    className={cn(
+                                        'border-b-2 pb-4 text-sm font-bold uppercase tracking-wide transition-all duration-300 whitespace-nowrap',
+                                        activeTab === 'description'
+                                            ? 'border-gold text-gold'
+                                            : 'border-transparent text-muted-foreground hover:text-foreground'
+                                    )}
+                                >
+                                    {t('product.description', 'Description')}
+                                </button>
+                                {product.additionalInformation && (
+                                    <button
+                                        onClick={() => setActiveTab('additional')}
+                                        className={cn(
+                                            'border-b-2 pb-4 text-sm font-bold uppercase tracking-wide transition-all duration-300 whitespace-nowrap',
+                                            activeTab === 'additional'
+                                                ? 'border-gold text-gold'
+                                                : 'border-transparent text-muted-foreground hover:text-foreground'
+                                        )}
+                                    >
+                                        {t('product.additional_info', 'Additional Info')}
+                                    </button>
+                                )}
+                                <button
+                                    onClick={() => setActiveTab('ingredients')}
+                                    className={cn(
+                                        'border-b-2 pb-4 text-sm font-bold uppercase tracking-wide transition-all duration-300 whitespace-nowrap',
+                                        activeTab === 'ingredients'
+                                            ? 'border-gold text-gold'
+                                            : 'border-transparent text-muted-foreground hover:text-foreground'
+                                    )}
+                                >
+                                    {t('product.ingredients', 'Ingredients')}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="py-8">
+                            <AnimatePresence mode="wait">
+                                {activeTab === 'description' && (
+                                    <motion.div
+                                        key="description"
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -10 }}
+                                        transition={{ duration: 0.2 }}
+                                        className="prose prose-neutral max-w-none dark:prose-invert"
+                                    >
+                                        <p className="text-foreground/80 whitespace-pre-line leading-relaxed">
+                                            {product.description}
+                                        </p>
+                                    </motion.div>
+                                )}
+
+                                {activeTab === 'additional' && product.additionalInformation && (
+                                    <motion.div
+                                        key="additional"
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -10 }}
+                                        transition={{ duration: 0.2 }}
+                                        className="prose prose-neutral max-w-none dark:prose-invert"
+                                    >
+                                        <p className="text-foreground/80 whitespace-pre-line leading-relaxed">
+                                            {product.additionalInformation}
+                                        </p>
+                                    </motion.div>
+                                )}
+
+                                {activeTab === 'ingredients' && (
+                                    <motion.div
+                                        key="ingredients"
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -10 }}
+                                        transition={{ duration: 0.2 }}
+                                        className="prose prose-neutral max-w-none dark:prose-invert"
+                                    >
+                                        <p className="text-foreground/80 whitespace-pre-line leading-relaxed">
+                                            {product.ingredients}
+                                        </p>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+                    </div>
+
+                    {/* Related Products */}
+                    {relatedProducts.length > 0 && (
+                        <div className="mt-12 lg:mt-16">
+                            <h2 className="mb-8 text-2xl font-bold uppercase tracking-wide text-foreground md:text-3xl">
+                                {t('product.related_products', 'Related Products')}
+                            </h2>
+                            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                                {relatedProducts.map((relatedProduct) => (
+                                    <Link
+                                        key={relatedProduct.id}
+                                        href={route('products.show', { slug: relatedProduct.slug })}
+                                    >
+                                        <div className="group h-full overflow-hidden rounded-2xl border-2 border-border bg-background transition-all duration-300 hover:border-gold/40 hover:shadow-lg hover:shadow-gold/10">
+                                            <div className="relative overflow-hidden p-6">
+                                                <div className="aspect-square w-full">
+                                                    <img
+                                                        src={relatedProduct.image}
+                                                        alt={relatedProduct.name}
+                                                        className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
+                                                    />
+                                                </div>
+                                                {relatedProduct.isOnSale && relatedProduct.salePercentage && (
+                                                    <div className="absolute right-3 top-3">
+                                                        <span className="rounded-full bg-gold px-3 py-1 text-xs font-bold uppercase tracking-wide text-white shadow-md shadow-gold/20">
+                                                            -{relatedProduct.salePercentage}%
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="space-y-1 p-4">
+                                                <h3 className="text-base font-bold uppercase tracking-wide text-foreground line-clamp-2">
+                                                    {relatedProduct.name}
+                                                </h3>
+                                                <div className="flex items-center gap-2 pt-2">
+                                                    <p className={cn(
+                                                        "text-lg font-bold",
+                                                        relatedProduct.compareAtPrice ? "text-gold" : "text-foreground"
+                                                    )}>
+                                                        €{relatedProduct.price.toFixed(2)}
+                                                    </p>
+                                                    {relatedProduct.compareAtPrice && (
+                                                        <p className="text-sm font-medium text-muted-foreground line-through">
+                                                            €{relatedProduct.compareAtPrice.toFixed(2)}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </Link>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                <Footer />
+
+                {/* Mobile Bottom Bar */}
+                <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur-lg lg:hidden">
+                    <div className="container mx-auto px-4 py-3">
+                        <div className="flex items-center gap-3">
+                            {/* Wishlist Button */}
+                            <button
+                                className="flex size-12 shrink-0 items-center justify-center rounded-lg border-2 border-border text-foreground transition-all duration-300 hover:border-gold hover:text-gold"
+                            >
+                                <Heart className="size-5" />
+                            </button>
+
+                            {/* Variant Selector - Mobile Compact */}
+                            {hasVariants && product.variants && (
+                                <div className="flex shrink-0 gap-2">
+                                    {product.variants.map((variant) => (
+                                        <button
+                                            key={variant.id}
+                                            onClick={() => setSelectedVariant(variant)}
+                                            disabled={!variant.inStock}
+                                            className={cn(
+                                                'rounded-lg border-2 px-3 py-2 text-xs font-bold uppercase tracking-wide transition-all duration-300 cursor-pointer',
+                                                selectedVariant?.id === variant.id
+                                                    ? 'border-gold bg-gold/10 text-foreground ring-2 ring-gold/20 shadow-sm'
+                                                    : variant.inStock
+                                                    ? 'border-muted/80 bg-muted/50 text-foreground'
+                                                    : 'border-border bg-muted text-muted-foreground opacity-50 cursor-not-allowed'
+                                            )}
+                                        >
+                                            {variant.size}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Add to Cart Button */}
+                            <button
+                                disabled={!currentInStock}
+                                onClick={handleAddToCart}
+                                className="flex flex-1 items-center justify-center gap-2 rounded-lg border-2 border-gold bg-gold px-4 py-3 text-sm font-bold uppercase tracking-wide text-white shadow-lg shadow-gold/30 transition-all duration-300 hover:bg-gold/90 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
+                            >
+                                <ShoppingCart className="size-4" />
+                                <span className="hidden xs:inline">{t('shop.add_to_cart', 'Add to Cart')}</span>
+                                <span className="xs:hidden">{t('shop.add', 'Add')}</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </>
+    );
+}

@@ -1,11 +1,14 @@
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
+import { useTranslation } from '@/hooks/use-translation';
 
 interface PromisesSectionProps {
     className?: string;
 }
 
 export default function PromisesSection({ className }: PromisesSectionProps) {
+    const { t } = useTranslation();
+
     return (
         <section className={cn('relative w-full p-[5px]', className)}>
             {/* Gradient background */}
@@ -22,12 +25,10 @@ export default function PromisesSection({ className }: PromisesSectionProps) {
                         className="border-b border-gold/30 py-0 pb-8 md:py-8 md:border-b-0 md:border-r-2 md:pr-12"
                     >
                         <h2 className="mb-6 text-2xl font-bold uppercase text-foreground md:text-3xl">
-                            Our Promise to You
+                            {t('promises.title_you')}
                         </h2>
                         <p className="leading-relaxed text-foreground/70 md:text-lg">
-                            We believe in beauty with a conscience. From cruelty-free formulas to
-                            plastic-free packaging, we're here to help you look and feel
-                            great without compromising the planet's health.
+                            {t('promises.you.description')}
                         </p>
                     </motion.div>
 
@@ -40,12 +41,10 @@ export default function PromisesSection({ className }: PromisesSectionProps) {
                         className="py-0 py-8 md:pl-12"
                     >
                         <h2 className="mb-6 text-2xl font-bold uppercase text-foreground md:text-3xl">
-                            Our Promise to the Planet
+                            {t('promises.title_planet')}
                         </h2>
                         <p className="leading-relaxed text-foreground/70 md:text-lg">
-                            Each product is designed to be as gentle on the environment as
-                            it is on your skin. With us, sustainability isn't just a trend
-                            — it's a commitment.
+                            {t('promises.planet.description')}
                         </p>
                     </motion.div>
                 </div>
