@@ -1,36 +1,26 @@
 import { useTranslation } from '@/hooks/use-translation';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
-import { Globe } from 'lucide-react';
 
-const localeNames: Record<string, string> = {
-    en: 'English',
-    lt: 'Lietuvių',
+const flagEmojis: Record<string, string> = {
+    en: '🇱🇹',
+    lt: '🇬🇧',
 };
 
 export default function LocaleSwitcher() {
     const { locale, availableLocales, switchLocale } = useTranslation();
 
+    const handleToggle = () => {
+        const currentIndex = availableLocales.indexOf(locale);
+        const nextIndex = (currentIndex + 1) % availableLocales.length;
+        switchLocale(availableLocales[nextIndex]);
+    };
+
     return (
-        <Select value={locale} onValueChange={switchLocale}>
-            <SelectTrigger className="w-[140px]">
-                <div className="flex items-center gap-2">
-                    <Globe className="size-4" />
-                    <SelectValue />
-                </div>
-            </SelectTrigger>
-            <SelectContent>
-                {availableLocales.map((loc) => (
-                    <SelectItem key={loc} value={loc}>
-                        {localeNames[loc] || loc.toUpperCase()}
-                    </SelectItem>
-                ))}
-            </SelectContent>
-        </Select>
+        <button
+            onClick={handleToggle}
+            className="flex items-center justify-center rounded-md p-2 text-2xl transition-all hover:bg-muted"
+            aria-label="Switch language"
+        >
+            {flagEmojis[locale] || '🌐'}
+        </button>
     );
 }

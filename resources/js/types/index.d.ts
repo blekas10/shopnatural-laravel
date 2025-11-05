@@ -1,5 +1,6 @@
 import { InertiaLinkProps } from '@inertiajs/react';
 import { LucideIcon } from 'lucide-react';
+import type { ProductListItem, ProductVariant } from './product';
 
 export interface Auth {
     user: User;
@@ -43,4 +44,13 @@ export interface User {
     created_at: string;
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
+}
+
+export interface CartItem {
+    id: string; // Unique identifier for cart item (productId-variantId)
+    productId: number;
+    variantId: number | null;
+    quantity: number;
+    product: ProductListItem;
+    variant: ProductVariant | null;
 }

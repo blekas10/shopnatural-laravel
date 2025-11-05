@@ -10,6 +10,7 @@
     "auth.dashboard": "Dashboard",
     "shop.add_to_cart": "Add to Cart",
     "shop.add": "Add",
+    "shop.adding": "Adding...",
     "shop.cart": "Cart",
     "shop.checkout": "Checkout",
     "shop.products": "Products",
@@ -82,5 +83,17 @@
     "common.edit": "Edit",
     "common.delete": "Delete",
     "common.search": "Search",
-    "common.filter": "Filter"
+    "common.filter": "Filter",
+    "cart.title": "Shopping Cart",
+    "cart.empty": "Your cart is empty",
+    "cart.empty_message": "Add some products to get started",
+    "cart.subtotal": "Subtotal",
+    "cart.view_cart": "View Cart",
+    "cart.continue_shopping": "Continue Shopping",
+    "cart.item_added": "Item added to cart",
+    "cart.quantity": "Quantity",
+    "cart.remove": "Remove",
+    "cart.total": "Total",
+    "cart.shipping": "Shipping",
+    "cart.free": "Free"
 }

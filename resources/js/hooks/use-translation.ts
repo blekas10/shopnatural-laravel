@@ -33,6 +33,8 @@ export function useTranslation(): TranslationHook {
         const routeMap: Record<string, Record<string, string>> = {
             'products': { en: 'products', lt: 'produktai' },
             'produktai': { en: 'products', lt: 'produktai' },
+            'cart': { en: 'cart', lt: 'krepselis' },
+            'krepselis': { en: 'cart', lt: 'krepselis' },
         };
 
         // Remove current locale if present

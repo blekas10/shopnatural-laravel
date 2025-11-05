@@ -1,7 +1,12 @@
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { Link } from '@inertiajs/react';
-import type { BaseProduct } from '@/types/product';
+import { ShoppingCart } from 'lucide-react';
+import { useState } from 'react';
+import { useCart } from '@/hooks/use-cart';
+import { useTranslation } from '@/hooks/use-translation';
+import { toast } from 'sonner';
+import type { BaseProduct, ProductListItem } from '@/types/product';
 
 interface ProductCardProps {
     product: BaseProduct;
@@ -11,6 +16,35 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, href, index = 0, className }: ProductCardProps) {
+    const { addItem } = useCart();
+    const { t } = useTranslation();
+    const [isAdding, setIsAdding] = useState(false);
+
+    const handleQuickAdd = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        setIsAdding(true);
+
+        // Convert BaseProduct to ProductListItem for cart
+        const productListItem: ProductListItem = {
+            ...product,
+            brandId: null,
+            brandName: null,
+            categoryIds: [],
+        };
+
+        // Add item with default variant (null means no variant selected)
+        addItem(productListItem, null, 1);
+
+        toast.success(t('cart.item_added', 'Item added to cart'), {
+            description: product.name,
+            duration: 2000,
+        });
+
+        setTimeout(() => setIsAdding(false), 500);
+    };
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -44,6 +78,18 @@ export function ProductCard({ product, href, index = 0, className }: ProductCard
                                 </span>
                             </div>
                         )}
+
+                        {/* Quick Add Button - Shows on hover */}
+                        <motion.button
+                            initial={{ opacity: 0, y: 10 }}
+                            whileHover={{ scale: 1.05 }}
+                            className="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-lg bg-gold px-4 py-2 text-sm font-bold uppercase tracking-wide text-white opacity-0 shadow-lg shadow-gold/30 transition-all duration-300 hover:bg-gold/90 group-hover:opacity-100"
+                            onClick={handleQuickAdd}
+                            disabled={isAdding}
+                        >
+                            <ShoppingCart className="mr-2 inline size-4" />
+                            {isAdding ? t('shop.adding', 'Adding...') : t('shop.quick_add', 'Quick Add')}
+                        </motion.button>
                     </div>
 
                     {/* Product Info */}

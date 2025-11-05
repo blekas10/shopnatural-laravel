@@ -10,6 +10,7 @@
     "auth.dashboard": "Valdymo skydelis",
     "shop.add_to_cart": "Pridėti į krepšelį",
     "shop.add": "Pridėti",
+    "shop.adding": "Pridedama...",
     "shop.cart": "Krepšelis",
     "shop.checkout": "Apmokėti",
     "shop.products": "Produktai",
@@ -82,5 +83,17 @@
     "common.edit": "Redaguoti",
     "common.delete": "Ištrinti",
     "common.search": "Ieškoti",
-    "common.filter": "Filtruoti"
+    "common.filter": "Filtruoti",
+    "cart.title": "Pirkinių krepšelis",
+    "cart.empty": "Jūsų krepšelis tuščias",
+    "cart.empty_message": "Pridėkite produktų, kad pradėtumėte",
+    "cart.subtotal": "Tarpinė suma",
+    "cart.view_cart": "Žiūrėti krepšelį",
+    "cart.continue_shopping": "Tęsti apsipirkimą",
+    "cart.item_added": "Prekė pridėta į krepšelį",
+    "cart.quantity": "Kiekis",
+    "cart.remove": "Pašalinti",
+    "cart.total": "Viso",
+    "cart.shipping": "Pristatymas",
+    "cart.free": "Nemokamas"
 }

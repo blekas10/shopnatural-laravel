@@ -146,9 +146,21 @@
 
     html {
         overflow-y: scroll; /* Prevent layout shift from scrollbar */
+        overscroll-behavior-y: none; /* Prevent rubber-band bounce on iOS */
     }
 
     body {
         @apply bg-background text-foreground;
+        overscroll-behavior-y: none; /* Prevent rubber-band bounce on iOS */
+        padding-top: var(--header-height, 73px); /* Dynamic header height, fallback to 73px */
+    }
+}
+
+/* Mobile scroll improvements */
+@supports (-webkit-touch-callout: none) {
+    /* iOS-specific fixes */
+    body {
+        position: relative;
+        -webkit-overflow-scrolling: touch;
     }
 }

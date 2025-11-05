@@ -431,7 +431,7 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
                 </div>
 
                 {/* Mobile Filter Button */}
-                <div className="fixed bottom-4 left-0 right-0 z-50 flex justify-center lg:hidden">
+                <div className="fixed bottom-4 left-0 right-0 z-10 flex justify-center lg:hidden">
                     <button
                         onClick={() => setMobileFiltersOpen(true)}
                         className="inline-flex items-center justify-center gap-2 rounded-md border-2 border-gold bg-gold px-6 py-3 text-sm font-bold uppercase tracking-wide text-foreground shadow-lg shadow-gold/50 transition-all duration-300 ease-in-out hover:bg-background hover:text-gold"

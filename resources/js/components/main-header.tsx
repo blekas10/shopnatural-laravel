@@ -2,8 +2,11 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Link } from '@inertiajs/react';
-import { Menu, ChevronDown } from 'lucide-react';
+import { Menu, ChevronDown, ShoppingCart } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
+import { CartDrawer } from '@/components/cart-drawer';
+import { useCart } from '@/hooks/use-cart';
 import {
     Sheet,
     SheetContent,
@@ -25,11 +28,14 @@ interface MainHeaderProps {
 
 export default function MainHeader({ className }: MainHeaderProps) {
     const { t, route } = useTranslation();
+    const { itemCount } = useCart();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [cartDrawerOpen, setCartDrawerOpen] = useState(false);
     const [mobileCategoriesOpen, setMobileCategoriesOpen] = useState(false);
     const [desktopCategoriesOpen, setDesktopCategoriesOpen] = useState(false);
     const [mobileSectionsOpen, setMobileSectionsOpen] = useState<Record<string, boolean>>({});
     const dropdownRef = useRef<HTMLDivElement>(null);
+    const headerRef = useRef<HTMLElement>(null);
 
     const navigationLinks = [
         { label: t('nav.home'), href: route('home') },
@@ -96,10 +102,34 @@ export default function MainHeader({ className }: MainHeaderProps) {
         };
     }, [desktopCategoriesOpen]);
 
+    // Listen for cart open event
+    useEffect(() => {
+        const handleOpenCart = () => {
+            setCartDrawerOpen(true);
+        };
+
+        window.addEventListener('openCart', handleOpenCart);
+
+        return () => {
+            window.removeEventListener('openCart', handleOpenCart);
+        };
+    }, []);
+
+    // Compensate for scrollbar when drawer is open
+    useEffect(() => {
+        if (cartDrawerOpen && headerRef.current) {
+            const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+            headerRef.current.style.paddingRight = `${scrollbarWidth}px`;
+        } else if (headerRef.current) {
+            headerRef.current.style.paddingRight = '';
+        }
+    }, [cartDrawerOpen]);
+
     return (
         <header
+            ref={headerRef}
             className={cn(
-                'sticky top-0 z-50 w-full border-b bg-background',
+                'fixed top-0 z-50 w-full border-b bg-background',
                 className
             )}
         >
@@ -157,11 +187,54 @@ export default function MainHeader({ className }: MainHeaderProps) {
 
                     {/* Desktop Locale Switcher */}
                     <LocaleSwitcher />
+
+                    {/* Desktop Cart Icon */}
+                    <button
+                        onClick={() => setCartDrawerOpen(true)}
+                        className="relative rounded-md p-2 transition-colors hover:bg-muted"
+                        aria-label="Shopping cart"
+                    >
+                        <ShoppingCart className="size-6 text-foreground" />
+                        <AnimatePresence>
+                            {itemCount > 0 && (
+                                <motion.span
+                                    initial={{ scale: 0 }}
+                                    animate={{ scale: 1 }}
+                                    exit={{ scale: 0 }}
+                                    className="absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full bg-gold text-xs font-bold text-white"
+                                >
+                                    {itemCount}
+                                </motion.span>
+                            )}
+                        </AnimatePresence>
+                    </button>
                 </nav>
 
                 {/* Mobile Actions */}
                 <div className="flex items-center gap-2 md:hidden">
                     <LocaleSwitcher />
+
+                    {/* Mobile Cart Icon */}
+                    <button
+                        onClick={() => setCartDrawerOpen(true)}
+                        className="relative rounded-md p-2 transition-colors hover:bg-muted"
+                        aria-label="Shopping cart"
+                    >
+                        <ShoppingCart className="size-6 text-foreground" />
+                        <AnimatePresence>
+                            {itemCount > 0 && (
+                                <motion.span
+                                    initial={{ scale: 0 }}
+                                    animate={{ scale: 1 }}
+                                    exit={{ scale: 0 }}
+                                    className="absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full bg-gold text-xs font-bold text-white"
+                                >
+                                    {itemCount}
+                                </motion.span>
+                            )}
+                        </AnimatePresence>
+                    </button>
+
                     <Button
                         variant="ghost"
                         size="icon"
@@ -325,6 +398,9 @@ export default function MainHeader({ className }: MainHeaderProps) {
                     </nav>
                 </SheetContent>
             </Sheet>
+
+            {/* Cart Drawer */}
+            <CartDrawer isOpen={cartDrawerOpen} onClose={() => setCartDrawerOpen(false)} />
         </header>
     );
 }

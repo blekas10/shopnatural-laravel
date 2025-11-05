@@ -2,12 +2,13 @@ import { Head, Link, router } from '@inertiajs/react';
 import MainHeader from '@/components/main-header';
 import Footer from '@/components/footer';
 import { useTranslation } from '@/hooks/use-translation';
+import { useCart } from '@/hooks/use-cart';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, ShoppingCart, Check, X, Heart } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import type { ProductDetail, ProductVariant, ProductImage, Category, BaseProduct } from '@/types/product';
+import type { ProductDetail, ProductVariant, BaseProduct, ProductListItem } from '@/types/product';
 
 
 interface ProductShowProps {
@@ -17,8 +18,10 @@ interface ProductShowProps {
 
 export default function ProductShow({ product, relatedProducts }: ProductShowProps) {
     const { t, route } = useTranslation();
+    const { addItem } = useCart();
     const [selectedImage, setSelectedImage] = useState(product.images?.[0]);
     const [activeTab, setActiveTab] = useState<'description' | 'additional' | 'ingredients'>('description');
+    const [isAdding, setIsAdding] = useState(false);
 
     // Variant selection state
     const hasVariants = product.variants && product.variants.length > 0;
@@ -41,18 +44,39 @@ export default function ProductShow({ product, relatedProducts }: ProductShowPro
         : null;
 
     const handleAddToCart = () => {
-        // Add to cart logic here
-        console.log('Add to cart:', {
-            productId: product.id,
-            variantId: selectedVariant?.id,
-        });
+        if (!currentInStock) return;
+
+        setIsAdding(true);
+
+        // Convert ProductDetail to ProductListItem for cart
+        const productListItem: ProductListItem = {
+            id: product.id,
+            name: product.name,
+            title: product.title,
+            slug: product.slug,
+            price: product.price,
+            compareAtPrice: product.compareAtPrice,
+            image: product.image,
+            isOnSale: product.isOnSale,
+            salePercentage: product.salePercentage,
+            brandId: null, // Not available in ProductDetail
+            brandName: null,
+            categoryIds: product.categories.map(c => c.id),
+        };
+
+        addItem(productListItem, selectedVariant, 1);
+
+        // Dispatch custom event to open cart drawer
+        window.dispatchEvent(new CustomEvent('openCart'));
+
+        setTimeout(() => setIsAdding(false), 500);
     };
 
     return (
         <>
             <Head title={product.name} />
 
-            <div className="min-h-screen bg-background pb-24 lg:pb-0">
+            <div className="min-h-screen bg-background pb-[calc(73px+env(safe-area-inset-bottom))] lg:pb-0">
                 <MainHeader />
 
                 {/* Breadcrumb */}
@@ -261,10 +285,10 @@ export default function ProductShow({ product, relatedProducts }: ProductShowPro
                                     >
                                         {currentInStock ? (
                                             <>
-                                                <div className="rounded-full bg-green-500/10 p-1">
-                                                    <Check className="size-3.5 text-green-500" />
+                                                <div className="rounded-full bg-teal-500/10 p-1">
+                                                    <Check className="size-3.5 text-teal-500" />
                                                 </div>
-                                                <span className="font-medium text-green-500">
+                                                <span className="font-medium text-teal-500">
                                                     {t('product.in_stock', 'In Stock')}
                                                     {currentStock > 0 && ` (${currentStock})`}
                                                 </span>
@@ -288,19 +312,19 @@ export default function ProductShow({ product, relatedProducts }: ProductShowPro
                                 <Button
                                     size="icon"
                                     variant="outline"
-                                    className="h-14 w-14 rounded-lg border-2 border-border transition-all duration-300 hover:border-gold hover:text-gold"
+                                    className="h-14 w-14 rounded-lg border-2 border-border transition-all duration-300 hover:border-gold hover:text-gold cursor-pointer"
                                 >
                                     <Heart className="size-5" />
                                 </Button>
 
                                 <Button
                                     size="lg"
-                                    disabled={!currentInStock}
+                                    disabled={!currentInStock || isAdding}
                                     onClick={handleAddToCart}
-                                    className="h-14 rounded-lg border-2 border-gold bg-gold px-8 text-base font-bold uppercase tracking-wide text-white transition-all duration-300 hover:bg-gold/90 hover:shadow-lg hover:shadow-gold/50 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:shadow-none"
+                                    className="h-14 rounded-lg border-2 border-gold bg-gold px-8 text-base font-bold uppercase tracking-wide text-white transition-all duration-300 hover:bg-transparent hover:text-gold disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
                                 >
                                     <ShoppingCart className="mr-2 size-5" />
-                                    {t('shop.add_to_cart', 'Add to Cart')}
+                                    {isAdding ? t('shop.adding', 'Adding...') : t('shop.add_to_cart', 'Add to Cart')}
                                 </Button>
                             </div>
                         </div>
@@ -456,7 +480,7 @@ export default function ProductShow({ product, relatedProducts }: ProductShowPro
                 <Footer />
 
                 {/* Mobile Bottom Bar */}
-                <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur-lg lg:hidden">
+                <div className="fixed bottom-0 left-0 right-0 z-10 border-t border-border bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-lg supports-[backdrop-filter]:bg-background/80 lg:hidden">
                     <div className="container mx-auto px-4 py-3">
                         <div className="flex items-center gap-3">
                             {/* Wishlist Button */}
@@ -491,13 +515,17 @@ export default function ProductShow({ product, relatedProducts }: ProductShowPro
 
                             {/* Add to Cart Button */}
                             <button
-                                disabled={!currentInStock}
+                                disabled={!currentInStock || isAdding}
                                 onClick={handleAddToCart}
-                                className="flex flex-1 items-center justify-center gap-2 rounded-lg border-2 border-gold bg-gold px-4 py-3 text-sm font-bold uppercase tracking-wide text-white shadow-lg shadow-gold/30 transition-all duration-300 hover:bg-gold/90 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
+                                className="flex flex-1 items-center justify-center gap-2 rounded-lg border-2 border-gold bg-gold px-4 py-3 text-sm font-bold uppercase tracking-wide text-white transition-all duration-300 hover:bg-transparent hover:text-gold disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 <ShoppingCart className="size-4" />
-                                <span className="hidden xs:inline">{t('shop.add_to_cart', 'Add to Cart')}</span>
-                                <span className="xs:hidden">{t('shop.add', 'Add')}</span>
+                                <span className="hidden xs:inline">
+                                    {isAdding ? t('shop.adding', 'Adding...') : t('shop.add_to_cart', 'Add to Cart')}
+                                </span>
+                                <span className="xs:hidden">
+                                    {isAdding ? '...' : t('shop.add', 'Add')}
+                                </span>
                             </button>
                         </div>
                     </div>
