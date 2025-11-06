@@ -1,17 +1,20 @@
 import { Head, Link } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, Plus, Minus, Trash2, ShoppingBag } from 'lucide-react';
-import { useOptimistic } from 'react';
+import { ChevronRight, Plus, Minus, Trash2, ShoppingBag, ArrowLeft } from 'lucide-react';
+import { useOptimistic, useState } from 'react';
 import MainHeader from '@/components/main-header';
 import Footer from '@/components/footer';
 import { useCart } from '@/hooks/use-cart';
 import { useTranslation } from '@/hooks/use-translation';
 import { Button } from '@/components/ui/button';
+import { OrderSummary } from '@/components/order-summary';
 import type { CartItem as CartItemType } from '@/types';
+import { toast } from 'sonner';
 
 export default function Cart() {
     const { items, totalPrice, removeItem, updateQuantity } = useCart();
     const { t, route } = useTranslation();
+    const [removingItems, setRemovingItems] = useState<Set<string>>(new Set());
 
     // Optimistic updates for quantity changes
     const [optimisticItems, addOptimisticUpdate] = useOptimistic(
@@ -24,21 +27,47 @@ export default function Cart() {
     );
 
     const handleQuantityChange = (itemId: string, newQuantity: number) => {
+        if (newQuantity < 1) return;
         // Optimistic update
         addOptimisticUpdate({ itemId, quantity: newQuantity });
         // Actual update
         updateQuantity(itemId, newQuantity);
     };
 
-    const handleRemove = (itemId: string) => {
-        // Optimistic update
-        addOptimisticUpdate({ itemId, quantity: 0 });
-        // Actual update
-        removeItem(itemId);
+    const handleRemove = (itemId: string, productName: string) => {
+        setRemovingItems(prev => new Set(prev).add(itemId));
+
+        setTimeout(() => {
+            // Optimistic update
+            addOptimisticUpdate({ itemId, quantity: 0 });
+            // Actual update
+            removeItem(itemId);
+            setRemovingItems(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(itemId);
+                return newSet;
+            });
+
+            toast.success(t('cart.item_removed', 'Item removed'), {
+                description: productName,
+            });
+        }, 300);
     };
 
-    const estimatedShipping: number = 0; // Placeholder
-    const total = totalPrice + estimatedShipping;
+    const subtotal = totalPrice;
+    const shipping = subtotal >= 50 ? 0 : 5.99;
+    const tax = 0;
+    const discount = 0;
+    const total = subtotal + shipping + tax - discount;
+
+    const orderSummaryData = {
+        subtotal,
+        shipping,
+        tax,
+        discount,
+        total,
+        items: optimisticItems,
+    };
 
     return (
         <>
@@ -77,6 +106,7 @@ export default function Cart() {
                             </p>
                             <Link href={route('products.index')}>
                                 <Button className="bg-gold px-8 text-white hover:bg-gold/90">
+                                    <ArrowLeft className="mr-2 size-4" />
                                     {t('cart.continue_shopping', 'Continue Shopping')}
                                 </Button>
                             </Link>
@@ -101,10 +131,14 @@ export default function Cart() {
                                                     key={item.id}
                                                     layout
                                                     initial={{ opacity: 0, y: 20 }}
-                                                    animate={{ opacity: 1, y: 0 }}
-                                                    exit={{ opacity: 0, height: 0 }}
-                                                    transition={{ duration: 0.2 }}
-                                                    className="overflow-hidden rounded-2xl border-2 border-border bg-background"
+                                                    animate={{
+                                                        opacity: removingItems.has(item.id) ? 0.5 : 1,
+                                                        y: 0,
+                                                        scale: removingItems.has(item.id) ? 0.95 : 1,
+                                                    }}
+                                                    exit={{ opacity: 0, x: -100, height: 0 }}
+                                                    transition={{ duration: 0.3 }}
+                                                    className="overflow-hidden rounded-2xl border-2 border-border bg-background transition-all hover:border-gold/40"
                                                 >
                                                     <div className="flex flex-col gap-4 p-4 sm:flex-row sm:p-6">
                                                         {/* Product Image */}
@@ -185,8 +219,9 @@ export default function Cart() {
                                                                 </div>
 
                                                                 <button
-                                                                    onClick={() => handleRemove(item.id)}
-                                                                    className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-red-500/10 hover:text-red-500"
+                                                                    onClick={() => handleRemove(item.id, item.product.name)}
+                                                                    disabled={removingItems.has(item.id)}
+                                                                    className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-red-500/10 hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-50"
                                                                 >
                                                                     <Trash2 className="size-4" />
                                                                     <span className="hidden sm:inline">
@@ -212,58 +247,42 @@ export default function Cart() {
                                         {t('cart.continue_shopping', 'Continue Shopping')}
                                     </Link>
                                 </div>
+
+                                {/* Free Shipping Notice */}
+                                {subtotal < 50 && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className="mt-6 rounded-lg border border-gold/30 bg-gold/5 p-4"
+                                    >
+                                        <p className="text-sm text-foreground">
+                                            {t('cart.free_shipping_notice', 'Add €{amount} more to get free shipping!', {
+                                                amount: (50 - subtotal).toFixed(2)
+                                            })}
+                                        </p>
+                                    </motion.div>
+                                )}
                             </div>
 
                             {/* Order Summary - 1/3 width */}
                             <div className="lg:col-span-1">
-                                <div className="sticky top-24 rounded-2xl border-2 border-border bg-background p-6">
-                                    <h2 className="mb-6 text-xl font-bold uppercase tracking-wide text-foreground">
-                                        {t('cart.order_summary', 'Order Summary')}
-                                    </h2>
+                                <OrderSummary
+                                    data={orderSummaryData}
+                                    sticky
+                                    showItems={false}
+                                />
 
-                                    <div className="space-y-4">
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-sm text-muted-foreground">
-                                                {t('cart.subtotal', 'Subtotal')}
-                                            </span>
-                                            <span className="text-lg font-bold text-foreground">
-                                                €{totalPrice.toFixed(2)}
-                                            </span>
-                                        </div>
+                                {/* Checkout Button */}
+                                <Link href={route('checkout')} className="mt-4 block">
+                                    <Button className="h-14 w-full rounded-lg bg-gold text-base font-bold uppercase tracking-wide text-white transition-all hover:bg-gold/90">
+                                        {t('cart.checkout', 'Proceed to Checkout')}
+                                        <ChevronRight className="ml-2 size-5" />
+                                    </Button>
+                                </Link>
 
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-sm text-muted-foreground">
-                                                {t('cart.shipping', 'Shipping')}
-                                            </span>
-                                            <span className="text-sm text-muted-foreground">
-                                                {estimatedShipping === 0
-                                                    ? t('cart.free', 'Free')
-                                                    : `€${estimatedShipping.toFixed(2)}`}
-                                            </span>
-                                        </div>
-
-                                        <div className="border-t border-border pt-4">
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-base font-bold uppercase tracking-wide text-foreground">
-                                                    {t('cart.total', 'Total')}
-                                                </span>
-                                                <span className="text-3xl font-bold text-gold">
-                                                    €{total.toFixed(2)}
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        <Button
-                                            className="w-full bg-gold py-6 text-base font-bold uppercase tracking-wide text-white hover:bg-gold/90"
-                                        >
-                                            {t('cart.checkout', 'Proceed to Checkout')}
-                                        </Button>
-
-                                        <p className="text-center text-xs text-muted-foreground">
-                                            {t('cart.secure_checkout', 'Secure checkout with SSL encryption')}
-                                        </p>
-                                    </div>
-                                </div>
+                                <p className="mt-3 text-center text-xs text-muted-foreground">
+                                    {t('cart.secure_checkout', 'Secure checkout with SSL encryption')}
+                                </p>
                             </div>
                         </div>
                     )}

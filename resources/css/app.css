@@ -149,11 +149,6 @@
         overscroll-behavior-y: none; /* Prevent rubber-band bounce on iOS */
     }
 
-    body {
-        @apply bg-background text-foreground;
-        overscroll-behavior-y: none; /* Prevent rubber-band bounce on iOS */
-        padding-top: var(--header-height, 73px); /* Dynamic header height, fallback to 73px */
-    }
 }
 
 /* Mobile scroll improvements */

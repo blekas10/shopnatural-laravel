@@ -46,35 +46,6 @@
     <body class="font-sans antialiased">
         @inertia
 
-        <script>
-            // Dynamically calculate and apply header height as CSS variable
-            function updateHeaderHeight() {
-                // Wait for header to be rendered
-                const header = document.querySelector('header');
-                if (header) {
-                    const height = header.getBoundingClientRect().height;
-                    document.documentElement.style.setProperty('--header-height', `${height}px`);
-                }
-            }
-
-            // Run on DOM ready
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', updateHeaderHeight);
-            } else {
-                updateHeaderHeight();
-            }
-
-            // Update on resize (header height might change on mobile/desktop)
-            let resizeTimer;
-            window.addEventListener('resize', () => {
-                clearTimeout(resizeTimer);
-                resizeTimer = setTimeout(updateHeaderHeight, 100);
-            });
-
-            // Re-check after React hydration (when Inertia navigates)
-            document.addEventListener('inertia:success', () => {
-                setTimeout(updateHeaderHeight, 50);
-            });
-        </script>
+        
     </body>
 </html>

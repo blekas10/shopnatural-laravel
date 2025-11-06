@@ -1,0 +1,139 @@
+{
+  "checkout": {
+    "title": "Checkout",
+    "back_to_cart": "Back to Cart",
+    "secure_checkout": "Secure checkout with SSL encryption",
+    "processing": "Processing...",
+    "place_order": "Place Order",
+
+    "contact_information": "Contact Information",
+    "email": "Email",
+    "phone": "Phone",
+    "optional": "Optional",
+
+    "shipping_address": "Shipping Address",
+    "billing_address": "Billing Address",
+    "billing_same_as_shipping": "Billing address same as shipping",
+    "full_name": "Full Name",
+    "full_name_placeholder": "John Doe",
+    "address_line_1": "Address Line 1",
+    "address_line_1_placeholder": "Street address",
+    "address_line_2": "Address Line 2",
+    "address_line_2_placeholder": "Apartment, suite, etc.",
+    "city": "City",
+    "city_placeholder": "Vilnius",
+    "postal_code": "Postal Code",
+    "postal_code_placeholder": "01234",
+    "postal_code_format": "Format",
+    "country": "Country",
+    "select_country": "Select country",
+
+    "delivery_method": "Delivery Method",
+    "free": "Free",
+
+    "payment_method": "Payment Method",
+    "card_details": "Card Details",
+    "card_number": "Card Number",
+    "expiry_date": "Expiry Date",
+    "cvv": "CVV",
+    "cardholder_name": "Cardholder Name",
+    "cardholder_name_placeholder": "Name on card",
+
+    "order_summary": "Order Summary",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "tax": "Tax",
+    "discount": "Discount",
+    "total": "Total",
+    "add_promo_code": "Add promo code",
+    "promo_code_placeholder": "Enter code",
+    "applying": "Applying...",
+    "apply": "Apply",
+
+    "agree_to_terms_prefix": "I agree to the",
+    "terms_and_conditions": "Terms and Conditions",
+    "and": "and",
+    "privacy_policy": "Privacy Policy",
+    "please_accept_terms": "Please accept the terms and conditions",
+    "field_required": "{field} is required",
+    "invalid_field": "Invalid {field}"
+  },
+
+  "cart": {
+    "title": "Shopping Cart",
+    "empty": "Your cart is empty",
+    "empty_message": "Add some products to get started",
+    "continue_shopping": "Continue Shopping",
+    "quantity": "Quantity",
+    "remove": "Remove",
+    "item_removed": "Item removed",
+    "free_shipping_notice": "Add €{amount} more to get free shipping!",
+    "checkout": "Proceed to Checkout",
+    "secure_checkout": "Secure checkout with SSL encryption"
+  },
+
+  "order": {
+    "confirmation_title": "Order Confirmed",
+    "thank_you": "Thank You For Your Order!",
+    "confirmation_sent": "A confirmation email has been sent to",
+    "order_number": "Order Number",
+    "order_number_copied": "Order number copied!",
+    "order_summary": "Order Summary",
+    "quantity": "Qty",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "tax": "Tax",
+    "discount": "Discount",
+    "total": "Total",
+    "free": "Free",
+    "shipping_address": "Shipping Address",
+    "contact_payment": "Contact & Payment",
+    "email": "Email",
+    "phone": "Phone",
+    "payment_method": "Payment Method",
+    "estimated_delivery": "Estimated Delivery",
+    "shipping_method": "Shipping Method",
+    "view_order_details": "View Order Details",
+    "download_invoice": "Download Invoice",
+    "print_receipt": "Print Receipt",
+    "continue_shopping": "Continue Shopping",
+    "need_help": "Need help?",
+    "contact_us": "Contact us",
+    "print_initiated": "Print dialog opened",
+    "invoice_downloading": "Invoice will be downloaded shortly",
+
+    "order_details": "Order #{number}",
+    "order": "Order",
+    "placed_on": "Placed on",
+    "invoice": "Invoice",
+    "cancel_order": "Cancel Order",
+    "order_timeline": "Order Timeline",
+    "tracking_number": "Tracking Number",
+    "track_shipment": "Track Shipment",
+    "opening_tracking": "Opening tracking page...",
+    "items": "Items",
+    "size": "Size",
+    "each": "each",
+    "contact_information": "Contact Information",
+    "contact_support": "Contact support",
+    "back_to_orders": "Back to Orders",
+
+    "cancelled_successfully": "Order cancelled successfully",
+    "cancel_failed": "Failed to cancel order",
+    "cancel_confirmation": "Are you sure you want to cancel order #{orderNumber}? This action cannot be undone.",
+    "cancelling": "Cancelling...",
+    "confirm_cancel": "Yes, Cancel Order"
+  },
+
+  "product": {
+    "size": "Size"
+  },
+
+  "nav": {
+    "home": "Home"
+  },
+
+  "common": {
+    "cancel": "Cancel"
+  }
+}

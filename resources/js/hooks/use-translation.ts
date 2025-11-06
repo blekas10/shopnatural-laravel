@@ -35,6 +35,18 @@ export function useTranslation(): TranslationHook {
             'produktai': { en: 'products', lt: 'produktai' },
             'cart': { en: 'cart', lt: 'krepselis' },
             'krepselis': { en: 'cart', lt: 'krepselis' },
+            'checkout': { en: 'checkout', lt: 'apmokejimas' },
+            'apmokejimas': { en: 'checkout', lt: 'apmokejimas' },
+            'orders': { en: 'orders', lt: 'uzsakymai' },
+            'uzsakymai': { en: 'orders', lt: 'uzsakymai' },
+            'order': { en: 'order', lt: 'uzsakymas' },
+            'uzsakymas': { en: 'order', lt: 'uzsakymas' },
+            'confirmation': { en: 'confirmation', lt: 'patvirtinimas' },
+            'patvirtinimas': { en: 'confirmation', lt: 'patvirtinimas' },
+            'login': { en: 'login', lt: 'prisijungti' },
+            'prisijungti': { en: 'login', lt: 'prisijungti' },
+            'register': { en: 'register', lt: 'registruotis' },
+            'registruotis': { en: 'register', lt: 'registruotis' },
         };
 
         // Remove current locale if present
