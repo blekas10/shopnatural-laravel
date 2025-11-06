@@ -1,0 +1,3 @@
+$user = \App\Models\User::create(['name' => 'Admin11', 'email' => 'admin@admin', 'password' => bcrypt('Admin11.'), 'email_verified_at' => now()]);
+$user->assignRole('admin');
+echo "Admin user created!\n";

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\OrderResource;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -11,7 +10,13 @@ class DashboardController extends Controller
 {
     public function index(): Response
     {
+        /** @var \App\Models\User $user */
         $user = auth()->user();
+
+        // Check if user has admin role
+        if ($user->hasRole('admin')) {
+            return Inertia::render('admin-dashboard');
+        }
 
         // Get all user orders with relationships
         $orders = $user->orders()->with(['items.product', 'items.variant'])->get();

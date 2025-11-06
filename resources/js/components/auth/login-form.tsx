@@ -31,8 +31,8 @@ export function LoginForm({ onSwitchToRegister, onSwitchToForgotPassword }: Logi
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
         post(route('login'), {
-            onSuccess: () => {
-                window.location.reload();
+            onFinish: () => {
+                // Let Fortify handle the redirect to dashboard
             }
         });
     };

@@ -10,13 +10,7 @@ import type { Order } from '@/types/checkout';
 import { Head, Link } from '@inertiajs/react';
 import { Package, Clock, CheckCircle2, ShoppingBag, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Dashboard',
-        href: dashboard().url,
-    },
-];
+import { useTranslation } from '@/hooks/use-translation';
 
 interface DashboardProps {
     auth: {
@@ -44,23 +38,32 @@ const cardVariants = {
 };
 
 export default function Dashboard({ auth, stats, recentOrders }: DashboardProps) {
+    const { t } = useTranslation();
+
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: t('dashboard.title', 'Dashboard'),
+            href: dashboard().url,
+        },
+    ];
+
     const statCards = [
         {
-            title: 'Total Orders',
+            title: t('dashboard.total_orders', 'Total Orders'),
             value: stats?.totalOrders || 0,
             icon: ShoppingBag,
             iconColor: 'text-gold',
             bgColor: 'bg-gold/10',
         },
         {
-            title: 'Pending Orders',
+            title: t('dashboard.pending_orders', 'Pending Orders'),
             value: stats?.pendingOrders || 0,
             icon: Clock,
             iconColor: 'text-gray-600',
             bgColor: 'bg-gray-100',
         },
         {
-            title: 'Completed',
+            title: t('dashboard.completed', 'Completed'),
             value: stats?.completedOrders || 0,
             icon: CheckCircle2,
             iconColor: 'text-teal-600',
@@ -70,7 +73,7 @@ export default function Dashboard({ auth, stats, recentOrders }: DashboardProps)
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Dashboard" />
+            <Head title={t('dashboard.title', 'Dashboard')} />
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto p-4 md:p-6 lg:p-8">
                 {/* Welcome Header */}
                 <motion.div
@@ -80,10 +83,10 @@ export default function Dashboard({ auth, stats, recentOrders }: DashboardProps)
                     className="space-y-2"
                 >
                     <h1 className="text-2xl font-bold uppercase tracking-wide md:text-3xl">
-                        Welcome back, {auth.user.name}
+                        {t('dashboard.welcome_back', 'Welcome back, {name}').replace('{name}', auth.user.name)}
                     </h1>
                     <p className="text-sm text-muted-foreground md:text-base">
-                        Here's what's happening with your orders
+                        {t('dashboard.whats_happening', "Here's what's happening with your orders")}
                     </p>
                 </motion.div>
 
@@ -121,13 +124,13 @@ export default function Dashboard({ auth, stats, recentOrders }: DashboardProps)
                     className="space-y-4"
                 >
                     <div className="flex items-center justify-between">
-                        <h2 className="text-xl font-bold uppercase tracking-wide">Recent Orders</h2>
+                        <h2 className="text-xl font-bold uppercase tracking-wide">{t('dashboard.recent_orders', 'Recent Orders')}</h2>
                         <Link href="/orders">
                             <Button
                                 variant="ghost"
                                 className="group text-gold hover:text-gold/90"
                             >
-                                View All
+                                {t('dashboard.view_all_orders', 'View All Orders')}
                                 <ArrowRight className="ml-2 size-4 transition-transform group-hover:translate-x-1" />
                             </Button>
                         </Link>
@@ -197,13 +200,13 @@ export default function Dashboard({ auth, stats, recentOrders }: DashboardProps)
                             className="flex flex-col items-center justify-center rounded-xl border border-dashed py-12 text-center"
                         >
                             <Package className="mb-4 size-12 text-muted-foreground/50" />
-                            <h3 className="mb-2 text-lg font-bold">No orders yet</h3>
+                            <h3 className="mb-2 text-lg font-bold">{t('dashboard.no_orders', 'No orders yet')}</h3>
                             <p className="mb-6 text-sm text-muted-foreground">
-                                Start shopping to see your orders here
+                                {t('dashboard.no_orders_description', 'Start shopping to see your orders here')}
                             </p>
                             <Link href="/products">
                                 <Button className="bg-gold hover:bg-gold/90 text-white font-bold uppercase tracking-wide">
-                                    Browse Products
+                                    {t('dashboard.start_shopping', 'Start Shopping')}
                                 </Button>
                             </Link>
                         </motion.div>
@@ -217,7 +220,7 @@ export default function Dashboard({ auth, stats, recentOrders }: DashboardProps)
                     transition={{ delay: 0.6, duration: 0.5 }}
                     className="space-y-4"
                 >
-                    <h2 className="text-xl font-bold uppercase tracking-wide">Quick Actions</h2>
+                    <h2 className="text-xl font-bold uppercase tracking-wide">{t('dashboard.quick_actions', 'Quick Actions')}</h2>
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         <Link href="/orders">
                             <Button
@@ -225,9 +228,9 @@ export default function Dashboard({ auth, stats, recentOrders }: DashboardProps)
                                 className="h-auto w-full flex-col items-start gap-2 p-6 text-left hover:border-gold hover:bg-gold/5"
                             >
                                 <Package className="size-6 text-gold" />
-                                <span className="font-bold uppercase tracking-wide">View All Orders</span>
+                                <span className="font-bold uppercase tracking-wide">{t('dashboard.quick_actions.view_all_orders', 'View All Orders')}</span>
                                 <span className="text-xs text-muted-foreground">
-                                    Track and manage your orders
+                                    {t('dashboard.quick_actions.view_all_orders_desc', 'Track and manage your orders')}
                                 </span>
                             </Button>
                         </Link>
@@ -237,9 +240,9 @@ export default function Dashboard({ auth, stats, recentOrders }: DashboardProps)
                                 className="h-auto w-full flex-col items-start gap-2 p-6 text-left hover:border-gold hover:bg-gold/5"
                             >
                                 <CheckCircle2 className="size-6 text-gold" />
-                                <span className="font-bold uppercase tracking-wide">Edit Profile</span>
+                                <span className="font-bold uppercase tracking-wide">{t('dashboard.quick_actions.edit_profile', 'Edit Profile')}</span>
                                 <span className="text-xs text-muted-foreground">
-                                    Update your account information
+                                    {t('dashboard.quick_actions.edit_profile_desc', 'Update your account information')}
                                 </span>
                             </Button>
                         </Link>
@@ -249,9 +252,9 @@ export default function Dashboard({ auth, stats, recentOrders }: DashboardProps)
                                 className="h-auto w-full flex-col items-start gap-2 p-6 text-left hover:border-gold hover:bg-gold/5"
                             >
                                 <ShoppingBag className="size-6 text-gold" />
-                                <span className="font-bold uppercase tracking-wide">Shop Products</span>
+                                <span className="font-bold uppercase tracking-wide">{t('dashboard.quick_actions.shop_products', 'Shop Products')}</span>
                                 <span className="text-xs text-muted-foreground">
-                                    Browse our natural beauty collection
+                                    {t('dashboard.quick_actions.shop_products_desc', 'Browse our natural beauty collection')}
                                 </span>
                             </Button>
                         </Link>

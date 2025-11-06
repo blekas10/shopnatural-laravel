@@ -48,8 +48,8 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
         post(route('register'), {
-            onSuccess: () => {
-                window.location.reload();
+            onFinish: () => {
+                // Let Fortify handle the redirect to dashboard
             }
         });
     };

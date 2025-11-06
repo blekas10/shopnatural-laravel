@@ -30,10 +30,16 @@ class CreateNewUser implements CreatesNewUsers
             'password' => $this->passwordRules(),
         ])->validate();
 
-        return User::create([
+        $user = User::create([
             'name' => $input['name'],
             'email' => $input['email'],
             'password' => $input['password'],
+            'email_verified_at' => now(), // Auto-verify email on registration
         ]);
+
+        // Assign the 'simple' role to the new user
+        $user->assignRole('simple');
+
+        return $user;
     }
 }

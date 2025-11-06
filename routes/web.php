@@ -59,9 +59,14 @@ Route::group(['prefix' => 'lt'], function () {
 
     // Order confirmation - accessible after checkout (uses policy for authorization)
     Route::get('uzsakymas/patvirtinimas/{orderNumber}', [OrderController::class, 'confirmation'])->name('lt.order.confirmation');
+
+    // Authenticated routes (Lithuanian)
+    Route::middleware(['auth', 'verified'])->group(function () {
+        Route::get('dashboard', [DashboardController::class, 'index'])->name('lt.dashboard');
+    });
 });
 
-// Authenticated routes
+// Authenticated routes (English)
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 });
