@@ -70,6 +70,10 @@ Route::group(['prefix' => 'lt'], function () {
         Route::prefix('admin')->group(function () {
             Route::get('products', [AdminProductController::class, 'index'])->name('lt.admin.products.index');
             Route::get('products/create', [AdminProductController::class, 'create'])->name('lt.admin.products.create');
+            Route::post('products', [AdminProductController::class, 'store'])->name('lt.admin.products.store');
+            Route::get('products/{product}/edit', [AdminProductController::class, 'edit'])->name('lt.admin.products.edit');
+            Route::put('products/{product}', [AdminProductController::class, 'update'])->name('lt.admin.products.update');
+            Route::delete('products/{product}', [AdminProductController::class, 'destroy'])->name('lt.admin.products.destroy');
 
             // Category management
             Route::get('categories', [AdminCategoryController::class, 'index'])->name('lt.admin.categories.index');
@@ -90,6 +94,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::prefix('admin')->group(function () {
         Route::get('products', [AdminProductController::class, 'index'])->name('admin.products.index');
         Route::get('products/create', [AdminProductController::class, 'create'])->name('admin.products.create');
+        Route::post('products', [AdminProductController::class, 'store'])->name('admin.products.store');
+        Route::get('products/{product}/edit', [AdminProductController::class, 'edit'])->name('admin.products.edit');
+        Route::put('products/{product}', [AdminProductController::class, 'update'])->name('admin.products.update');
+        Route::delete('products/{product}', [AdminProductController::class, 'destroy'])->name('admin.products.destroy');
 
         // Category management
         Route::get('categories', [AdminCategoryController::class, 'index'])->name('admin.categories.index');
