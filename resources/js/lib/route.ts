@@ -21,10 +21,29 @@ const routeMap: Record<string, Record<string, string>> = {
     'logout': { en: 'logout', lt: 'logout' },
     'dashboard': { en: 'dashboard', lt: 'dashboard' },
     'profile.edit': { en: 'settings/profile', lt: 'settings/profile' },
+    // Admin routes (not localized)
+    'admin.categories.index': { en: 'admin/categories', lt: 'admin/categories' },
+    'admin.categories.create': { en: 'admin/categories/create', lt: 'admin/categories/create' },
+    'admin.categories.store': { en: 'admin/categories', lt: 'admin/categories' },
+    'admin.categories.edit': { en: 'admin/categories', lt: 'admin/categories' },
+    'admin.categories.update': { en: 'admin/categories', lt: 'admin/categories' },
+    'admin.categories.destroy': { en: 'admin/categories', lt: 'admin/categories' },
 };
 
 // Non-localized routes (auth routes that don't have locale prefix)
-const nonLocalizedRoutes = ['login', 'register', 'logout', 'dashboard', 'profile.edit'];
+const nonLocalizedRoutes = [
+    'login',
+    'register',
+    'logout',
+    'dashboard',
+    'profile.edit',
+    'admin.categories.index',
+    'admin.categories.create',
+    'admin.categories.store',
+    'admin.categories.edit',
+    'admin.categories.update',
+    'admin.categories.destroy',
+];
 
 /**
  * Generate a locale-aware URL
@@ -56,19 +75,27 @@ export function route(name: string, params: Record<string, any> = {}, locale: st
         path += `/${segment}`;
     }
 
-    // Handle route parameters (like {slug}, {orderNumber}, {id})
+    // Handle route parameters (like {slug}, {orderNumber}, {id}, {category})
     if (params.slug) {
         path += `/${params.slug}`;
     } else if (params.orderNumber) {
         path += `/${params.orderNumber}`;
+    } else if (params.category) {
+        path += `/${params.category}`;
     } else if (params.id) {
         path += `/${params.id}`;
+    }
+
+    // Add /edit suffix for edit routes
+    if (name.endsWith('.edit')) {
+        path += '/edit';
     }
 
     // Handle query parameters
     const queryParams = { ...params };
     delete queryParams.slug; // Remove slug as it's already in the path
     delete queryParams.orderNumber; // Remove orderNumber as it's already in the path
+    delete queryParams.category; // Remove category as it's already in the path
     delete queryParams.id; // Remove id as it's already in the path
 
     const queryString = Object.keys(queryParams)

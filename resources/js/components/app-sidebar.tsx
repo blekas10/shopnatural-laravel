@@ -55,8 +55,21 @@ export function AppSidebar() {
         },
         {
             title: t('sidebar.manage_products', 'Manage Products'),
-            href: '/admin/products',
             icon: BoxIcon,
+            items: [
+                {
+                    title: t('sidebar.manage_products.all', 'All Products'),
+                    href: '/admin/products',
+                },
+                {
+                    title: t('sidebar.manage_products.add', 'Add Product'),
+                    href: '/admin/products/create',
+                },
+                {
+                    title: t('sidebar.manage_products.categories', 'Categories'),
+                    href: '/admin/categories',
+                },
+            ],
         },
         {
             title: t('sidebar.manage_orders', 'Manage Orders'),
