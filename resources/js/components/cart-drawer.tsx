@@ -152,8 +152,13 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                                                 const price =
                                                     item.variant?.price ||
                                                     item.product.price;
+                                                const compareAtPrice =
+                                                    item.variant?.compareAtPrice ||
+                                                    item.product.compareAtPrice;
                                                 const lineTotal =
                                                     price * item.quantity;
+                                                const compareLineTotal =
+                                                    compareAtPrice ? compareAtPrice * item.quantity : null;
 
                                                 return (
                                                     <motion.div
@@ -189,19 +194,18 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                                                             onClick={onClose}
                                                             className="shrink-0"
                                                         >
-                                                            <div className="h-20 w-20 overflow-hidden rounded-lg border border-border bg-muted">
+                                                            <div className="h-20 w-20 overflow-hidden rounded-lg">
                                                                 <img
                                                                     src={
-                                                                        item
-                                                                            .product
-                                                                            .image
+                                                                        item.variant?.image ||
+                                                                        item.product.image
                                                                     }
                                                                     alt={
                                                                         item
                                                                             .product
                                                                             .name
                                                                     }
-                                                                    className="h-full w-full object-contain p-2"
+                                                                    className="h-full w-full object-contain"
                                                                 />
                                                             </div>
                                                         </Link>
@@ -239,12 +243,16 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                                                                             }
                                                                         </p>
                                                                     )}
-                                                                    <p className="mt-1 text-sm font-bold text-gold">
-                                                                        €
-                                                                        {lineTotal.toFixed(
-                                                                            2,
+                                                                    <div className="flex items-center gap-2">
+                                                                        <p className="mt-1 text-sm font-bold text-gold">
+                                                                            €{lineTotal.toFixed(2)}
+                                                                        </p>
+                                                                        {compareLineTotal && compareLineTotal > lineTotal && (
+                                                                            <p className="mt-1 text-xs font-medium text-muted-foreground line-through">
+                                                                                €{compareLineTotal.toFixed(2)}
+                                                                            </p>
                                                                         )}
-                                                                    </p>
+                                                                    </div>
                                                                 </div>
                                                             </div>
 

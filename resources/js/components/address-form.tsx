@@ -1,17 +1,10 @@
 import { Input } from './ui/input';
 import { Label } from './ui/label';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from './ui/select';
 import type { ShippingAddress } from '@/types/checkout';
 import { useTranslation } from '@/hooks/use-translation';
 
 interface AddressFormProps {
-    values: ShippingAddress;
+    values: Omit<ShippingAddress, 'fullName'> & { fullName?: string };
     errors?: Partial<Record<keyof ShippingAddress, string>>;
     onChange: (field: keyof ShippingAddress, value: string) => void;
     prefix?: string;
@@ -80,7 +73,7 @@ export function AddressForm({
                 />
             </div>
 
-            {/* City and Postal Code */}
+            {/* City, State/Province, and Postal Code */}
             <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                     <Label htmlFor={fieldId('city')} className="text-sm font-bold uppercase tracking-wide">
@@ -100,49 +93,42 @@ export function AddressForm({
                 </div>
 
                 <div>
-                    <Label htmlFor={fieldId('postalCode')} className="text-sm font-bold uppercase tracking-wide">
-                        {t('checkout.postal_code', 'Postal Code')} *
+                    <Label htmlFor={fieldId('state')} className="text-sm font-bold uppercase tracking-wide">
+                        {t('checkout.state', 'State/Province')} *
                     </Label>
                     <Input
-                        id={fieldId('postalCode')}
-                        value={values.postalCode}
-                        onChange={(e) => onChange('postalCode', e.target.value.toUpperCase())}
-                        placeholder={postalPlaceholder}
+                        id={fieldId('state')}
+                        value={values.state}
+                        onChange={(e) => onChange('state', e.target.value)}
+                        placeholder={t('checkout.state_placeholder', 'State or Province')}
                         className="mt-1.5"
-                        error={errors.postalCode}
+                        error={errors.state}
                     />
-                    {errors.postalCode ? (
-                        <p className="mt-1 text-sm text-red-600">{errors.postalCode}</p>
-                    ) : selectedCountry && (
-                        <p className="mt-1 text-xs text-muted-foreground">
-                            {t('checkout.postal_code_format', 'Format')}: {selectedCountry.format}
-                        </p>
+                    {errors.state && (
+                        <p className="mt-1 text-sm text-red-600">{errors.state}</p>
                     )}
                 </div>
             </div>
 
-            {/* Country */}
+            {/* Postal Code */}
             <div>
-                <Label htmlFor={fieldId('country')} className="text-sm font-bold uppercase tracking-wide">
-                    {t('checkout.country', 'Country')} *
+                <Label htmlFor={fieldId('postalCode')} className="text-sm font-bold uppercase tracking-wide">
+                    {t('checkout.postal_code', 'Postal Code')} *
                 </Label>
-                <Select
-                    value={values.country}
-                    onValueChange={(value) => onChange('country', value)}
-                >
-                    <SelectTrigger className="mt-1.5">
-                        <SelectValue placeholder={t('checkout.select_country', 'Select country')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {COUNTRIES.map((country) => (
-                            <SelectItem key={country.code} value={country.code}>
-                                {t(country.nameKey, country.code)}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-                {errors.country && (
-                    <p className="mt-1 text-sm text-red-600">{errors.country}</p>
+                <Input
+                    id={fieldId('postalCode')}
+                    value={values.postalCode}
+                    onChange={(e) => onChange('postalCode', e.target.value.toUpperCase())}
+                    placeholder={postalPlaceholder}
+                    className="mt-1.5"
+                    error={errors.postalCode}
+                />
+                {errors.postalCode ? (
+                    <p className="mt-1 text-sm text-red-600">{errors.postalCode}</p>
+                ) : selectedCountry && (
+                    <p className="mt-1 text-xs text-muted-foreground">
+                        {t('checkout.postal_code_format', 'Format')}: {selectedCountry.format}
+                    </p>
                 )}
             </div>
         </div>

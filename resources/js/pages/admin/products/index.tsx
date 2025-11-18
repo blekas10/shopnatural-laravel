@@ -733,6 +733,25 @@ export default function AdminProducts({ products, categories, brands, filters }:
                                 </div>
                                 <div>
                                     <label className="text-xs font-medium text-gray-700 block mb-1">
+                                        {t('admin.products.compare_at_price', 'Regular Price (€)')}
+                                    </label>
+                                    <Input
+                                        type="number"
+                                        step="0.01"
+                                        value={variant.compare_at_price || ''}
+                                        onChange={(e) =>
+                                            updateVariantField(
+                                                variant.id,
+                                                'compare_at_price',
+                                                e.target.value ? parseFloat(e.target.value) : null
+                                            )
+                                        }
+                                        className="text-sm"
+                                        placeholder={t('admin.products.optional', 'Optional')}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-xs font-medium text-gray-700 block mb-1">
                                         {t('admin.products.stock', 'Stock')} <span className="text-gray-400">({t('admin.products.zero_unlimited', '0 = Unlimited')})</span>
                                     </label>
                                     <Input

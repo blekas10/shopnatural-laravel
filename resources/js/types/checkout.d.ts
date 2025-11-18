@@ -5,13 +5,14 @@ export interface ShippingAddress {
     addressLine1: string;
     addressLine2?: string;
     city: string;
+    state: string;
     postalCode: string;
     country: string;
 }
 
 export interface ContactInformation {
     email: string;
-    phone?: string;
+    phone: string;
 }
 
 export interface ShippingMethod {
@@ -110,10 +111,9 @@ export interface Order {
 }
 
 export interface CheckoutPageProps {
-    shippingMethods: ShippingMethod[];
     paymentMethods: PaymentMethod[];
-    cartItems: CartItem[];
-    subtotal: number;
+    cartItems?: CartItem[];
+    subtotal?: number;
     errors?: Record<string, string>;
 }
 

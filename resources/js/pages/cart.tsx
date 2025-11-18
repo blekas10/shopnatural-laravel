@@ -54,18 +54,26 @@ export default function Cart() {
         }, 300);
     };
 
+    // Calculate original subtotal (before discounts)
+    const originalSubtotal = optimisticItems.reduce((sum, item) => {
+        const price = item.variant?.price || item.product.price;
+        const compareAtPrice = item.variant?.compareAtPrice || item.product.compareAtPrice;
+        const originalPrice = compareAtPrice || price;
+        return sum + (originalPrice * item.quantity);
+    }, 0);
+
+    // Calculate actual subtotal (with discounts)
     const subtotal = totalPrice;
-    const shipping = subtotal >= 50 ? 0 : 5.99;
-    const tax = 0;
-    const discount = 0;
-    const total = subtotal + shipping + tax - discount;
+
+    // Calculate total discount
+    const discount = originalSubtotal - subtotal;
 
     const orderSummaryData = {
-        subtotal,
-        shipping,
-        tax,
-        discount,
-        total,
+        subtotal: originalSubtotal,
+        shipping: 0,
+        tax: 0,
+        discount: discount,
+        total: subtotal,
         items: optimisticItems,
     };
 
@@ -124,7 +132,9 @@ export default function Cart() {
                                     <AnimatePresence mode="popLayout">
                                         {optimisticItems.map((item) => {
                                             const price = item.variant?.price || item.product.price;
+                                            const compareAtPrice = item.variant?.compareAtPrice || item.product.compareAtPrice;
                                             const lineTotal = price * item.quantity;
+                                            const compareLineTotal = compareAtPrice ? compareAtPrice * item.quantity : null;
 
                                             return (
                                                 <motion.div
@@ -138,96 +148,79 @@ export default function Cart() {
                                                     }}
                                                     exit={{ opacity: 0, x: -100, height: 0 }}
                                                     transition={{ duration: 0.3 }}
-                                                    className="overflow-hidden rounded-2xl border-2 border-border bg-background transition-all hover:border-gold/40"
+                                                    className="overflow-hidden rounded-xl border border-border bg-background"
                                                 >
-                                                    <div className="flex flex-col gap-4 p-4 sm:flex-row sm:p-6">
+                                                    <div className="flex gap-4 p-4">
                                                         {/* Product Image */}
                                                         <Link
                                                             href={route('products.show', { slug: item.product.slug })}
                                                             className="shrink-0"
                                                         >
-                                                            <div className="h-32 w-32 overflow-hidden rounded-xl border border-border bg-muted">
+                                                            <div className="h-24 w-24 overflow-hidden rounded-lg">
                                                                 <img
-                                                                    src={item.product.image}
+                                                                    src={item.variant?.image || item.product.image}
                                                                     alt={item.product.name}
-                                                                    className="h-full w-full object-contain p-3"
+                                                                    className="h-full w-full object-contain"
                                                                 />
                                                             </div>
                                                         </Link>
 
                                                         {/* Product Details */}
-                                                        <div className="flex flex-1 flex-col justify-between gap-4">
-                                                            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                                                                <div>
+                                                        <div className="flex flex-1 flex-col gap-3">
+                                                            {/* Title and Price Row */}
+                                                            <div className="flex items-start justify-between gap-3">
+                                                                <div className="flex-1">
                                                                     <Link
                                                                         href={route('products.show', { slug: item.product.slug })}
-                                                                        className="text-lg font-bold uppercase tracking-wide text-foreground hover:text-gold"
+                                                                        className="text-sm font-bold uppercase tracking-wide text-foreground hover:text-gold line-clamp-2 sm:text-base"
                                                                     >
                                                                         {item.product.name}
                                                                     </Link>
-                                                                    {item.product.brandName && (
-                                                                        <p className="mt-1 text-sm text-muted-foreground">
-                                                                            {item.product.brandName}
+                                                                    {item.variant && (
+                                                                        <p className="mt-1 text-xs uppercase text-muted-foreground">
+                                                                            {t('product.size', 'Size')}: {item.variant.size}
                                                                         </p>
                                                                     )}
                                                                 </div>
-                                                                <p className="text-2xl font-bold text-gold">
-                                                                    €{lineTotal.toFixed(2)}
-                                                                </p>
-                                                            </div>
-
-                                                            {/* Variant Selection */}
-                                                            {item.variant && (
-                                                                <div className="space-y-2">
-                                                                    <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
-                                                                        {t('product.size', 'Size')}
-                                                                    </p>
-                                                                    <div className="flex flex-wrap gap-2">
-                                                                        {/* In a real implementation, you'd fetch all variants for this product */}
-                                                                        <button
-                                                                            className="rounded-lg border-2 border-gold bg-gold/10 px-4 py-2 text-sm font-bold uppercase tracking-wide text-foreground ring-2 ring-gold/20"
-                                                                        >
-                                                                            {item.variant.size}
-                                                                        </button>
-                                                                    </div>
-                                                                </div>
-                                                            )}
-
-                                                            {/* Quantity and Remove */}
-                                                            <div className="flex items-center justify-between">
-                                                                <div className="flex items-center gap-3">
-                                                                    <p className="text-sm font-medium text-muted-foreground">
-                                                                        {t('cart.quantity', 'Quantity')}:
-                                                                    </p>
-                                                                    <div className="flex items-center gap-2">
-                                                                        <button
-                                                                            onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
-                                                                            className="flex size-9 items-center justify-center rounded-md border-2 border-border bg-muted transition-all hover:border-gold hover:text-gold"
-                                                                        >
-                                                                            <Minus className="size-4" />
-                                                                        </button>
-                                                                        <span className="min-w-[3rem] text-center text-lg font-bold">
-                                                                            {item.quantity}
-                                                                        </span>
-                                                                        <button
-                                                                            onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
-                                                                            className="flex size-9 items-center justify-center rounded-md border-2 border-border bg-muted transition-all hover:border-gold hover:text-gold"
-                                                                        >
-                                                                            <Plus className="size-4" />
-                                                                        </button>
-                                                                    </div>
-                                                                </div>
-
                                                                 <button
                                                                     onClick={() => handleRemove(item.id, item.product.name)}
                                                                     disabled={removingItems.has(item.id)}
-                                                                    className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-red-500/10 hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-50"
+                                                                    className="text-muted-foreground transition-colors hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-50"
+                                                                    title={t('cart.remove', 'Remove')}
                                                                 >
                                                                     <Trash2 className="size-4" />
-                                                                    <span className="hidden sm:inline">
-                                                                        {t('cart.remove', 'Remove')}
-                                                                    </span>
                                                                 </button>
+                                                            </div>
+
+                                                            {/* Quantity and Price Row */}
+                                                            <div className="flex items-center justify-between gap-3">
+                                                                <div className="flex items-center gap-2">
+                                                                    <button
+                                                                        onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+                                                                        className="flex size-8 items-center justify-center rounded-md border border-border bg-background transition-colors hover:border-gold hover:text-gold"
+                                                                    >
+                                                                        <Minus className="size-3.5" />
+                                                                    </button>
+                                                                    <span className="min-w-[2.5rem] text-center text-sm font-bold">
+                                                                        {item.quantity}
+                                                                    </span>
+                                                                    <button
+                                                                        onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                                                                        className="flex size-8 items-center justify-center rounded-md border border-border bg-background transition-colors hover:border-gold hover:text-gold"
+                                                                    >
+                                                                        <Plus className="size-3.5" />
+                                                                    </button>
+                                                                </div>
+                                                                <div className="flex flex-col items-end">
+                                                                    <p className="text-lg font-bold text-gold">
+                                                                        €{lineTotal.toFixed(2)}
+                                                                    </p>
+                                                                    {compareLineTotal && compareLineTotal > lineTotal && (
+                                                                        <p className="text-xs font-medium text-muted-foreground line-through">
+                                                                            €{compareLineTotal.toFixed(2)}
+                                                                        </p>
+                                                                    )}
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -247,42 +240,29 @@ export default function Cart() {
                                         {t('cart.continue_shopping', 'Continue Shopping')}
                                     </Link>
                                 </div>
-
-                                {/* Free Shipping Notice */}
-                                {subtotal < 50 && (
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        className="mt-6 rounded-lg border border-gold/30 bg-gold/5 p-4"
-                                    >
-                                        <p className="text-sm text-foreground">
-                                            {t('cart.free_shipping_notice', 'Add €{amount} more to get free shipping!', {
-                                                amount: (50 - subtotal).toFixed(2)
-                                            })}
-                                        </p>
-                                    </motion.div>
-                                )}
                             </div>
 
                             {/* Order Summary - 1/3 width */}
                             <div className="lg:col-span-1">
-                                <OrderSummary
-                                    data={orderSummaryData}
-                                    sticky
-                                    showItems={false}
-                                />
+                                <div className="lg:sticky lg:top-24 space-y-4">
+                                    <OrderSummary
+                                        data={orderSummaryData}
+                                        sticky={false}
+                                        showItems={false}
+                                    />
 
-                                {/* Checkout Button */}
-                                <Link href={route('checkout')} className="mt-4 block">
-                                    <Button className="h-14 w-full rounded-lg bg-gold text-base font-bold uppercase tracking-wide text-white transition-all hover:bg-gold/90">
-                                        {t('cart.checkout', 'Proceed to Checkout')}
-                                        <ChevronRight className="ml-2 size-5" />
-                                    </Button>
-                                </Link>
+                                    {/* Checkout Button */}
+                                    <Link href={route('checkout')} className="block">
+                                        <Button className="h-14 w-full rounded-lg bg-gold text-base font-bold uppercase tracking-wide text-white transition-all hover:bg-gold/90">
+                                            {t('cart.proceed_to_checkout', 'Proceed to Checkout')}
+                                            <ChevronRight className="ml-2 size-5" />
+                                        </Button>
+                                    </Link>
 
-                                <p className="mt-3 text-center text-xs text-muted-foreground">
-                                    {t('cart.secure_checkout', 'Secure checkout with SSL encryption')}
-                                </p>
+                                    <p className="text-center text-xs text-muted-foreground">
+                                        {t('cart.shipping_at_checkout', 'Shipping prices will be shown at checkout')}
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     )}

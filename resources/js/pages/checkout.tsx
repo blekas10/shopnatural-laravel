@@ -1,7 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowLeft, Lock, Check, ChevronRight } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useFormStatus } from 'react-dom';
 import MainHeader from '@/components/main-header';
 import Footer from '@/components/footer';
@@ -15,6 +15,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { OrderSummary } from '@/components/order-summary';
 import { AddressForm } from '@/components/address-form';
 import { PaymentForm } from '@/components/payment-form';
+import { CountrySelector } from '@/components/country-selector';
 import type {
     CheckoutFormData,
     ShippingAddress,
@@ -24,6 +25,8 @@ import type {
 } from '@/types/checkout';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { CheckoutValidator } from '@/utils/checkout-validation';
+import { getShippingMethods, calculateShippingCost } from '@/utils/shipping-methods';
 
 function SubmitButton() {
     const { pending } = useFormStatus();
@@ -44,22 +47,6 @@ function SubmitButton() {
 }
 
 export default function Checkout({
-    shippingMethods = [
-        {
-            id: 'standard',
-            name: 'Standard Shipping',
-            description: 'Free for orders over €50',
-            price: 5.99,
-            estimatedDays: '5-7 business days',
-        },
-        {
-            id: 'express',
-            name: 'Express Shipping',
-            description: '1-2 business days',
-            price: 9.99,
-            estimatedDays: '1-2 business days',
-        },
-    ],
     paymentMethods = [
         {
             id: 'card',
@@ -77,6 +64,9 @@ export default function Checkout({
     const { items, totalPrice } = useCart();
     const { t, route } = useTranslation();
 
+    // Initialize validator
+    const validator = useMemo(() => new CheckoutValidator(t), [t]);
+
     // Step Management
     const [currentStep, setCurrentStep] = useState(1);
     const [completedSteps, setCompletedSteps] = useState<number[]>([]);
@@ -92,16 +82,28 @@ export default function Checkout({
         addressLine1: '',
         addressLine2: '',
         city: '',
+        state: '',
         postalCode: '',
-        country: 'LT',
+        country: '',
     });
+
+    // Get shipping methods based on selected country
+    const shippingMethods = useMemo(() => {
+        const country = shippingAddress.country;
+        if (!country) {
+            // Default to Lithuania if no country selected yet
+            return getShippingMethods('LT', t);
+        }
+        return getShippingMethods(country, t);
+    }, [shippingAddress.country, t]);
 
     const [billingAddress, setBillingAddress] = useState<Omit<ShippingAddress, 'fullName'> & { fullName?: string }>({
         addressLine1: '',
         addressLine2: '',
         city: '',
+        state: '',
         postalCode: '',
-        country: 'LT',
+        country: '',
     });
 
     const [billingSameAsShipping, setBillingSameAsShipping] = useState(true);
@@ -116,6 +118,29 @@ export default function Checkout({
     });
     const [agreeToTerms, setAgreeToTerms] = useState(false);
 
+    // Validation Errors
+    const [contactErrors, setContactErrors] = useState<{
+        fullName?: string;
+        email?: string;
+        phone?: string;
+    }>({});
+
+    const [shippingAddressErrors, setShippingAddressErrors] = useState<{
+        country?: string;
+        addressLine1?: string;
+        city?: string;
+        state?: string;
+        postalCode?: string;
+    }>({});
+
+    const [billingAddressErrors, setBillingAddressErrors] = useState<{
+        country?: string;
+        addressLine1?: string;
+        city?: string;
+        state?: string;
+        postalCode?: string;
+    }>({});
+
     // Redirect to cart if empty
     if (items.length === 0) {
         router.visit(route('cart'));
@@ -123,21 +148,30 @@ export default function Checkout({
     }
 
     // Calculate totals
+    // Calculate original subtotal (before discounts)
+    const originalSubtotal = items.reduce((sum, item) => {
+        const price = item.variant?.price || item.product.price;
+        const compareAtPrice = item.variant?.compareAtPrice || item.product.compareAtPrice;
+        const originalPrice = compareAtPrice || price;
+        return sum + (originalPrice * item.quantity);
+    }, 0);
+
+    // Calculate actual subtotal (with discounts)
     const subtotal = totalPrice;
-    const shippingMethod = shippingMethods.find(
-        (m) => m.id === selectedShippingMethod,
+
+    // Calculate total discount
+    const discount = originalSubtotal - subtotal;
+
+    const shipping = calculateShippingCost(
+        selectedShippingMethod,
+        shippingMethods,
+        subtotal
     );
-    const shipping = shippingMethod?.id === 'pickup'
-        ? 0
-        : shippingMethod?.id === 'standard' && subtotal >= 50
-            ? 0
-            : shippingMethod?.price || 0;
     const tax = 0;
-    const discount = 0;
-    const total = subtotal + shipping + tax - discount;
+    const total = subtotal + shipping + tax;
 
     const orderSummaryData = {
-        subtotal,
+        subtotal: originalSubtotal,
         shipping,
         tax,
         discount,
@@ -147,54 +181,23 @@ export default function Checkout({
 
     // Validation functions
     const validateContactInfo = () => {
-        if (!contact.fullName.trim()) {
-            toast.error(t('checkout.field_required', '{field} is required', { field: t('checkout.full_name', 'Full Name') }));
-            return false;
-        }
-        if (!contact.email.trim()) {
-            toast.error(t('checkout.field_required', '{field} is required', { field: t('checkout.email', 'Email') }));
-            return false;
-        }
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(contact.email)) {
-            toast.error(t('checkout.invalid_email', 'Please enter a valid email address'));
-            return false;
-        }
-        return true;
+        const errors = validator.validateContact(contact);
+        setContactErrors(errors);
+        return !validator.hasErrors(errors);
     };
 
     const validateShippingAddress = () => {
-        const requiredFields = [
-            { value: shippingAddress.addressLine1, name: t('checkout.address_line_1', 'Address') },
-            { value: shippingAddress.city, name: t('checkout.city', 'City') },
-            { value: shippingAddress.postalCode, name: t('checkout.postal_code', 'Postal Code') },
-            { value: shippingAddress.country, name: t('checkout.country', 'Country') },
-        ];
-
-        const missingField = requiredFields.find(field => !field.value?.trim());
-        if (missingField) {
-            toast.error(t('checkout.field_required', '{field} is required', { field: missingField.name }));
-            return false;
-        }
-        return true;
+        const errors = validator.validateAddress(shippingAddress);
+        setShippingAddressErrors(errors);
+        return !validator.hasErrors(errors);
     };
 
     const validateBillingAddress = () => {
         if (billingSameAsShipping) return true;
 
-        const requiredFields = [
-            { value: billingAddress.addressLine1, name: t('checkout.address_line_1', 'Address') },
-            { value: billingAddress.city, name: t('checkout.city', 'City') },
-            { value: billingAddress.postalCode, name: t('checkout.postal_code', 'Postal Code') },
-            { value: billingAddress.country, name: t('checkout.country', 'Country') },
-        ];
-
-        const missingField = requiredFields.find(field => !field.value?.trim());
-        if (missingField) {
-            toast.error(t('checkout.field_required', '{field} is required', { field: missingField.name }));
-            return false;
-        }
-        return true;
+        const errors = validator.validateAddress(billingAddress);
+        setBillingAddressErrors(errors);
+        return !validator.hasErrors(errors);
     };
 
     const validatePayment = () => {
@@ -304,6 +307,10 @@ export default function Checkout({
         value: string,
     ) => {
         setShippingAddress((prev) => ({ ...prev, [field]: value }));
+        // Clear error when user types
+        if (shippingAddressErrors[field as keyof typeof shippingAddressErrors]) {
+            setShippingAddressErrors((prev) => ({ ...prev, [field]: undefined }));
+        }
     };
 
     const updateBillingAddress = (
@@ -311,6 +318,10 @@ export default function Checkout({
         value: string,
     ) => {
         setBillingAddress((prev) => ({ ...prev, [field]: value }));
+        // Clear error when user types
+        if (billingAddressErrors[field as keyof typeof billingAddressErrors]) {
+            setBillingAddressErrors((prev) => ({ ...prev, [field]: undefined }));
+        }
     };
 
     const updateCardDetails = (field: keyof CardDetails, value: string) => {
@@ -409,16 +420,24 @@ export default function Checkout({
                                                         id="fullName"
                                                         type="text"
                                                         value={contact.fullName}
-                                                        onChange={(e) =>
+                                                        onChange={(e) => {
                                                             setContact((prev) => ({
                                                                 ...prev,
                                                                 fullName: e.target.value,
-                                                            }))
-                                                        }
+                                                            }));
+                                                            // Clear error when user types
+                                                            if (contactErrors.fullName) {
+                                                                setContactErrors((prev) => ({ ...prev, fullName: undefined }));
+                                                            }
+                                                        }}
                                                         placeholder="Jonas Jonaitis"
                                                         className="mt-1.5"
+                                                        error={contactErrors.fullName}
                                                         autoFocus
                                                     />
+                                                    {contactErrors.fullName && (
+                                                        <p className="mt-1 text-sm text-red-600">{contactErrors.fullName}</p>
+                                                    )}
                                                 </div>
                                                 <div>
                                                     <Label htmlFor="email" className="text-sm font-bold uppercase tracking-wide">
@@ -428,36 +447,49 @@ export default function Checkout({
                                                         id="email"
                                                         type="email"
                                                         value={contact.email}
-                                                        onChange={(e) =>
+                                                        onChange={(e) => {
                                                             setContact((prev) => ({
                                                                 ...prev,
                                                                 email: e.target.value,
-                                                            }))
-                                                        }
+                                                            }));
+                                                            // Clear error when user types
+                                                            if (contactErrors.email) {
+                                                                setContactErrors((prev) => ({ ...prev, email: undefined }));
+                                                            }
+                                                        }}
                                                         placeholder="your@email.com"
                                                         className="mt-1.5"
+                                                        error={contactErrors.email}
                                                     />
+                                                    {contactErrors.email && (
+                                                        <p className="mt-1 text-sm text-red-600">{contactErrors.email}</p>
+                                                    )}
                                                 </div>
                                                 <div>
                                                     <Label htmlFor="phone" className="text-sm font-bold uppercase tracking-wide">
-                                                        {t('checkout.phone', 'Phone')}
-                                                        <span className="ml-1 text-xs font-normal text-muted-foreground">
-                                                            ({t('checkout.optional', 'Optional')})
-                                                        </span>
+                                                        {t('checkout.phone', 'Phone')} *
                                                     </Label>
                                                     <Input
                                                         id="phone"
                                                         type="tel"
-                                                        value={contact.phone || ''}
-                                                        onChange={(e) =>
+                                                        value={contact.phone}
+                                                        onChange={(e) => {
                                                             setContact((prev) => ({
                                                                 ...prev,
                                                                 phone: e.target.value,
-                                                            }))
-                                                        }
+                                                            }));
+                                                            // Clear error when user types
+                                                            if (contactErrors.phone) {
+                                                                setContactErrors((prev) => ({ ...prev, phone: undefined }));
+                                                            }
+                                                        }}
                                                         placeholder="+370 600 12345"
                                                         className="mt-1.5"
+                                                        error={contactErrors.phone}
                                                     />
+                                                    {contactErrors.phone && (
+                                                        <p className="mt-1 text-sm text-red-600">{contactErrors.phone}</p>
+                                                    )}
                                                 </div>
                                             </div>
                                             <Button
@@ -484,11 +516,29 @@ export default function Checkout({
                                             <h2 className="mb-6 text-xl font-bold uppercase tracking-wide">
                                                 2. {t('checkout.shipping_address', 'Shipping Address')}
                                             </h2>
-                                            <AddressForm
-                                                values={shippingAddress}
-                                                onChange={updateShippingAddress}
-                                                prefix="shipping"
-                                            />
+
+                                            {/* Country Selector */}
+                                            <div className="mb-6">
+                                                <CountrySelector
+                                                    value={shippingAddress.country}
+                                                    onChange={(value) => updateShippingAddress('country', value)}
+                                                    label={t('checkout.country', 'Country')}
+                                                    placeholder={t('checkout.select_country', 'Select country...')}
+                                                />
+                                                {shippingAddressErrors.country && (
+                                                    <p className="mt-1 text-sm text-red-600">{shippingAddressErrors.country}</p>
+                                                )}
+                                            </div>
+
+                                            {/* Address Form - only show after country selected */}
+                                            {shippingAddress.country && (
+                                                <AddressForm
+                                                    values={shippingAddress}
+                                                    onChange={updateShippingAddress}
+                                                    errors={shippingAddressErrors}
+                                                    prefix="shipping"
+                                                />
+                                            )}
 
                                             {/* Billing Address Checkbox */}
                                             <div className="mt-6 mb-6 flex items-center space-x-2">
@@ -515,11 +565,29 @@ export default function Checkout({
                                                     <h3 className="mb-4 text-lg font-bold uppercase tracking-wide">
                                                         {t('checkout.billing_address', 'Billing Address')}
                                                     </h3>
-                                                    <AddressForm
-                                                        values={billingAddress}
-                                                        onChange={updateBillingAddress}
-                                                        prefix="billing"
-                                                    />
+
+                                                    {/* Billing Country Selector */}
+                                                    <div className="mb-6">
+                                                        <CountrySelector
+                                                            value={billingAddress.country}
+                                                            onChange={(value) => updateBillingAddress('country', value)}
+                                                            label={t('checkout.country', 'Country')}
+                                                            placeholder={t('checkout.select_country', 'Select country...')}
+                                                        />
+                                                        {billingAddressErrors.country && (
+                                                            <p className="mt-1 text-sm text-red-600">{billingAddressErrors.country}</p>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Billing Address Form - only show after country selected */}
+                                                    {billingAddress.country && (
+                                                        <AddressForm
+                                                            values={billingAddress}
+                                                            onChange={updateBillingAddress}
+                                                            errors={billingAddressErrors}
+                                                            prefix="billing"
+                                                        />
+                                                    )}
                                                 </>
                                             )}
 
@@ -567,9 +635,6 @@ export default function Checkout({
                                                         const isSelected =
                                                             selectedShippingMethod ===
                                                             method.id;
-                                                        const isFree =
-                                                            method.id === 'standard' &&
-                                                            subtotal >= 50;
 
                                                         return (
                                                             <label
@@ -605,9 +670,7 @@ export default function Checkout({
                                                                             </p>
                                                                         </div>
                                                                         <p className="font-bold text-gold">
-                                                                            {isFree
-                                                                                ? t('checkout.free', 'Free')
-                                                                                : `€${method.price.toFixed(2)}`}
+                                                                            €{method.price.toFixed(2)}
                                                                         </p>
                                                                     </div>
                                                                 </div>

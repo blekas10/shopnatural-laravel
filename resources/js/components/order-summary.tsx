@@ -37,12 +37,12 @@ export function OrderSummary({
     return (
         <div
             className={cn(
-                'rounded-2xl border-2 border-border bg-background p-6',
+                'rounded-xl border border-border bg-background p-6',
                 sticky && 'lg:sticky lg:top-24',
                 className,
             )}
         >
-            <h2 className="mb-6 text-xl font-bold uppercase tracking-wide">
+            <h2 className="mb-6 text-lg font-bold uppercase tracking-wide">
                 {t('checkout.order_summary', 'Order Summary')}
             </h2>
 
@@ -51,15 +51,17 @@ export function OrderSummary({
                 <div className="mb-6 space-y-4 border-b border-border pb-6">
                     {data.items.map((item) => {
                         const price = item.variant?.price || item.product.price;
+                        const compareAtPrice = item.variant?.compareAtPrice || item.product.compareAtPrice;
                         const lineTotal = price * item.quantity;
+                        const compareLineTotal = compareAtPrice ? compareAtPrice * item.quantity : null;
 
                         return (
                             <div key={item.id} className="flex gap-3">
-                                <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-border bg-muted">
+                                <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg">
                                     <img
-                                        src={item.product.image}
+                                        src={item.variant?.image || item.product.image}
                                         alt={item.product.name}
-                                        className="h-full w-full object-contain p-2"
+                                        className="h-full w-full object-contain"
                                     />
                                     <div className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-gold text-xs font-bold text-white">
                                         {item.quantity}
@@ -74,9 +76,16 @@ export function OrderSummary({
                                             {item.variant.size}
                                         </p>
                                     )}
-                                    <p className="mt-1 text-sm font-bold text-gold">
-                                        €{lineTotal.toFixed(2)}
-                                    </p>
+                                    <div className="mt-1 flex items-center gap-2">
+                                        <p className="text-sm font-bold text-gold">
+                                            €{lineTotal.toFixed(2)}
+                                        </p>
+                                        {compareLineTotal && compareLineTotal > lineTotal && (
+                                            <p className="text-xs font-medium text-muted-foreground line-through">
+                                                €{compareLineTotal.toFixed(2)}
+                                            </p>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         );
@@ -140,16 +149,16 @@ export function OrderSummary({
                     </span>
                 </div>
 
-                <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">
-                        {t('checkout.shipping', 'Shipping')}
-                    </span>
-                    <span className="font-medium text-foreground">
-                        {data.shipping === 0
-                            ? t('checkout.free', 'Free')
-                            : `€${data.shipping.toFixed(2)}`}
-                    </span>
-                </div>
+                {data.shipping > 0 && (
+                    <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">
+                            {t('checkout.shipping', 'Shipping')}
+                        </span>
+                        <span className="font-medium text-foreground">
+                            €{data.shipping.toFixed(2)}
+                        </span>
+                    </div>
+                )}
 
                 {data.tax > 0 && (
                     <div className="flex items-center justify-between text-sm">

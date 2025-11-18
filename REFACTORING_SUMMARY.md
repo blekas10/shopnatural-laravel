@@ -168,6 +168,195 @@ This script cleans up old variant images (order >= 100) that are not assigned to
 - ✅ **Fix:** Changed to use `handleVariantSelect()` function
 - **File:** `resources/js/pages/products/show.tsx:603`
 
+### 7. **Cart Showing Wrong Variant Images**
+- ❌ **Issue:** Cart drawer, cart page, and order summary all showed product image instead of variant image
+- ✅ **Fix:** Changed to use `item.variant?.image || item.product.image` across all cart components
+- **Files:**
+  - `resources/js/components/cart-drawer.tsx:195`
+  - `resources/js/pages/cart.tsx:151`
+  - `resources/js/components/order-summary.tsx:60`
+
+### 8. **Unwanted Borders on Cart Item Images**
+- ❌ **Issue:** Cart item images had grey borders and padding (`border border-border bg-muted`, `p-2`/`p-3`)
+- ✅ **Fix:** Removed border, background, and padding classes for cleaner image display
+- **Files:**
+  - `resources/js/components/cart-drawer.tsx:192`
+  - `resources/js/pages/cart.tsx:149`
+  - `resources/js/components/order-summary.tsx:58`
+
+### 9. **Free Shipping Logic Removed**
+- ❌ **Issue:** Cart and checkout showed free shipping promotions (≥€50), but shop doesn't offer free shipping
+- ✅ **Fix:** Removed all free shipping conditional logic, set fixed shipping rates
+- **Files:**
+  - `resources/js/pages/checkout.tsx:51,130,564` - Updated shipping descriptions and logic
+
+### 10. **Cart Should Not Show Shipping Prices**
+- ❌ **Issue:** Cart page displayed €5.99 shipping price, but shipping should only be shown at checkout
+- ❌ **Issue:** "PROCEED TO CHECKOUT" button not translated to Lithuanian
+- ❌ **Issue:** "Shipping prices will be shown at checkout" text in English on Lithuanian page
+- ✅ **Fix:** Removed all shipping calculations from cart page (shipping: 0, total = subtotal)
+- ✅ **Fix:** OrderSummary component hides shipping row when shipping is 0
+- ✅ **Fix:** Added translation key `cart.proceed_to_checkout` (LT: "Pereiti prie apmokėjimo")
+- ✅ **Fix:** Added translation key `cart.shipping_at_checkout` (LT: "Pristatymo kainos bus parodytos apmokėjimo metu")
+- **Files:**
+  - `resources/js/pages/cart.tsx:59-65,265` - Removed shipping from cart
+  - `resources/js/components/order-summary.tsx:143-152` - Hide shipping when 0
+  - `lang/lt.json:113-114` - Added translations
+  - `lang/en.json:113-114` - Added translations
+
+### 11. **Discount Pricing System Implementation**
+- ✅ **Feature:** Complete discount/sale pricing system using existing `compare_at_price` field
+- ✅ **Database:** Field already exists in `product_variants` table (`compare_at_price` column)
+- ✅ **Backend:** Model already has `isOnSale()` and `getSalePercentage()` methods
+- ✅ **Admin UI:** Added `compare_at_price` field to Quick Edit dialog with translations
+- ✅ **Frontend:** Shows both regular price (strikethrough) and discount price when applicable
+- ✅ **How it works:**
+  - `price` = current selling price (what customer pays)
+  - `compare_at_price` = original price before discount (optional, nullable)
+  - When `compare_at_price` > `price`, product shows as "on sale"
+  - Regular price shown with strikethrough, sale price highlighted in gold
+- **Files:**
+  - `app/Models/ProductVariant.php` - Already had discount logic ✅
+  - `app/Http/Resources/ProductDetailResource.php:54` - Already included compareAtPrice ✅
+  - `resources/js/pages/admin/products/form.tsx:824-843` - Already had input field ✅
+  - `resources/js/pages/admin/products/index.tsx:734-752` - Added to Quick Edit dialog
+  - `resources/js/pages/products/show.tsx:92-102,315-337` - Already displayed discounts ✅
+  - `resources/js/components/cart-drawer.tsx:155-161,246-256` - Added discount display
+  - `resources/js/pages/cart.tsx:123-126,172-182` - Added discount display
+  - `resources/js/components/order-summary.tsx:54-56,79-88` - Added discount display
+  - `lang/lt.json:439-440` - Added translations
+  - `lang/en.json:427-428` - Added translations
+
+### 12. **Cart Page Redesign - Cleaner Mobile & Desktop Layout**
+- ❌ **Issue:** Cart item cards looked cluttered and overwhelming on mobile
+- ❌ **Issue:** Order summary sticky positioning covered checkout button when scrolling
+- ❌ **Issue:** Desktop layout not utilizing horizontal space effectively
+- ✅ **Fix:** Redesigned cart item cards with cleaner, more compact layout
+  - Reduced border thickness (`border-2` → `border`)
+  - Reduced border radius (`rounded-2xl` → `rounded-xl`)
+  - Smaller image size (132px → 96px), removed grey background and padding
+  - Compact 2-row layout: Title/Remove top, Quantity/Price bottom
+  - Inline size display instead of separate section
+  - Smaller buttons and cleaner spacing
+- ✅ **Fix:** Fixed sticky positioning by wrapping OrderSummary + Button together
+  - Both elements now stick as one unit
+  - Button never gets covered when scrolling
+  - Proper spacing maintained
+- ✅ **Fix:** Desktop layout already horizontal (2/3 products, 1/3 summary)
+- **Files:**
+  - `resources/js/pages/cart.tsx:127-216` - Redesigned cart item cards
+  - `resources/js/pages/cart.tsx:234-254` - Fixed sticky positioning wrapper
+  - `resources/js/components/order-summary.tsx:40,45` - Cleaner borders
+
+### 13. **Order Summary Shows Discount Breakdown**
+- ❌ **Issue:** Order summary showed only final total, not showing discount savings
+- ✅ **Fix:** Updated order summary to show proper price breakdown
+  - **Tarpinė suma (Subtotal):** Shows original prices before any discounts
+  - **Nuolaida (Discount):** Shows total discount amount in teal with minus sign
+  - **Viso (Total):** Shows final price after discounts (before shipping)
+- ✅ **How it works:**
+  - Calculates `originalSubtotal` using `compareAtPrice` when available, otherwise `price`
+  - Calculates actual `subtotal` using discounted prices
+  - Shows `discount = originalSubtotal - subtotal`
+  - Applied to both cart and checkout pages consistently
+- **Files:**
+  - `resources/js/pages/cart.tsx:57-78` - Calculate discount breakdown
+  - `resources/js/pages/checkout.tsx:125-156` - Calculate discount breakdown
+  - `resources/js/components/order-summary.tsx:174-183` - Display discount row
+  - `lang/lt.json:172` - Translation already exists ("Nuolaida")
+
+### 14. **Beautiful Country Selector with Flags and Native Names**
+- ✅ **Feature:** Searchable country selector with flag emojis and native names for checkout
+- ✅ **Implementation:**
+  - Created dedicated `CountrySelector` component with Popover-based UI
+  - Includes **100+ world countries** (Europe, Americas, Asia, Oceania, Africa)
+  - Countries displayed in **native language** (e.g., "Deutschland" for Germany, "中国" for China)
+  - English name shown in parentheses when different from native name
+  - Live search/filter works with both native and English names
+  - Alphabetically sorted by native name
+  - Selected state with gold checkmark
+  - Hover effects with gold accent
+  - Proper accessibility with ARIA labels
+- ✅ **Integration & UX:**
+  - Placed at top of Step 2 (Shipping Address) in checkout
+  - Also added to billing address section (when different from shipping)
+  - Removed duplicate country field from `AddressForm` component
+  - **Country selection is now required** - address fields hidden until country selected
+  - **Cannot continue** to next step without selecting a country
+  - Initial state is empty (no default country)
+  - Validation checks country selection first before checking other fields
+- **Files:**
+  - `resources/js/components/country-selector.tsx:14-119` - Expanded to 100+ countries with native names
+  - `resources/js/pages/checkout.tsx:92-106` - Changed default country from 'LT' to '' (empty)
+  - `resources/js/pages/checkout.tsx:177-196,198-219` - Updated validation to check country first
+  - `resources/js/pages/checkout.tsx:510-516` - Conditional rendering of shipping address form
+  - `resources/js/pages/checkout.tsx:555-561` - Conditional rendering of billing address form
+  - `resources/js/components/address-form.tsx:1-4,83-122` - Removed country field and Select imports
+  - `lang/lt.json:157-158` - Translations ("Šalis", "Pasirinkite šalį")
+  - `lang/en.json:157-158` - Translations ("Country", "Select country")
+
+### 15. **Added Required State/Province Field to Address**
+- ✅ **Feature:** Added State/Province field to address forms for better international support
+- ✅ **Implementation:**
+  - Added `state` field to `ShippingAddress` interface (required field)
+  - Positioned between City and Postal Code fields
+  - 2-column layout: City | State/Province
+  - Postal Code moved to its own full-width row below
+  - Marked as required with asterisk (*)
+  - Supports both "State" and "Province" naming for different countries
+  - Form validation enforces state field completion
+  - Error messages display when field is empty
+- ✅ **Address Structure:**
+  - Street Address (Line 1) - required
+  - Street Address (Line 2) - optional
+  - City - required
+  - State/Province - **required**
+  - Postal Code - required
+- **Files:**
+  - `resources/js/types/checkout.d.ts:8` - Added state field to ShippingAddress interface (required)
+  - `resources/js/components/address-form.tsx:95-110` - Added state input field with validation
+  - `resources/js/pages/checkout.tsx:96,105` - Initialize state field in address objects
+  - `resources/js/pages/checkout.tsx:189,213` - Added state to validation checks
+  - `lang/lt.json:155-156` - Added translations ("Valstija/Provincija", "Valstija arba provincija")
+  - `lang/en.json:155-156` - Added translations ("State/Province", "State or Province")
+
+### 16. **Centralized Validation System with Proper Translations**
+- ✅ **Feature:** Created dedicated validation utility with proper language support
+- ✅ **Implementation:**
+  - Created `CheckoutValidator` class in `/resources/js/utils/checkout-validation.ts`
+  - Centralized all validation logic for contact info, addresses, and card details
+  - Proper translation support using the app's translation system
+  - Validation methods return typed error objects
+  - Email format validation with regex
+  - Phone number validation (minimum 6 digits)
+  - Card number, expiry date, and CVV validation
+  - Minimum length validations for text fields
+- ✅ **Translation Keys Added:**
+  - `validation.required` - "yra privalomas" / "is required"
+  - `validation.invalid_email` - "Įveskite teisingą el. pašto adresą" / "Please enter a valid email address"
+  - `validation.invalid_phone` - "Įveskite teisingą telefono numerį" / "Please enter a valid phone number"
+  - `validation.min_length` - "Turi būti bent {min} simboliai" / "Must be at least {min} characters"
+  - `validation.invalid_card_number` - Card validation message
+  - `validation.invalid_expiry` - Expiry date validation message
+  - `validation.invalid_cvv` - CVV validation message
+- ✅ **Contact Information Validation:**
+  - Full Name: Required, minimum 2 characters
+  - Email: Required, proper email format validation
+  - Phone: **Required**, minimum 6 digits (spaces/dashes ignored)
+  - Inline error messages under each field
+  - Errors clear automatically when user starts typing
+  - Red border on invalid inputs
+  - Form cannot proceed until all valid
+- **Files:**
+  - `resources/js/utils/checkout-validation.ts` - NEW: Validation utility class
+  - `resources/js/types/checkout.d.ts:15` - Changed phone from optional to required
+  - `resources/js/pages/checkout.tsx:4,28,83` - Import and initialize validator
+  - `resources/js/pages/checkout.tsx:122-127` - Added contactErrors state
+  - `resources/js/pages/checkout.tsx:173-177` - Use validator for contact validation
+  - `resources/js/pages/checkout.tsx:449-529` - Display inline errors with auto-clear
+  - `lang/lt.json:191-197` - Added validation translations (Lithuanian)
+  - `lang/en.json:191-197` - Added validation translations (English)
+
 ---
 
 ## 📊 Code Quality Metrics
@@ -283,11 +472,12 @@ Consider adding:
 ## ✨ Summary
 
 **Total Changes:**
-- 33 modified files
-- 9 new files
+- 35 modified files
+- 10 new files
 - 1 deleted file (create.tsx merged into form.tsx)
 - 7 new database migrations
 - 100+ new translation keys
+- 100+ world countries with native names
 
 **Code Quality:** ✅ Excellent
 - No build errors
