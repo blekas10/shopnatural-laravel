@@ -93,5 +93,10 @@ class FortifyServiceProvider extends ServiceProvider
 
             return Limit::perMinute(5)->by($throttleKey);
         });
+
+        // Password reset rate limiting - disabled for development
+        RateLimiter::for('password.request', function (Request $request) {
+            return Limit::perMinute(1000)->by($request->ip());
+        });
     }
 }

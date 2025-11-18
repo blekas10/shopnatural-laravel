@@ -30,11 +30,19 @@ createInertiaApp({
                             style: {
                                 background: 'hsl(var(--background))',
                                 color: 'hsl(var(--foreground))',
-                                border: '1px solid hsl(var(--border))',
+                                border: '2px solid hsl(var(--border))',
+                                fontSize: '14px',
+                                fontWeight: '500',
+                                padding: '16px 20px',
+                                boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)',
+                                opacity: '1',
+                                backdropFilter: 'blur(8px)',
                             },
                             className: 'toast',
                         }}
                         richColors
+                        expand={false}
+                        duration={4000}
                     />
                 </CartProvider>
             </StrictMode>,

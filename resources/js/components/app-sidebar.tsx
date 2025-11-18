@@ -77,7 +77,7 @@ export function AppSidebar() {
         },
         {
             title: t('sidebar.manage_orders', 'Manage Orders'),
-            href: route('orders.index'),
+            href: route('admin.orders.index'),
             icon: Package,
         },
         {

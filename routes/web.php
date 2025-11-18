@@ -4,13 +4,31 @@ use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\BrandController as AdminBrandController;
 use App\Http\Controllers\Admin\ProductImageController as AdminProductImageController;
+use App\Http\Controllers\Admin\OrderController as AdminOrderController;
+use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\VenipakController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+
+// Override Fortify email verification routes
+Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
+    ->middleware(['auth', 'signed', 'throttle:6,1'])
+    ->name('verification.verify');
+
+Route::post('/email/verification-notification', [EmailVerificationController::class, 'resend'])
+    ->middleware(['auth', 'throttle:6,1'])
+    ->name('verification.send');
+
+// API routes for Venipak (accessible without locale prefix)
+Route::prefix('api')->group(function () {
+    Route::get('venipak/pickup-points', [VenipakController::class, 'getPickupPoints'])->name('api.venipak.pickup-points');
+    Route::post('venipak/clear-cache', [VenipakController::class, 'clearCache'])->middleware('auth')->name('api.venipak.clear-cache');
+});
 
 // English routes (default, no prefix)
 Route::group([], function () {
@@ -21,6 +39,14 @@ Route::group([], function () {
 
     // Auth routes - redirect to home with modal (handled by Fortify for default locale)
     // The /login and /register routes are automatically handled by FortifyServiceProvider
+
+    // Password reset routes (English)
+    Route::get('reset-password/{token}', function ($token) {
+        return Inertia::render('auth/reset-password', [
+            'email' => request('email'),
+            'token' => $token,
+        ]);
+    })->name('password.reset');
 
     // Checkout routes
     Route::get('checkout', [CheckoutController::class, 'index'])->name('en.checkout');
@@ -64,8 +90,16 @@ Route::group(['prefix' => 'lt'], function () {
     // Order confirmation - accessible after checkout (uses policy for authorization)
     Route::get('uzsakymas/patvirtinimas/{orderNumber}', [OrderController::class, 'confirmation'])->name('lt.order.confirmation');
 
+    // Password reset routes (Lithuanian)
+    Route::get('reset-password/{token}', function ($token) {
+        return Inertia::render('auth/reset-password', [
+            'email' => request('email'),
+            'token' => $token,
+        ]);
+    })->name('lt.password.reset');
+
     // Authenticated routes (Lithuanian)
-    Route::middleware(['auth', 'verified'])->group(function () {
+    Route::middleware(['auth'])->group(function () {
         Route::get('dashboard', [DashboardController::class, 'index'])->name('lt.dashboard');
 
         // Admin routes
@@ -100,12 +134,20 @@ Route::group(['prefix' => 'lt'], function () {
             Route::get('brands/{brand}/edit', [AdminBrandController::class, 'edit'])->name('lt.admin.brands.edit');
             Route::put('brands/{brand}', [AdminBrandController::class, 'update'])->name('lt.admin.brands.update');
             Route::delete('brands/{brand}', [AdminBrandController::class, 'destroy'])->name('lt.admin.brands.destroy');
+
+            // Order management
+            Route::get('orders', [AdminOrderController::class, 'index'])->name('lt.admin.orders.index');
+            Route::get('orders/{order}', [AdminOrderController::class, 'show'])->name('lt.admin.orders.show');
+            Route::patch('orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('lt.admin.orders.update-status');
+            Route::patch('orders/{order}/payment-status', [AdminOrderController::class, 'updatePaymentStatus'])->name('lt.admin.orders.update-payment-status');
+            Route::get('orders/{order}/invoice/download', [AdminOrderController::class, 'downloadInvoice'])->name('lt.admin.orders.invoice.download');
+            Route::get('orders/{order}/invoice/view', [AdminOrderController::class, 'viewInvoice'])->name('lt.admin.orders.invoice.view');
         });
     });
 });
 
 // Authenticated routes (English)
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Admin routes
@@ -140,6 +182,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('brands/{brand}/edit', [AdminBrandController::class, 'edit'])->name('admin.brands.edit');
         Route::put('brands/{brand}', [AdminBrandController::class, 'update'])->name('admin.brands.update');
         Route::delete('brands/{brand}', [AdminBrandController::class, 'destroy'])->name('admin.brands.destroy');
+
+        // Order management
+        Route::get('orders', [AdminOrderController::class, 'index'])->name('admin.orders.index');
+        Route::get('orders/{order}', [AdminOrderController::class, 'show'])->name('admin.orders.show');
+        Route::patch('orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('admin.orders.update-status');
+        Route::patch('orders/{order}/payment-status', [AdminOrderController::class, 'updatePaymentStatus'])->name('admin.orders.update-payment-status');
+        Route::get('orders/{order}/invoice/download', [AdminOrderController::class, 'downloadInvoice'])->name('admin.orders.invoice.download');
+        Route::get('orders/{order}/invoice/view', [AdminOrderController::class, 'viewInvoice'])->name('admin.orders.invoice.view');
     });
 });
 

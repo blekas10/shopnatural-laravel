@@ -77,15 +77,23 @@ class CheckoutController extends Controller
             'shippingAddress.addressLine1' => 'required|string',
             'shippingAddress.addressLine2' => 'nullable|string',
             'shippingAddress.city' => 'required|string',
+            'shippingAddress.state' => 'nullable|string',
             'shippingAddress.postalCode' => 'required|string',
             'shippingAddress.country' => 'required|string',
             'billingSameAsShipping' => 'required|boolean',
             'billingAddress.addressLine1' => 'required_if:billingSameAsShipping,false|nullable|string',
             'billingAddress.addressLine2' => 'nullable|string',
             'billingAddress.city' => 'required_if:billingSameAsShipping,false|nullable|string',
+            'billingAddress.state' => 'nullable|string',
             'billingAddress.postalCode' => 'required_if:billingSameAsShipping,false|nullable|string',
             'billingAddress.country' => 'required_if:billingSameAsShipping,false|nullable|string',
             'shippingMethod' => 'required|string',
+            'venipakPickupPoint' => 'nullable|array',
+            'venipakPickupPoint.id' => 'nullable|integer',
+            'venipakPickupPoint.name' => 'nullable|string',
+            'venipakPickupPoint.address' => 'nullable|string',
+            'venipakPickupPoint.city' => 'nullable|string',
+            'venipakPickupPoint.zip' => 'nullable|string',
             'paymentMethod' => 'required|string',
             'cardDetails' => 'nullable|array',
             'cardDetails.cardNumber' => 'required_if:paymentMethod,card|nullable|string',
@@ -123,6 +131,8 @@ class CheckoutController extends Controller
                 'subtotal' => $validated['subtotal'],
                 'tax' => $validated['tax'],
                 'shipping_cost' => $validated['shipping'],
+                'shipping_method' => $validated['shippingMethod'],
+                'venipak_pickup_point' => $validated['venipakPickupPoint'] ?? null,
                 'discount' => $validated['discount'],
                 'total' => $validated['total'],
                 'currency' => 'EUR',
@@ -133,6 +143,7 @@ class CheckoutController extends Controller
                 'shipping_street_address' => $validated['shippingAddress']['addressLine1'],
                 'shipping_apartment' => $validated['shippingAddress']['addressLine2'] ?? null,
                 'shipping_city' => $validated['shippingAddress']['city'],
+                'shipping_state' => $validated['shippingAddress']['state'] ?? null,
                 'shipping_postal_code' => $validated['shippingAddress']['postalCode'],
                 'shipping_country' => $validated['shippingAddress']['country'],
                 'shipping_phone' => $validated['contact']['phone'] ?? null,
@@ -143,6 +154,7 @@ class CheckoutController extends Controller
                 'billing_street_address' => $billingAddress['addressLine1'],
                 'billing_apartment' => $billingAddress['addressLine2'] ?? null,
                 'billing_city' => $billingAddress['city'],
+                'billing_state' => $billingAddress['state'] ?? null,
                 'billing_postal_code' => $billingAddress['postalCode'],
                 'billing_country' => $billingAddress['country'],
                 'billing_phone' => $validated['contact']['phone'] ?? null,
@@ -184,6 +196,9 @@ class CheckoutController extends Controller
             }
 
             DB::commit();
+
+            // Send order confirmation emails to customer and admin
+            $order->sendOrderConfirmationEmails();
 
             // For guest orders, store the email in session to allow confirmation page access
             if (!auth()->check()) {

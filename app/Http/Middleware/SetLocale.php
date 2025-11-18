@@ -26,6 +26,9 @@ class SetLocale
 
         app()->setLocale($locale);
 
+        // Store locale in session for use in notifications/emails
+        session(['locale' => $locale]);
+
         return $next($request);
     }
 }

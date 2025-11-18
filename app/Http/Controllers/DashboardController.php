@@ -35,6 +35,8 @@ class DashboardController extends Controller
         return Inertia::render('dashboard', [
             'stats' => $stats,
             'recentOrders' => OrderResource::collection($recentOrders),
+            'emailVerified' => $user->hasVerifiedEmail(),
+            'status' => session('status'),
         ]);
     }
 }

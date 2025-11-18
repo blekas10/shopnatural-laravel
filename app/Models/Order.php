@@ -20,6 +20,8 @@ class Order extends Model
         'subtotal',
         'tax',
         'shipping_cost',
+        'shipping_method',
+        'venipak_pickup_point',
         'discount',
         'total',
         'currency',
@@ -58,6 +60,7 @@ class Order extends Model
             'shipping_cost' => 'decimal:2',
             'discount' => 'decimal:2',
             'total' => 'decimal:2',
+            'venipak_pickup_point' => 'array',
             'shipped_at' => 'datetime',
             'delivered_at' => 'datetime',
         ];
@@ -177,11 +180,32 @@ class Order extends Model
     }
 
     /**
-     * Mark as processing
+     * Mark as processing and send confirmation emails
      */
-    public function markAsProcessing(): void
+    public function markAsProcessing(bool $sendEmail = true): void
     {
         $this->update(['status' => 'processing']);
+
+        if ($sendEmail) {
+            $this->sendOrderConfirmationEmails();
+        }
+    }
+
+    /**
+     * Send order confirmation emails to customer and admin
+     */
+    public function sendOrderConfirmationEmails(): void
+    {
+        $locale = app()->getLocale();
+
+        // Send to customer in their language
+        \Mail::to($this->customer_email)
+            ->send(new \App\Mail\OrderConfirmed($this, $locale));
+
+        // Send to admin always in Lithuanian
+        $adminEmail = config('mail.admin_email', 'admin@shopnatural.com');
+        \Mail::to($adminEmail)
+            ->send(new \App\Mail\OrderConfirmed($this, 'lt'));
     }
 
     /**

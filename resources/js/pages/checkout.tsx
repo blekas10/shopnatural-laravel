@@ -16,6 +16,7 @@ import { OrderSummary } from '@/components/order-summary';
 import { AddressForm } from '@/components/address-form';
 import { PaymentForm } from '@/components/payment-form';
 import { CountrySelector } from '@/components/country-selector';
+import { VenipakPickupSelector, VenipakPickupPoint } from '@/components/venipak-pickup-selector';
 import type {
     CheckoutFormData,
     ShippingAddress,
@@ -108,8 +109,9 @@ export default function Checkout({
 
     const [billingSameAsShipping, setBillingSameAsShipping] = useState(true);
     const [selectedShippingMethod, setSelectedShippingMethod] =
-        useState('pickup');
+        useState('');
     const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('cash');
+    const [selectedVenipakPoint, setSelectedVenipakPoint] = useState<VenipakPickupPoint | null>(null);
     const [cardDetails, setCardDetails] = useState<CardDetails>({
         cardNumber: '',
         expiryDate: '',
@@ -164,8 +166,7 @@ export default function Checkout({
 
     const shipping = calculateShippingCost(
         selectedShippingMethod,
-        shippingMethods,
-        subtotal
+        shippingMethods
     );
     const tax = 0;
     const total = subtotal + shipping + tax;
@@ -234,10 +235,22 @@ export default function Checkout({
                 isValid = validateShippingAddress() && validateBillingAddress();
                 break;
             case 3:
-                isValid = true; // Shipping method always has a selection
-                break;
-            case 4:
-                isValid = validatePayment();
+                // Validate shipping method is selected
+                if (!selectedShippingMethod) {
+                    toast.error(t('checkout.please_select_shipping', 'Please select a delivery method'));
+                    isValid = false;
+                    break;
+                }
+
+                // Validate Venipak pickup point if Lithuania + Venipak Pickup selected
+                if (selectedShippingMethod === 'venipak-pickup' && shippingAddress.country === 'LT') {
+                    if (!selectedVenipakPoint) {
+                        toast.error(t('venipak.please_select', 'Please select a Venipak pickup point'));
+                        isValid = false;
+                        break;
+                    }
+                }
+                isValid = true;
                 break;
         }
 
@@ -255,6 +268,11 @@ export default function Checkout({
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Validate payment
+        if (!validatePayment()) {
+            return;
+        }
 
         if (!agreeToTerms) {
             toast.error(
@@ -274,6 +292,7 @@ export default function Checkout({
                 : billingAddress,
             billingSameAsShipping,
             shippingMethod: selectedShippingMethod,
+            venipakPickupPoint: selectedVenipakPoint || undefined,
             paymentMethod: selectedPaymentMethod,
             cardDetails:
                 selectedPaymentMethod === 'card' ? cardDetails : undefined,
@@ -679,6 +698,18 @@ export default function Checkout({
                                                     })}
                                                 </div>
                                             </RadioGroup>
+
+                                            {/* Venipak Pickup Point Selector - Show when Venipak Pickup + Lithuania */}
+                                            {selectedShippingMethod === 'venipak-pickup' && shippingAddress.country === 'LT' && (
+                                                <div className="mt-6">
+                                                    <VenipakPickupSelector
+                                                        country={shippingAddress.country}
+                                                        selectedPickupPoint={selectedVenipakPoint}
+                                                        onSelect={setSelectedVenipakPoint}
+                                                    />
+                                                </div>
+                                            )}
+
                                             <div className="mt-6 flex items-center justify-between gap-3">
                                                 <Button
                                                     type="button"
@@ -721,6 +752,44 @@ export default function Checkout({
                                                 onCardDetailsChange={updateCardDetails}
                                                 availableMethods={paymentMethods}
                                             />
+
+                                            {/* Terms and Conditions */}
+                                            <div className={cn(
+                                                "mt-6 flex items-start space-x-3 rounded-lg border-2 p-4 transition-colors",
+                                                !agreeToTerms ? "border-border bg-background" : "border-gold bg-gold/5"
+                                            )}>
+                                                <Checkbox
+                                                    id="agreeToTerms"
+                                                    checked={agreeToTerms}
+                                                    onCheckedChange={(checked) =>
+                                                        setAgreeToTerms(checked as boolean)
+                                                    }
+                                                />
+                                                <div className="flex-1">
+                                                    <Label
+                                                        htmlFor="agreeToTerms"
+                                                        className="cursor-pointer text-sm leading-relaxed"
+                                                    >
+                                                        {t('checkout.agree_to_terms_prefix', 'I agree to the')}{' '}
+                                                        <Link
+                                                            href="/terms"
+                                                            className="font-medium text-gold hover:underline"
+                                                        >
+                                                            {t('checkout.terms_and_conditions', 'Terms and Conditions')}
+                                                        </Link>
+                                                        {' '}
+                                                        {t('checkout.and', 'and')}{' '}
+                                                        <Link
+                                                            href="/privacy"
+                                                            className="font-medium text-gold hover:underline"
+                                                        >
+                                                            {t('checkout.privacy_policy', 'Privacy Policy')}
+                                                        </Link>
+                                                    </Label>
+                                                </div>
+                                            </div>
+
+                                            {/* Buttons */}
                                             <div className="mt-6 flex items-center justify-between gap-3">
                                                 <Button
                                                     type="button"
@@ -731,74 +800,8 @@ export default function Checkout({
                                                     <ArrowLeft className="mr-2 size-4" />
                                                     {t('checkout.back', 'Back')}
                                                 </Button>
-                                                <Button
-                                                    type="button"
-                                                    onClick={() => handleContinue(4)}
-                                                    className="bg-gold hover:bg-gold/90"
-                                                >
-                                                    {t('checkout.continue', 'Continue')}
-                                                    <ChevronRight className="ml-2 size-4" />
-                                                </Button>
-                                            </div>
-                                        </motion.div>
-                                    )}
-
-                                    {/* Step 5: Review & Submit */}
-                                    {currentStep === 5 && (
-                                        <motion.div
-                                            key="step5"
-                                            initial={{ opacity: 0, x: 20 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            exit={{ opacity: 0, x: -20 }}
-                                            transition={{ duration: 0.3 }}
-                                            className="space-y-4"
-                                        >
-
-                                            {/* Terms and Conditions */}
-                                            <motion.div
-                                                initial={{ opacity: 0, y: 20 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                transition={{ delay: 0.1 }}
-                                                className="flex items-start space-x-3 rounded-2xl border-2 border-border bg-background p-6"
-                                            >
-                                                <Checkbox
-                                                    id="agreeToTerms"
-                                                    checked={agreeToTerms}
-                                                    onCheckedChange={(checked) =>
-                                                        setAgreeToTerms(checked as boolean)
-                                                    }
-                                                    required
-                                                />
-                                                <Label
-                                                    htmlFor="agreeToTerms"
-                                                    className="cursor-pointer text-sm leading-relaxed"
-                                                >
-                                                    {t('checkout.agree_to_terms_prefix', 'I agree to the')}{' '}
-                                                    <Link
-                                                        href="/terms"
-                                                        className="font-medium text-gold hover:underline"
-                                                    >
-                                                        {t('checkout.terms_and_conditions', 'Terms and Conditions')}
-                                                    </Link>
-                                                    {' '}
-                                                    {t('checkout.and', 'and')}{' '}
-                                                    <Link
-                                                        href="/privacy"
-                                                        className="font-medium text-gold hover:underline"
-                                                    >
-                                                        {t('checkout.privacy_policy', 'Privacy Policy')}
-                                                    </Link>
-                                                </Label>
-                                            </motion.div>
-
-                                            {/* Submit Button */}
-                                            <motion.div
-                                                initial={{ opacity: 0, y: 20 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                transition={{ delay: 0.2 }}
-                                            >
                                                 <SubmitButton />
-                                            </motion.div>
+                                            </div>
                                         </motion.div>
                                     )}
                                 </AnimatePresence>

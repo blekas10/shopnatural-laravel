@@ -1,12 +1,10 @@
-import { update } from '@/routes/password';
-import { Form, Head } from '@inertiajs/react';
-
-import InputError from '@/components/input-error';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Spinner } from '@/components/ui/spinner';
-import AuthLayout from '@/layouts/auth-layout';
+import { useState, useEffect } from 'react';
+import { Head } from '@inertiajs/react';
+import MainHeader from '@/components/main-header';
+import Footer from '@/components/footer';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ResetPasswordForm } from '@/components/auth/reset-password-form';
+import { useTranslation } from '@/hooks/use-translation';
 
 interface ResetPasswordProps {
     token: string;
@@ -14,81 +12,45 @@ interface ResetPasswordProps {
 }
 
 export default function ResetPassword({ token, email }: ResetPasswordProps) {
+    const { t } = useTranslation();
+    const [modalOpen, setModalOpen] = useState(true);
+
+    // If modal is closed, redirect to home
+    const handleClose = () => {
+        setModalOpen(false);
+        window.location.href = '/';
+    };
+
     return (
-        <AuthLayout
-            title="Reset password"
-            description="Please enter your new password below"
-        >
-            <Head title="Reset password" />
+        <>
+            <Head title={t('auth.reset_password', 'Reset Password')} />
 
-            <Form
-                {...update.form()}
-                transform={(data) => ({ ...data, token, email })}
-                resetOnSuccess={['password', 'password_confirmation']}
-            >
-                {({ processing, errors }) => (
-                    <div className="grid gap-6">
-                        <div className="grid gap-2">
-                            <Label htmlFor="email">Email</Label>
-                            <Input
-                                id="email"
-                                type="email"
-                                name="email"
-                                autoComplete="email"
-                                value={email}
-                                className="mt-1 block w-full"
-                                readOnly
-                            />
-                            <InputError
-                                message={errors.email}
-                                className="mt-2"
-                            />
-                        </div>
+            <div className="min-h-screen bg-background">
+                <MainHeader />
 
-                        <div className="grid gap-2">
-                            <Label htmlFor="password">Password</Label>
-                            <Input
-                                id="password"
-                                type="password"
-                                name="password"
-                                autoComplete="new-password"
-                                className="mt-1 block w-full"
-                                autoFocus
-                                placeholder="Password"
-                            />
-                            <InputError message={errors.password} />
-                        </div>
+                <div className="container mx-auto px-4 py-20 text-center">
+                    <h1 className="text-3xl font-bold text-gold mb-4">
+                        {t('auth.reset_password', 'Reset Password')}
+                    </h1>
+                    <p className="text-gray-600">
+                        {t('auth.reset_password_page_message', 'Please complete the password reset form in the modal.')}
+                    </p>
+                </div>
 
-                        <div className="grid gap-2">
-                            <Label htmlFor="password_confirmation">
-                                Confirm password
-                            </Label>
-                            <Input
-                                id="password_confirmation"
-                                type="password"
-                                name="password_confirmation"
-                                autoComplete="new-password"
-                                className="mt-1 block w-full"
-                                placeholder="Confirm password"
-                            />
-                            <InputError
-                                message={errors.password_confirmation}
-                                className="mt-2"
-                            />
-                        </div>
+                <Footer />
+            </div>
 
-                        <Button
-                            type="submit"
-                            className="mt-4 w-full bg-gold hover:bg-gold/90 text-white font-bold uppercase tracking-wide"
-                            disabled={processing}
-                            data-test="reset-password-button"
-                        >
-                            {processing && <Spinner />}
-                            Reset password
-                        </Button>
-                    </div>
-                )}
-            </Form>
-        </AuthLayout>
+            {/* Reset Password Modal */}
+            <Dialog open={modalOpen} onOpenChange={handleClose}>
+                <DialogContent className="sm:max-w-[480px] p-0">
+                    <DialogHeader className="px-6 pt-6">
+                        <DialogTitle className="text-2xl font-bold uppercase tracking-wide text-center">
+                            {t('auth.reset_password', 'Reset Password')}
+                        </DialogTitle>
+                    </DialogHeader>
+                    <ResetPasswordForm token={token} email={email} />
+                </DialogContent>
+            </Dialog>
+        </>
     );
 }

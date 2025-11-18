@@ -1,4 +1,5 @@
 import type { CartItem } from './index';
+import type { VenipakPickupPoint } from '@/components/venipak-pickup-selector';
 
 export interface ShippingAddress {
     fullName: string;
@@ -57,6 +58,7 @@ export interface CheckoutFormData {
     billingAddress?: ShippingAddress;
     billingSameAsShipping: boolean;
     shippingMethod: string;
+    venipakPickupPoint?: VenipakPickupPoint;
     paymentMethod: string;
     cardDetails?: CardDetails;
     promoCode?: string;

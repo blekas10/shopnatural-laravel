@@ -3,14 +3,16 @@
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { OrderStatusBadge } from '@/components/order-status-badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem, type User } from '@/types';
 import type { Order } from '@/types/checkout';
-import { Head, Link } from '@inertiajs/react';
-import { Package, Clock, CheckCircle2, ShoppingBag, ArrowRight } from 'lucide-react';
+import { Head, Link, router } from '@inertiajs/react';
+import { Package, Clock, CheckCircle2, ShoppingBag, ArrowRight, Mail, AlertCircle, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/hooks/use-translation';
+import { useState } from 'react';
 
 interface DashboardProps {
     auth: {
@@ -22,6 +24,8 @@ interface DashboardProps {
         completedOrders: number;
     };
     recentOrders: Order[];
+    emailVerified?: boolean;
+    status?: string;
 }
 
 const cardVariants = {
@@ -37,8 +41,9 @@ const cardVariants = {
     }),
 };
 
-export default function Dashboard({ auth, stats, recentOrders }: DashboardProps) {
+export default function Dashboard({ auth, stats, recentOrders, emailVerified = true, status }: DashboardProps) {
     const { t } = useTranslation();
+    const [resending, setResending] = useState(false);
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -46,6 +51,14 @@ export default function Dashboard({ auth, stats, recentOrders }: DashboardProps)
             href: dashboard().url,
         },
     ];
+
+    const handleResendVerification = () => {
+        setResending(true);
+        router.post('/email/verification-notification', {}, {
+            preserveScroll: true,
+            onFinish: () => setResending(false),
+        });
+    };
 
     const statCards = [
         {
@@ -89,6 +102,77 @@ export default function Dashboard({ auth, stats, recentOrders }: DashboardProps)
                         {t('dashboard.whats_happening', "Here's what's happening with your orders")}
                     </p>
                 </motion.div>
+
+                {/* Status Messages */}
+                {status === 'email-verified' && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                    >
+                        <Alert className="border-green-200 bg-green-50">
+                            <Check className="h-4 w-4 text-green-600" />
+                            <AlertDescription className="text-green-800">
+                                {t('dashboard.email_verified_success', 'Your email has been verified successfully!')}
+                            </AlertDescription>
+                        </Alert>
+                    </motion.div>
+                )}
+
+                {status === 'verification-link-sent' && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                    >
+                        <Alert className="border-blue-200 bg-blue-50">
+                            <Mail className="h-4 w-4 text-blue-600" />
+                            <AlertDescription className="text-blue-800">
+                                {t('dashboard.verification_link_sent', 'A new verification link has been sent to your email address.')}
+                            </AlertDescription>
+                        </Alert>
+                    </motion.div>
+                )}
+
+                {/* Email Verification Banner */}
+                {!emailVerified && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                    >
+                        <Alert className="border-amber-200 bg-amber-50">
+                            <AlertCircle className="h-4 w-4 text-amber-600" />
+                            <AlertDescription className="flex flex-col gap-3 text-amber-900 sm:flex-row sm:items-center sm:justify-between">
+                                <div>
+                                    <p className="font-semibold">
+                                        {t('dashboard.verify_email_title', 'Please verify your email address')}
+                                    </p>
+                                    <p className="text-sm">
+                                        {t('dashboard.verify_email_description', 'Check your inbox for the verification link we sent you.')}
+                                    </p>
+                                </div>
+                                <Button
+                                    onClick={handleResendVerification}
+                                    disabled={resending}
+                                    variant="outline"
+                                    size="sm"
+                                    className="border-amber-300 bg-white text-amber-900 hover:bg-amber-100 whitespace-nowrap"
+                                >
+                                    {resending ? (
+                                        <>
+                                            <Clock className="mr-2 h-4 w-4 animate-spin" />
+                                            {t('dashboard.resending', 'Resending...')}
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Mail className="mr-2 h-4 w-4" />
+                                            {t('dashboard.resend_verification', 'Resend Email')}
+                                        </>
+                                    )}
+                                </Button>
+                            </AlertDescription>
+                        </Alert>
+                    </motion.div>
+                )}
 
                 {/* Stats Cards */}
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

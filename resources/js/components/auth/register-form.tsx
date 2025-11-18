@@ -14,13 +14,14 @@ interface RegisterFormProps {
 }
 
 export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
-    const { t, route } = useTranslation();
+    const { t, route, locale } = useTranslation();
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         email: '',
         password: '',
         password_confirmation: '',
         terms: false,
+        locale: locale,
     });
 
     const [showPassword, setShowPassword] = useState(false);

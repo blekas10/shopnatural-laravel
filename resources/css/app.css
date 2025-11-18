@@ -182,3 +182,14 @@
 .sidebar-filters::-webkit-scrollbar-thumb:hover {
     background: rgba(194, 163, 99, 0.5);
 }
+
+/* Toast notifications - ensure solid background */
+[data-sonner-toast] {
+    background: hsl(var(--background)) !important;
+    opacity: 1 !important;
+}
+
+.dark [data-sonner-toast] {
+    background: hsl(var(--background)) !important;
+    opacity: 1 !important;
+}

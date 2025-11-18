@@ -42,88 +42,64 @@ type TranslationFunction = (key: string, fallback: string, params?: Record<strin
 /**
  * Get available shipping methods based on country code
  * Pricing structure:
- * - Lithuania: Pickup €2, Standard €5, Express €9
- * - Other EU: Pickup €4, Standard €8, Express €15
- * - Rest of World: Pickup €20, Standard €25, Express €40
+ * - Lithuania: Venipak Courier €4, Venipak Pickup €4
+ * - Other EU: Venipak Courier €4
+ * - Rest of World: Courier Shipping €20
  */
 export function getShippingMethods(countryCode: string, t: TranslationFunction): ShippingMethod[] {
     const isLithuania = countryCode === 'LT';
     const isEU = EU_COUNTRIES.includes(countryCode);
 
-    // Determine pricing based on country
-    let pickupPrice: number;
-    let standardPrice: number;
-    let expressPrice: number;
-    let standardDays: string;
-    let expressDays: string;
-
     if (isLithuania) {
-        pickupPrice = 2;
-        standardPrice = 5;
-        expressPrice = 9;
-        standardDays = t('shipping.standard_days_lt', '3-5 business days');
-        expressDays = t('shipping.express_days_lt', '1-2 business days');
+        // Lithuania: Both courier and pickup available at €4
+        return [
+            {
+                id: 'venipak-courier',
+                name: t('shipping.venipak_courier', 'Venipak Courier'),
+                description: t('shipping.venipak_courier_description', 'Delivery to your door'),
+                price: 4,
+                estimatedDays: t('shipping.venipak_courier_days_lt', '1-2 business days'),
+            },
+            {
+                id: 'venipak-pickup',
+                name: t('shipping.venipak_pickup', 'Venipak Pickup Location'),
+                description: t('shipping.venipak_pickup_description', 'Pick up from Venipak location'),
+                price: 4,
+                estimatedDays: t('shipping.venipak_pickup_days', 'Available next day'),
+            },
+        ];
     } else if (isEU) {
-        pickupPrice = 4;
-        standardPrice = 8;
-        expressPrice = 15;
-        standardDays = t('shipping.standard_days_eu', '5-7 business days');
-        expressDays = t('shipping.express_days_eu', '2-3 business days');
+        // Europe: Only courier available at €4
+        return [
+            {
+                id: 'venipak-courier',
+                name: t('shipping.venipak_courier', 'Venipak Courier'),
+                description: t('shipping.venipak_courier_description', 'Delivery to your door'),
+                price: 4,
+                estimatedDays: t('shipping.venipak_courier_days_eu', '3-5 business days'),
+            },
+        ];
     } else {
-        pickupPrice = 20;
-        standardPrice = 25;
-        expressPrice = 40;
-        standardDays = t('shipping.standard_days_world', '10-15 business days');
-        expressDays = t('shipping.express_days_world', '5-7 business days');
+        // Rest of World: Only courier shipping at €20
+        return [
+            {
+                id: 'courier-shipping',
+                name: t('shipping.courier', 'Courier Shipping'),
+                description: t('shipping.courier_description', 'International delivery'),
+                price: 20,
+                estimatedDays: t('shipping.courier_days_world', '7-14 business days'),
+            },
+        ];
     }
-
-    return [
-        {
-            id: 'pickup',
-            name: t('shipping.pickup', 'Pick Up'),
-            description: t('shipping.pickup_description', 'Pick up from our store'),
-            price: pickupPrice,
-            estimatedDays: t('shipping.pickup_days', 'Available today'),
-        },
-        {
-            id: 'standard',
-            name: t('shipping.standard', 'Standard Shipping'),
-            description: t('shipping.standard_description', 'Free for orders over €50', { price: `€${standardPrice.toFixed(2)}` }),
-            price: standardPrice,
-            estimatedDays: standardDays,
-        },
-        {
-            id: 'express',
-            name: t('shipping.express', 'Express Shipping'),
-            description: t('shipping.express_description', 'Fast delivery'),
-            price: expressPrice,
-            estimatedDays: expressDays,
-        },
-    ];
 }
 
 /**
- * Calculate final shipping cost (can apply free shipping rules here)
+ * Calculate final shipping cost
  */
 export function calculateShippingCost(
     shippingMethodId: string,
-    shippingMethods: ShippingMethod[],
-    subtotal: number,
-    freeShippingThreshold: number = 50
+    shippingMethods: ShippingMethod[]
 ): number {
-    // Pickup is always the set price
-    if (shippingMethodId === 'pickup') {
-        const pickupMethod = shippingMethods.find(m => m.id === 'pickup');
-        return pickupMethod?.price || 0;
-    }
-
     const method = shippingMethods.find(m => m.id === shippingMethodId);
-    if (!method) return 0;
-
-    // Free shipping for standard if over threshold
-    if (shippingMethodId === 'standard' && subtotal >= freeShippingThreshold) {
-        return 0;
-    }
-
-    return method.price;
+    return method?.price || 0;
 }

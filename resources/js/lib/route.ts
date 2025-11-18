@@ -19,6 +19,8 @@ const routeMap: Record<string, Record<string, string>> = {
     'login': { en: 'login', lt: 'login' },
     'register': { en: 'register', lt: 'register' },
     'logout': { en: 'logout', lt: 'logout' },
+    'password.email': { en: 'forgot-password', lt: 'forgot-password' },
+    'password.update': { en: 'reset-password', lt: 'reset-password' },
     // Dashboard
     'dashboard': { en: 'dashboard', lt: 'dashboard' },
     'profile.edit': { en: 'settings/profile', lt: 'settings/profile' },
@@ -41,6 +43,12 @@ const routeMap: Record<string, Record<string, string>> = {
     'admin.brands.edit': { en: 'admin/brands', lt: 'admin/brands' },
     'admin.brands.update': { en: 'admin/brands', lt: 'admin/brands' },
     'admin.brands.destroy': { en: 'admin/brands', lt: 'admin/brands' },
+    'admin.orders.index': { en: 'admin/orders', lt: 'admin/orders' },
+    'admin.orders.show': { en: 'admin/orders', lt: 'admin/orders' },
+    'admin.orders.update-status': { en: 'admin/orders', lt: 'admin/orders' },
+    'admin.orders.update-payment-status': { en: 'admin/orders', lt: 'admin/orders' },
+    'admin.orders.invoice.download': { en: 'admin/orders', lt: 'admin/orders' },
+    'admin.orders.invoice.view': { en: 'admin/orders', lt: 'admin/orders' },
 };
 
 // Non-localized routes (auth routes that don't have locale prefix)
@@ -48,6 +56,8 @@ const nonLocalizedRoutes = [
     'login',
     'register',
     'logout',
+    'password.email',
+    'password.update',
 ];
 
 /**
@@ -80,11 +90,13 @@ export function route(name: string, params: Record<string, any> = {}, locale: st
         path += `/${segment}`;
     }
 
-    // Handle route parameters (like {slug}, {orderNumber}, {id}, {category}, {product})
+    // Handle route parameters (like {slug}, {orderNumber}, {id}, {category}, {product}, {order})
     if (params.slug) {
         path += `/${params.slug}`;
     } else if (params.orderNumber) {
         path += `/${params.orderNumber}`;
+    } else if (params.order) {
+        path += `/${params.order}`;
     } else if (params.category) {
         path += `/${params.category}`;
     } else if (params.product) {
@@ -98,10 +110,31 @@ export function route(name: string, params: Record<string, any> = {}, locale: st
         path += '/edit';
     }
 
+    // Add /invoice/download suffix for invoice download routes
+    if (name.endsWith('.invoice.download')) {
+        path += '/invoice/download';
+    }
+
+    // Add /invoice/view suffix for invoice view routes
+    if (name.endsWith('.invoice.view')) {
+        path += '/invoice/view';
+    }
+
+    // Add /status suffix for status update routes
+    if (name.endsWith('.update-status')) {
+        path += '/status';
+    }
+
+    // Add /payment-status suffix for payment status update routes
+    if (name.endsWith('.update-payment-status')) {
+        path += '/payment-status';
+    }
+
     // Handle query parameters
     const queryParams = { ...params };
     delete queryParams.slug; // Remove slug as it's already in the path
     delete queryParams.orderNumber; // Remove orderNumber as it's already in the path
+    delete queryParams.order; // Remove order as it's already in the path
     delete queryParams.category; // Remove category as it's already in the path
     delete queryParams.product; // Remove product as it's already in the path
     delete queryParams.id; // Remove id as it's already in the path
