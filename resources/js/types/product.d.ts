@@ -5,6 +5,8 @@ export interface BaseProduct {
     slug: string;
     price: number;
     compareAtPrice: number | null;
+    minPrice: number | null;
+    maxPrice: number | null;
     image: string;
     isOnSale: boolean;
     salePercentage: number | null;
@@ -25,6 +27,7 @@ export interface ProductVariant {
     stock: number;
     inStock: boolean;
     isDefault: boolean;
+    image: string | null; // Variant-specific image
 }
 
 export interface ProductImage {
@@ -45,6 +48,7 @@ export interface Brand {
     id: number;
     name: string;
     productCount?: number;
+    children?: Brand[];
 }
 
 export interface ProductDetail extends BaseProduct {

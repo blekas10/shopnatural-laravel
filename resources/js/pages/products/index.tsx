@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import MainHeader from '@/components/main-header';
 import Footer from '@/components/footer';
 import { useTranslation } from '@/hooks/use-translation';
@@ -8,8 +8,9 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from '@/com
 import { Checkbox } from '@/components/ui/checkbox';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
-import { ChevronRight, Filter, X } from 'lucide-react';
-import { useState, useMemo, useEffect } from 'react';
+import { Input } from '@/components/ui/input';
+import { ChevronRight, ChevronDown, Filter, X, Search } from 'lucide-react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import type { ProductListItem, Brand, Category } from '@/types/product';
 
@@ -24,6 +25,7 @@ interface Filters {
     brandIds: number[];
     priceRange: [number, number];
     sort: string;
+    search: string;
 }
 
 export default function ProductsIndex({ allProducts, brands, categories }: ProductsIndexProps) {
@@ -38,48 +40,96 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
         return [min, max];
     }, [allProducts]);
 
-    const [filters, setFilters] = useState<Filters>({
-        categoryIds: [],
-        brandIds: [],
-        priceRange: priceExtent as [number, number],
-        sort: 'featured',
+    const [filters, setFilters] = useState<Filters>(() => {
+        // Initialize filters from URL params
+        const urlParams = new URLSearchParams(window.location.search);
+
+        const categoryIds = urlParams.get('categories')?.split(',').map(Number).filter(n => !isNaN(n)) || [];
+        const brandIds = urlParams.get('brands')?.split(',').map(Number).filter(n => !isNaN(n)) || [];
+        const search = urlParams.get('search') || '';
+        const sort = urlParams.get('sort') || 'featured';
+        const minPrice = urlParams.get('minPrice');
+        const maxPrice = urlParams.get('maxPrice');
+
+        const priceRange: [number, number] = [
+            minPrice ? parseFloat(minPrice) : priceExtent[0],
+            maxPrice ? parseFloat(maxPrice) : priceExtent[1],
+        ];
+
+        return {
+            categoryIds,
+            brandIds,
+            priceRange,
+            sort,
+            search,
+        };
     });
 
     const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+    const [expandedBrands, setExpandedBrands] = useState<number[]>([]);
+    const [expandedCategories, setExpandedCategories] = useState<number[]>([]);
+    const [visibleProductCount, setVisibleProductCount] = useState(20);
 
-    // Read category from URL and pre-filter
+    // Update URL when filters change
+    const updateURL = useCallback((newFilters: Filters) => {
+        const params = new URLSearchParams();
+
+        if (newFilters.categoryIds.length > 0) {
+            params.set('categories', newFilters.categoryIds.join(','));
+        }
+        if (newFilters.brandIds.length > 0) {
+            params.set('brands', newFilters.brandIds.join(','));
+        }
+        if (newFilters.search) {
+            params.set('search', newFilters.search);
+        }
+        if (newFilters.sort !== 'featured') {
+            params.set('sort', newFilters.sort);
+        }
+        if (newFilters.priceRange[0] !== priceExtent[0]) {
+            params.set('minPrice', newFilters.priceRange[0].toString());
+        }
+        if (newFilters.priceRange[1] !== priceExtent[1]) {
+            params.set('maxPrice', newFilters.priceRange[1].toString());
+        }
+
+        const queryString = params.toString();
+        const newUrl = queryString ? `?${queryString}` : window.location.pathname;
+
+        // Update URL without page reload
+        window.history.replaceState({}, '', newUrl);
+    }, [priceExtent]);
+
+    // Update URL and reset visible count when filters change
     useEffect(() => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const categoryParam = urlParams.get('category');
-        if (categoryParam) {
-            const categoryId = parseInt(categoryParam);
-            if (!isNaN(categoryId)) {
-                setFilters(prev => ({
-                    ...prev,
-                    categoryIds: [categoryId],
-                }));
+        updateURL(filters);
+        setVisibleProductCount(20);
+    }, [filters, updateURL]);
+
+
+    // Helper to find a brand by ID in hierarchical structure
+    const findBrandById = (brandId: number, brandList: Brand[] = brands): Brand | null => {
+        for (const brand of brandList) {
+            if (brand.id === brandId) return brand;
+            if (brand.children) {
+                const found = findBrandById(brandId, brand.children);
+                if (found) return found;
             }
         }
-    }, []);
-
-    // Flatten categories for easier rendering
-    const flattenCategories = (cats: Category[]): Array<{ id: number; name: string; level: number }> => {
-        const result: Array<{ id: number; name: string; level: number }> = [];
-
-        cats.forEach(cat => {
-            result.push({ id: cat.id, name: cat.name, level: 0 });
-            cat.children?.forEach(child => {
-                result.push({ id: child.id, name: child.name, level: 1 });
-                child.children?.forEach(grandchild => {
-                    result.push({ id: grandchild.id, name: grandchild.name, level: 2 });
-                });
-            });
-        });
-
-        return result;
+        return null;
     };
 
-    const flatCategories = useMemo(() => flattenCategories(categories), [categories]);
+    // Helper to find a category by ID in hierarchical structure
+    const findCategoryById = (categoryId: number, categoryList: Category[] = categories): Category | null => {
+        for (const category of categoryList) {
+            if (category.id === categoryId) return category;
+            if (category.children) {
+                const found = findCategoryById(categoryId, category.children);
+                if (found) return found;
+            }
+        }
+        return null;
+    };
 
     // Get all descendant category IDs (children and grandchildren)
     const getAllDescendantIds = (categoryId: number): number[] => {
@@ -109,9 +159,48 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
         return result;
     };
 
+    // Get all descendant brand IDs (children and grandchildren)
+    const getAllBrandDescendantIds = (brandId: number): number[] => {
+        const result: number[] = [brandId];
+
+        const findDescendants = (brandList: any[]) => {
+            for (const brand of brandList) {
+                if (brand.id === brandId) {
+                    // Add all children
+                    brand.children?.forEach((child: any) => {
+                        result.push(child.id);
+                        // Add all grandchildren
+                        child.children?.forEach((grandchild: any) => {
+                            result.push(grandchild.id);
+                        });
+                    });
+                    return;
+                }
+                // Recursively search in children
+                if (brand.children?.length) {
+                    findDescendants(brand.children);
+                }
+            }
+        };
+
+        findDescendants(brands);
+        return result;
+    };
+
     // Client-side filtering logic
     const filteredProducts = useMemo(() => {
         let filtered = [...allProducts];
+
+        // Filter by search (name or SKU - stored in slug or title)
+        if (filters.search) {
+            const searchLower = filters.search.toLowerCase();
+            filtered = filtered.filter(p => {
+                const nameMatch = p.name.toLowerCase().includes(searchLower);
+                const titleMatch = p.title?.toLowerCase().includes(searchLower);
+                const slugMatch = p.slug.toLowerCase().includes(searchLower);
+                return nameMatch || titleMatch || slugMatch;
+            });
+        }
 
         // Filter by categories (include children and grandchildren)
         if (filters.categoryIds.length > 0) {
@@ -122,10 +211,12 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
             );
         }
 
-        // Filter by brands
+        // Filter by brands (include children and grandchildren)
         if (filters.brandIds.length > 0) {
+            // Get all brand IDs including descendants
+            const allBrandIds = filters.brandIds.flatMap(id => getAllBrandDescendantIds(id));
             filtered = filtered.filter(p =>
-                p.brandId && filters.brandIds.includes(p.brandId)
+                p.brandId && allBrandIds.includes(p.brandId)
             );
         }
 
@@ -162,6 +253,7 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
         if (filters.categoryIds.length > 0) count += filters.categoryIds.length;
         if (filters.brandIds.length > 0) count += filters.brandIds.length;
         if (filters.priceRange[0] !== priceExtent[0] || filters.priceRange[1] !== priceExtent[1]) count += 1;
+        if (filters.search) count += 1;
         return count;
     }, [filters, priceExtent]);
 
@@ -172,6 +264,7 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
             brandIds: [],
             priceRange: priceExtent as [number, number],
             sort: filters.sort,
+            search: '',
         });
     };
 
@@ -195,70 +288,180 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
         }));
     };
 
-    // Filter components
-    const CategoryFilter = () => (
-        <div className="rounded-2xl border-2 border-border bg-background p-6 transition-all duration-300">
-            <h3 className="mb-4 text-sm font-bold uppercase tracking-wide text-gold">
-                {t('products.categories', 'Categories')}
-            </h3>
-            <div className="space-y-1">
-                {flatCategories.map(({ id, name, level }) => (
-                    <label
-                        key={id}
-                        className={cn(
-                            'flex items-center gap-3 cursor-pointer group py-2 px-3 rounded-lg transition-colors hover:bg-muted/50',
-                            level === 1 && 'ml-4',
-                            level === 2 && 'ml-8'
-                        )}
-                    >
+    // Toggle brand expansion
+    const toggleBrandExpansion = (brandId: number) => {
+        setExpandedBrands(prev =>
+            prev.includes(brandId)
+                ? prev.filter(id => id !== brandId)
+                : [...prev, brandId]
+        );
+    };
+
+    // Toggle category expansion
+    const toggleCategoryExpansion = (categoryId: number) => {
+        setExpandedCategories(prev =>
+            prev.includes(categoryId)
+                ? prev.filter(id => id !== categoryId)
+                : [...prev, categoryId]
+        );
+    };
+
+    // Render category recursively with expand/collapse
+    const renderCategory = (category: Category, level: number = 0) => {
+        const hasChildren = category.children && category.children.length > 0;
+        const isExpanded = expandedCategories.includes(category.id);
+        const isChecked = filters.categoryIds.includes(category.id);
+
+        return (
+            <div key={category.id}>
+                <div className={cn(
+                    'flex items-center gap-2 py-1.5 px-2 rounded-lg transition-colors hover:bg-muted/50',
+                    level === 1 && 'ml-6',
+                    level === 2 && 'ml-12'
+                )}>
+                    {hasChildren ? (
+                        <button
+                            onClick={() => toggleCategoryExpansion(category.id)}
+                            className="flex items-center justify-center w-5 h-5 hover:bg-muted rounded transition-colors flex-shrink-0"
+                        >
+                            {isExpanded ? (
+                                <ChevronDown className="size-4 text-muted-foreground" />
+                            ) : (
+                                <ChevronRight className="size-4 text-muted-foreground" />
+                            )}
+                        </button>
+                    ) : (
+                        <div className="w-5 flex-shrink-0" />
+                    )}
+
+                    <label className="flex items-center gap-2.5 cursor-pointer flex-1 min-w-0">
                         <Checkbox
-                            checked={filters.categoryIds.includes(id)}
-                            onCheckedChange={() => toggleCategory(id)}
-                            className="border-2 data-[state=checked]:bg-gold data-[state=checked]:border-gold"
+                            checked={isChecked}
+                            onCheckedChange={() => toggleCategory(category.id)}
+                            className="border-2 data-[state=checked]:bg-gold data-[state=checked]:border-gold flex-shrink-0"
                         />
                         <span className={cn(
-                            'text-sm transition-colors group-hover:text-gold',
-                            filters.categoryIds.includes(id) ? 'font-semibold text-gold' : level === 0 ? 'font-semibold text-gold uppercase' : 'text-foreground',
-                            level > 0 && !filters.categoryIds.includes(id) && 'text-muted-foreground'
+                            'text-sm transition-colors',
+                            isChecked ? 'font-semibold text-gold' : 'text-foreground',
+                            level === 0 ? 'font-semibold text-gold uppercase' : '',
+                            level > 0 && !isChecked && 'text-muted-foreground',
+                            'truncate'
                         )}>
-                            {name}
+                            {category.name}
                         </span>
                     </label>
-                ))}
-            </div>
-        </div>
-    );
+                </div>
 
-    const BrandFilter = () => (
-        <div className="rounded-2xl border-2 border-border bg-background p-6 transition-all duration-300">
-            <h3 className="mb-4 text-sm font-bold uppercase tracking-wide text-gold">
-                {t('products.brands', 'Brands')}
-            </h3>
-            <div className="space-y-1">
-                {brands.map(brand => (
-                    <label
-                        key={brand.id}
-                        className="flex items-center gap-3 cursor-pointer group py-2 px-3 rounded-lg transition-all hover:bg-muted/50"
-                    >
+                {hasChildren && isExpanded && (
+                    <div className="space-y-0.5">
+                        {category.children!.map(child => renderCategory(child, level + 1))}
+                    </div>
+                )}
+            </div>
+        );
+    };
+
+    // Filter components
+    const CategoryFilter = () => {
+        // Sort categories: items with children first, then items without children
+        const sortedCategories = [...categories].sort((a, b) => {
+            const aHasChildren = a.children && a.children.length > 0;
+            const bHasChildren = b.children && b.children.length > 0;
+
+            if (aHasChildren && !bHasChildren) return -1;
+            if (!aHasChildren && bHasChildren) return 1;
+            return 0;
+        });
+
+        return (
+            <div className="rounded-2xl border-2 border-border bg-background p-6 transition-all duration-300">
+                <h3 className="mb-4 text-sm font-bold uppercase tracking-wide text-gold">
+                    {t('products.categories', 'Categories')}
+                </h3>
+                <div className="space-y-0.5">
+                    {sortedCategories.map(category => renderCategory(category, 0))}
+                </div>
+            </div>
+        );
+    };
+
+    // Render brand recursively with expand/collapse
+    const renderBrand = (brand: Brand, level: number = 0) => {
+        const hasChildren = brand.children && brand.children.length > 0;
+        const isExpanded = expandedBrands.includes(brand.id);
+        const isChecked = filters.brandIds.includes(brand.id);
+
+        return (
+            <div key={brand.id}>
+                <div className={cn(
+                    'flex items-center gap-2 py-1.5 px-2 rounded-lg transition-colors hover:bg-muted/50',
+                    level === 1 && 'ml-6',
+                    level === 2 && 'ml-12'
+                )}>
+                    {hasChildren ? (
+                        <button
+                            onClick={() => toggleBrandExpansion(brand.id)}
+                            className="flex items-center justify-center w-5 h-5 hover:bg-muted rounded transition-colors flex-shrink-0"
+                        >
+                            {isExpanded ? (
+                                <ChevronDown className="size-4 text-muted-foreground" />
+                            ) : (
+                                <ChevronRight className="size-4 text-muted-foreground" />
+                            )}
+                        </button>
+                    ) : (
+                        <div className="w-5 flex-shrink-0" />
+                    )}
+
+                    <label className="flex items-center gap-2.5 cursor-pointer flex-1 min-w-0">
                         <Checkbox
-                            checked={filters.brandIds.includes(brand.id)}
+                            checked={isChecked}
                             onCheckedChange={() => toggleBrand(brand.id)}
-                            className="border-2 data-[state=checked]:bg-gold data-[state=checked]:border-gold"
+                            className="border-2 data-[state=checked]:bg-gold data-[state=checked]:border-gold flex-shrink-0"
                         />
                         <span className={cn(
-                            'flex-1 text-sm transition-colors group-hover:text-gold',
-                            filters.brandIds.includes(brand.id) ? 'font-semibold text-gold' : 'text-foreground'
+                            'text-sm transition-colors',
+                            isChecked ? 'font-semibold text-gold' : 'text-foreground',
+                            level === 0 ? 'font-semibold text-gold uppercase' : '',
+                            level > 0 && !isChecked && 'text-muted-foreground',
+                            'truncate'
                         )}>
                             {brand.name}
                         </span>
-                        <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
-                            {brand.productCount}
-                        </span>
                     </label>
-                ))}
+                </div>
+
+                {hasChildren && isExpanded && (
+                    <div className="space-y-0.5">
+                        {brand.children!.map(child => renderBrand(child, level + 1))}
+                    </div>
+                )}
             </div>
-        </div>
-    );
+        );
+    };
+
+    const BrandFilter = () => {
+        // Sort brands: items with children first, then items without children
+        const sortedBrands = [...brands].sort((a, b) => {
+            const aHasChildren = a.children && a.children.length > 0;
+            const bHasChildren = b.children && b.children.length > 0;
+
+            if (aHasChildren && !bHasChildren) return -1;
+            if (!aHasChildren && bHasChildren) return 1;
+            return 0;
+        });
+
+        return (
+            <div className="rounded-2xl border-2 border-border bg-background p-6 transition-all duration-300">
+                <h3 className="mb-4 text-sm font-bold uppercase tracking-wide text-gold">
+                    {t('products.brands', 'Brands')}
+                </h3>
+                <div className="space-y-0.5">
+                    {sortedBrands.map(brand => renderBrand(brand, 0))}
+                </div>
+            </div>
+        );
+    };
 
     const PriceRangeFilter = () => (
         <div className="rounded-2xl border-2 border-border bg-background p-6 transition-all duration-300">
@@ -315,8 +518,33 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
                 <div className="container mx-auto px-4 py-8 md:px-6 lg:px-8">
                     <div className="flex gap-8">
                         {/* Desktop Sidebar Filters */}
-                        <aside className="hidden w-64 flex-shrink-0 lg:block">
-                            <div className="sticky top-24 space-y-6">
+                        <aside className="hidden w-80 flex-shrink-0 lg:block">
+                            <div className="sidebar-filters sticky top-24 space-y-6 overflow-y-auto max-h-[calc(100vh-7rem)] pr-2">
+                                {/* Search Input */}
+                                <div className="rounded-2xl border-2 border-border bg-background p-6 transition-all duration-300">
+                                    <h3 className="mb-4 text-sm font-bold uppercase tracking-wide text-gold">
+                                        {t('products.search', 'Search')}
+                                    </h3>
+                                    <div className="relative">
+                                        <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                                        <Input
+                                            type="text"
+                                            placeholder={t('products.search_placeholder', 'Search products...')}
+                                            value={filters.search}
+                                            onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+                                            className="pl-10 pr-10"
+                                        />
+                                        {filters.search && (
+                                            <button
+                                                onClick={() => setFilters(prev => ({ ...prev, search: '' }))}
+                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                                            >
+                                                <X className="size-4" />
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+
                                 <CategoryFilter />
                                 <BrandFilter />
                                 <PriceRangeFilter />
@@ -337,48 +565,59 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
                         {/* Main Content */}
                         <div className="flex-1">
                             {/* Active Filter Pills */}
-                            {activeFilterCount > 0 && (
-                                <div className="mb-6 flex flex-wrap gap-2">
-                                    {filters.categoryIds.map(catId => {
-                                        const cat = flatCategories.find(c => c.id === catId);
-                                        return cat ? (
-                                            <div key={catId} className="flex items-center gap-2 rounded-full border-2 border-gold bg-gold/10 px-3 py-1 text-sm font-medium text-gold">
-                                                {cat.name}
-                                                <button onClick={() => toggleCategory(catId)} className="ml-1 rounded-full hover:bg-gold/20 p-0.5 transition-colors">
+                            <div className="mb-6 space-y-4">
+                                {activeFilterCount > 0 && (
+                                    <div className="flex flex-wrap gap-2">
+                                        {filters.search && (
+                                            <div className="flex items-center gap-2 rounded-full border-2 border-gold bg-gold/10 px-3 py-1 text-sm font-medium text-gold">
+                                                <Search className="size-3.5" />
+                                                "{filters.search}"
+                                                <button onClick={() => setFilters(prev => ({ ...prev, search: '' }))} className="ml-1 rounded-full hover:bg-gold/20 p-0.5 transition-colors">
                                                     <X className="size-3.5 stroke-[2.5]" />
                                                 </button>
                                             </div>
-                                        ) : null;
-                                    })}
-                                    {filters.brandIds.map(brandId => {
-                                        const brand = brands.find(b => b.id === brandId);
-                                        return brand ? (
-                                            <div key={brandId} className="flex items-center gap-2 rounded-full border-2 border-gold bg-gold/10 px-3 py-1 text-sm font-medium text-gold">
-                                                {brand.name}
-                                                <button onClick={() => toggleBrand(brandId)} className="ml-1 rounded-full hover:bg-gold/20 p-0.5 transition-colors">
+                                        )}
+                                        {filters.categoryIds.map(catId => {
+                                            const cat = findCategoryById(catId);
+                                            return cat ? (
+                                                <div key={catId} className="flex items-center gap-2 rounded-full border-2 border-gold bg-gold/10 px-3 py-1 text-sm font-medium text-gold">
+                                                    {cat.name}
+                                                    <button onClick={() => toggleCategory(catId)} className="ml-1 rounded-full hover:bg-gold/20 p-0.5 transition-colors">
+                                                        <X className="size-3.5 stroke-[2.5]" />
+                                                    </button>
+                                                </div>
+                                            ) : null;
+                                        })}
+                                        {filters.brandIds.map(brandId => {
+                                            const brand = findBrandById(brandId);
+                                            return brand ? (
+                                                <div key={brandId} className="flex items-center gap-2 rounded-full border-2 border-gold bg-gold/10 px-3 py-1 text-sm font-medium text-gold">
+                                                    {brand.name}
+                                                    <button onClick={() => toggleBrand(brandId)} className="ml-1 rounded-full hover:bg-gold/20 p-0.5 transition-colors">
+                                                        <X className="size-3.5 stroke-[2.5]" />
+                                                    </button>
+                                                </div>
+                                            ) : null;
+                                        })}
+                                        {(filters.priceRange[0] !== priceExtent[0] || filters.priceRange[1] !== priceExtent[1]) && (
+                                            <div className="flex items-center gap-2 rounded-full border-2 border-gold bg-gold/10 px-3 py-1 text-sm font-medium text-gold">
+                                                €{filters.priceRange[0].toFixed(2)} - €{filters.priceRange[1].toFixed(2)}
+                                                <button
+                                                    onClick={() => setFilters(prev => ({ ...prev, priceRange: priceExtent as [number, number] }))}
+                                                    className="ml-1 rounded-full hover:bg-gold/20 p-0.5 transition-colors"
+                                                >
                                                     <X className="size-3.5 stroke-[2.5]" />
                                                 </button>
                                             </div>
-                                        ) : null;
-                                    })}
-                                    {(filters.priceRange[0] !== priceExtent[0] || filters.priceRange[1] !== priceExtent[1]) && (
-                                        <div className="flex items-center gap-2 rounded-full border-2 border-gold bg-gold/10 px-3 py-1 text-sm font-medium text-gold">
-                                            €{filters.priceRange[0].toFixed(2)} - €{filters.priceRange[1].toFixed(2)}
-                                            <button
-                                                onClick={() => setFilters(prev => ({ ...prev, priceRange: priceExtent as [number, number] }))}
-                                                className="ml-1 rounded-full hover:bg-gold/20 p-0.5 transition-colors"
-                                            >
-                                                <X className="size-3.5 stroke-[2.5]" />
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
+                                        )}
+                                    </div>
+                                )}
+                            </div>
 
-                            {/* Sort Dropdown */}
+                            {/* Sort and Results Count */}
                             <div className="mb-6 flex items-center justify-between gap-4">
                                 <div className="text-sm text-muted-foreground">
-                                    {filteredProducts.length} {filteredProducts.length === 1 ? t('products.product', 'product') : t('products.products', 'products')}
+                                    {t('products.showing', 'Showing')} {Math.min(visibleProductCount, filteredProducts.length)} {t('products.of', 'of')} {filteredProducts.length} {filteredProducts.length === 1 ? t('products.product', 'product') : t('products.products', 'products')}
                                 </div>
 
                                 <Select
@@ -400,16 +639,34 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
 
                             {/* Products Grid */}
                             {filteredProducts.length > 0 ? (
-                                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                                    {filteredProducts.map((product, index) => (
-                                        <ProductCard
-                                            key={product.id}
-                                            product={product}
-                                            href={route('products.show', { slug: product.slug })}
-                                            index={index}
-                                        />
-                                    ))}
-                                </div>
+                                <>
+                                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 items-stretch">
+                                        {filteredProducts.slice(0, visibleProductCount).map((product, index) => (
+                                            <ProductCard
+                                                key={product.id}
+                                                product={product}
+                                                href={route('products.show', { slug: product.slug })}
+                                                index={index}
+                                            />
+                                        ))}
+                                    </div>
+
+                                    {/* Load More Button */}
+                                    {filteredProducts.length > visibleProductCount && (
+                                        <div className="mt-12 flex justify-center">
+                                            <Button
+                                                onClick={() => setVisibleProductCount(prev => prev + 20)}
+                                                variant="outline"
+                                                className="border-2 border-gold text-gold hover:bg-gold hover:text-white transition-all duration-300 px-8 py-6 text-base font-bold uppercase"
+                                            >
+                                                {t('products.load_more', 'Load More Products')}
+                                                <span className="ml-2 text-sm">
+                                                    ({visibleProductCount} / {filteredProducts.length})
+                                                </span>
+                                            </Button>
+                                        </div>
+                                    )}
+                                </>
                             ) : (
                                 <div className="flex flex-col items-center justify-center py-16 text-center">
                                     <div className="rounded-2xl border-2 border-dashed border-border p-12">
@@ -457,6 +714,31 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
                         </SheetHeader>
 
                         <div className="space-y-6 p-2 pb-24 ">
+                            {/* Search Input */}
+                            <div className="rounded-2xl border-2 border-border bg-background p-6 transition-all duration-300">
+                                <h3 className="mb-4 text-sm font-bold uppercase tracking-wide text-gold">
+                                    {t('products.search', 'Search')}
+                                </h3>
+                                <div className="relative">
+                                    <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                                    <Input
+                                        type="text"
+                                        placeholder={t('products.search_placeholder', 'Search products...')}
+                                        value={filters.search}
+                                        onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+                                        className="pl-10 pr-10"
+                                    />
+                                    {filters.search && (
+                                        <button
+                                            onClick={() => setFilters(prev => ({ ...prev, search: '' }))}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                                        >
+                                            <X className="size-4" />
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+
                             <CategoryFilter />
                             <BrandFilter />
                             <PriceRangeFilter />

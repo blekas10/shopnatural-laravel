@@ -12,7 +12,7 @@ class ProductService
      */
     public function getFeaturedProducts(int $limit = 8): Collection
     {
-        return Product::with(['categories', 'primaryImage', 'defaultVariant'])
+        return Product::with(['categories', 'primaryImage', 'defaultVariant', 'variants'])
             ->active()
             ->featured()
             ->take($limit)
@@ -24,7 +24,7 @@ class ProductService
      */
     public function getRelatedProducts(Product $product, int $limit = 4): Collection
     {
-        return Product::with(['primaryImage', 'defaultVariant'])
+        return Product::with(['primaryImage', 'defaultVariant', 'variants'])
             ->active()
             ->whereHas('categories', function ($query) use ($product) {
                 $query->whereIn('categories.id', $product->categories->pluck('id'));
@@ -40,7 +40,7 @@ class ProductService
      */
     public function getAllActiveProducts(): Collection
     {
-        return Product::with(['categories', 'primaryImage', 'defaultVariant', 'brand'])
+        return Product::with(['categories', 'primaryImage', 'defaultVariant', 'variants', 'brand'])
             ->active()
             ->orderByDesc('is_featured')
             ->latest()

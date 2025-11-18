@@ -55,10 +55,10 @@ export function ProductCard({ product, href, index = 0, className }: ProductCard
                 ease: 'easeOut',
                 delay: index * 0.1,
             }}
-            className={cn('group cursor-pointer', className)}
+            className={cn('group cursor-pointer h-full', className)}
         >
-            <Link href={href}>
-                <div className="overflow-hidden rounded-2xl border-2 border-border bg-background transition-all duration-300 group-hover:border-gold/40 group-hover:shadow-lg group-hover:shadow-gold/10">
+            <Link href={href} className="h-full block">
+                <div className="h-full flex flex-col overflow-hidden rounded-2xl border-2 border-border bg-background transition-all duration-300 group-hover:border-gold/40 group-hover:shadow-lg group-hover:shadow-gold/10">
                     {/* Product Image */}
                     <div className="relative overflow-hidden p-6">
                         <div className="aspect-square w-full">
@@ -93,26 +93,32 @@ export function ProductCard({ product, href, index = 0, className }: ProductCard
                     </div>
 
                     {/* Product Info */}
-                    <div className="space-y-1 p-4">
-                        <h3 className="text-base font-bold uppercase tracking-wide text-foreground">
+                    <div className="mt-auto space-y-1 p-4">
+                        <h3 className="text-base font-bold uppercase tracking-wide text-foreground line-clamp-2">
                             {product.name}
                         </h3>
-                        {product.title && (
-                            <p className="text-sm text-muted-foreground">
-                                {product.title}
-                            </p>
-                        )}
+
                         <div className="flex items-center gap-2">
-                            <p className={cn(
-                                "text-lg font-bold",
-                                product.compareAtPrice ? "text-gold" : "text-foreground"
-                            )}>
-                                €{product.price.toFixed(2)}
-                            </p>
-                            {product.compareAtPrice && (
-                                <p className="text-sm font-medium text-muted-foreground line-through">
-                                    €{product.compareAtPrice.toFixed(2)}
+                            {product.minPrice && product.maxPrice ? (
+                                // Show price range for variable products
+                                <p className="text-lg font-bold text-foreground">
+                                    €{product.minPrice.toFixed(2)} - €{product.maxPrice.toFixed(2)}
                                 </p>
+                            ) : (
+                                // Show single price
+                                <>
+                                    <p className={cn(
+                                        "text-lg font-bold",
+                                        product.compareAtPrice ? "text-gold" : "text-foreground"
+                                    )}>
+                                        €{product.price.toFixed(2)}
+                                    </p>
+                                    {product.compareAtPrice && (
+                                        <p className="text-sm font-medium text-muted-foreground line-through">
+                                            €{product.compareAtPrice.toFixed(2)}
+                                        </p>
+                                    )}
+                                </>
                             )}
                         </div>
                     </div>

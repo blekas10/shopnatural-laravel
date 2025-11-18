@@ -27,12 +27,25 @@ class ProductController extends Controller
         // Get all active products for client-side filtering
         $products = $this->productService->getAllActiveProducts();
 
-        // Get all active brands with product counts
+        // Get all active brands with product counts (hierarchical)
         $brands = Brand::where('is_active', true)
+            ->with([
+                'activeChildren' => function ($query) {
+                    $query->withCount(['products' => function ($q) {
+                        $q->where('is_active', true);
+                    }]);
+                },
+                'activeChildren.activeChildren' => function ($query) {
+                    $query->withCount(['products' => function ($q) {
+                        $q->where('is_active', true);
+                    }]);
+                }
+            ])
             ->withCount(['products' => function ($query) {
                 $query->where('is_active', true);
             }])
-            ->having('products_count', '>', 0)
+            ->whereNull('parent_id') // Only root brands
+            ->orderBy('name->en')
             ->get();
 
         // Get categories with hierarchy (3 levels)
@@ -54,8 +67,12 @@ class ProductController extends Controller
      */
     public function show(string $slug): Response
     {
-        $product = Product::with(['categories', 'images', 'defaultVariant', 'variants'])
-            ->where('slug', $slug)
+        // Query slug from both English and Lithuanian translations
+        $product = Product::with(['categories', 'images', 'defaultVariant', 'variants.image', 'brand'])
+            ->where(function ($query) use ($slug) {
+                $query->where('slug->en', $slug)
+                      ->orWhere('slug->lt', $slug);
+            })
             ->active()
             ->firstOrFail();
 

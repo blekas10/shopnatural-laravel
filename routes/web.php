@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
+use App\Http\Controllers\Admin\BrandController as AdminBrandController;
+use App\Http\Controllers\Admin\ProductImageController as AdminProductImageController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
@@ -74,6 +76,14 @@ Route::group(['prefix' => 'lt'], function () {
             Route::get('products/{product}/edit', [AdminProductController::class, 'edit'])->name('lt.admin.products.edit');
             Route::put('products/{product}', [AdminProductController::class, 'update'])->name('lt.admin.products.update');
             Route::delete('products/{product}', [AdminProductController::class, 'destroy'])->name('lt.admin.products.destroy');
+            Route::patch('products/{product}/variants/{variant}/quick-update', [AdminProductController::class, 'quickUpdateVariant'])->name('lt.admin.products.variants.quick-update');
+
+            // Product image management
+            Route::post('products/{product}/images', [AdminProductImageController::class, 'store'])->name('lt.admin.products.images.store');
+            Route::delete('products/{product}/images/{image}', [AdminProductImageController::class, 'destroy'])->name('lt.admin.products.images.destroy');
+            Route::post('products/{product}/images/{image}/primary', [AdminProductImageController::class, 'setPrimary'])->name('lt.admin.products.images.primary');
+            Route::post('products/{product}/images/reorder', [AdminProductImageController::class, 'reorder'])->name('lt.admin.products.images.reorder');
+            Route::put('products/{product}/images/{image}/alt', [AdminProductImageController::class, 'updateAlt'])->name('lt.admin.products.images.alt');
 
             // Category management
             Route::get('categories', [AdminCategoryController::class, 'index'])->name('lt.admin.categories.index');
@@ -82,6 +92,14 @@ Route::group(['prefix' => 'lt'], function () {
             Route::get('categories/{category}/edit', [AdminCategoryController::class, 'edit'])->name('lt.admin.categories.edit');
             Route::put('categories/{category}', [AdminCategoryController::class, 'update'])->name('lt.admin.categories.update');
             Route::delete('categories/{category}', [AdminCategoryController::class, 'destroy'])->name('lt.admin.categories.destroy');
+
+            // Brand management
+            Route::get('brands', [AdminBrandController::class, 'index'])->name('lt.admin.brands.index');
+            Route::get('brands/create', [AdminBrandController::class, 'create'])->name('lt.admin.brands.create');
+            Route::post('brands', [AdminBrandController::class, 'store'])->name('lt.admin.brands.store');
+            Route::get('brands/{brand}/edit', [AdminBrandController::class, 'edit'])->name('lt.admin.brands.edit');
+            Route::put('brands/{brand}', [AdminBrandController::class, 'update'])->name('lt.admin.brands.update');
+            Route::delete('brands/{brand}', [AdminBrandController::class, 'destroy'])->name('lt.admin.brands.destroy');
         });
     });
 });
@@ -98,6 +116,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('products/{product}/edit', [AdminProductController::class, 'edit'])->name('admin.products.edit');
         Route::put('products/{product}', [AdminProductController::class, 'update'])->name('admin.products.update');
         Route::delete('products/{product}', [AdminProductController::class, 'destroy'])->name('admin.products.destroy');
+        Route::patch('products/{product}/variants/{variant}/quick-update', [AdminProductController::class, 'quickUpdateVariant'])->name('admin.products.variants.quick-update');
+
+        // Product image management
+        Route::post('products/{product}/images', [AdminProductImageController::class, 'store'])->name('admin.products.images.store');
+        Route::delete('products/{product}/images/{image}', [AdminProductImageController::class, 'destroy'])->name('admin.products.images.destroy');
+        Route::post('products/{product}/images/{image}/primary', [AdminProductImageController::class, 'setPrimary'])->name('admin.products.images.primary');
+        Route::post('products/{product}/images/reorder', [AdminProductImageController::class, 'reorder'])->name('admin.products.images.reorder');
+        Route::put('products/{product}/images/{image}/alt', [AdminProductImageController::class, 'updateAlt'])->name('admin.products.images.alt');
 
         // Category management
         Route::get('categories', [AdminCategoryController::class, 'index'])->name('admin.categories.index');
@@ -106,6 +132,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('categories/{category}/edit', [AdminCategoryController::class, 'edit'])->name('admin.categories.edit');
         Route::put('categories/{category}', [AdminCategoryController::class, 'update'])->name('admin.categories.update');
         Route::delete('categories/{category}', [AdminCategoryController::class, 'destroy'])->name('admin.categories.destroy');
+
+        // Brand management
+        Route::get('brands', [AdminBrandController::class, 'index'])->name('admin.brands.index');
+        Route::get('brands/create', [AdminBrandController::class, 'create'])->name('admin.brands.create');
+        Route::post('brands', [AdminBrandController::class, 'store'])->name('admin.brands.store');
+        Route::get('brands/{brand}/edit', [AdminBrandController::class, 'edit'])->name('admin.brands.edit');
+        Route::put('brands/{brand}', [AdminBrandController::class, 'update'])->name('admin.brands.update');
+        Route::delete('brands/{brand}', [AdminBrandController::class, 'destroy'])->name('admin.brands.destroy');
     });
 });
 

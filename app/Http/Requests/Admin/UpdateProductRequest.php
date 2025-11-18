@@ -16,16 +16,32 @@ class UpdateProductRequest extends FormRequest
         $productId = $this->route('product')->id;
 
         return [
-            // Basic product info
-            'name' => 'required|string|max:255',
+            // Basic product info with translations
+            'name' => 'required|array',
+            'name.en' => 'required|string|max:255',
+            'name.lt' => 'nullable|string|max:255',
             'slug' => 'nullable|string|unique:products,slug,' . $productId . '|max:255',
-            'title' => 'nullable|string|max:255',
-            'short_description' => 'nullable|string|max:500',
-            'description' => 'nullable|string',
-            'additional_information' => 'nullable|string',
-            'ingredients' => 'nullable|string',
-            'meta_title' => 'nullable|string|max:255',
-            'meta_description' => 'nullable|string|max:500',
+            'title' => 'nullable|array',
+            'title.en' => 'nullable|string|max:255',
+            'title.lt' => 'nullable|string|max:255',
+            'short_description' => 'nullable|array',
+            'short_description.en' => 'nullable|string|max:500',
+            'short_description.lt' => 'nullable|string|max:500',
+            'description' => 'nullable|array',
+            'description.en' => 'nullable|string',
+            'description.lt' => 'nullable|string',
+            'additional_information' => 'nullable|array',
+            'additional_information.en' => 'nullable|string',
+            'additional_information.lt' => 'nullable|string',
+            'ingredients' => 'nullable|array',
+            'ingredients.en' => 'nullable|string',
+            'ingredients.lt' => 'nullable|string',
+            'meta_title' => 'nullable|array',
+            'meta_title.en' => 'nullable|string|max:255',
+            'meta_title.lt' => 'nullable|string|max:255',
+            'meta_description' => 'nullable|array',
+            'meta_description.en' => 'nullable|string|max:500',
+            'meta_description.lt' => 'nullable|string|max:500',
 
             // Relationships
             'brand_id' => 'nullable|exists:brands,id',

@@ -19,15 +19,28 @@ const routeMap: Record<string, Record<string, string>> = {
     'login': { en: 'login', lt: 'login' },
     'register': { en: 'register', lt: 'register' },
     'logout': { en: 'logout', lt: 'logout' },
+    // Dashboard
     'dashboard': { en: 'dashboard', lt: 'dashboard' },
     'profile.edit': { en: 'settings/profile', lt: 'settings/profile' },
-    // Admin routes (not localized)
+    // Admin routes
     'admin.categories.index': { en: 'admin/categories', lt: 'admin/categories' },
     'admin.categories.create': { en: 'admin/categories/create', lt: 'admin/categories/create' },
     'admin.categories.store': { en: 'admin/categories', lt: 'admin/categories' },
     'admin.categories.edit': { en: 'admin/categories', lt: 'admin/categories' },
     'admin.categories.update': { en: 'admin/categories', lt: 'admin/categories' },
     'admin.categories.destroy': { en: 'admin/categories', lt: 'admin/categories' },
+    'admin.products.index': { en: 'admin/products', lt: 'admin/products' },
+    'admin.products.create': { en: 'admin/products/create', lt: 'admin/products/create' },
+    'admin.products.store': { en: 'admin/products', lt: 'admin/products' },
+    'admin.products.edit': { en: 'admin/products', lt: 'admin/products' },
+    'admin.products.update': { en: 'admin/products', lt: 'admin/products' },
+    'admin.products.destroy': { en: 'admin/products', lt: 'admin/products' },
+    'admin.brands.index': { en: 'admin/brands', lt: 'admin/brands' },
+    'admin.brands.create': { en: 'admin/brands/create', lt: 'admin/brands/create' },
+    'admin.brands.store': { en: 'admin/brands', lt: 'admin/brands' },
+    'admin.brands.edit': { en: 'admin/brands', lt: 'admin/brands' },
+    'admin.brands.update': { en: 'admin/brands', lt: 'admin/brands' },
+    'admin.brands.destroy': { en: 'admin/brands', lt: 'admin/brands' },
 };
 
 // Non-localized routes (auth routes that don't have locale prefix)
@@ -35,14 +48,6 @@ const nonLocalizedRoutes = [
     'login',
     'register',
     'logout',
-    'dashboard',
-    'profile.edit',
-    'admin.categories.index',
-    'admin.categories.create',
-    'admin.categories.store',
-    'admin.categories.edit',
-    'admin.categories.update',
-    'admin.categories.destroy',
 ];
 
 /**
@@ -75,13 +80,15 @@ export function route(name: string, params: Record<string, any> = {}, locale: st
         path += `/${segment}`;
     }
 
-    // Handle route parameters (like {slug}, {orderNumber}, {id}, {category})
+    // Handle route parameters (like {slug}, {orderNumber}, {id}, {category}, {product})
     if (params.slug) {
         path += `/${params.slug}`;
     } else if (params.orderNumber) {
         path += `/${params.orderNumber}`;
     } else if (params.category) {
         path += `/${params.category}`;
+    } else if (params.product) {
+        path += `/${params.product}`;
     } else if (params.id) {
         path += `/${params.id}`;
     }
@@ -96,6 +103,7 @@ export function route(name: string, params: Record<string, any> = {}, locale: st
     delete queryParams.slug; // Remove slug as it's already in the path
     delete queryParams.orderNumber; // Remove orderNumber as it's already in the path
     delete queryParams.category; // Remove category as it's already in the path
+    delete queryParams.product; // Remove product as it's already in the path
     delete queryParams.id; // Remove id as it's already in the path
 
     const queryString = Object.keys(queryParams)

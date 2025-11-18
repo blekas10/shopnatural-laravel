@@ -13,13 +13,36 @@ class ProductDetailResource extends ProductResource
     {
         $baseData = parent::toArray($request);
 
+        // Collect variant image IDs that are explicitly assigned to variants
+        $variantImageIds = $this->relationLoaded('variants')
+            ? $this->variants->pluck('image_id')->filter()->unique()->toArray()
+            : [];
+
+        // Gallery logic:
+        // - If product has variant images assigned: show ONLY variant images (no duplicates/confusion)
+        // - If product has NO variant images: show general gallery images (order < 100)
+        $hasVariantImages = count($variantImageIds) > 0;
+
         $images = $this->relationLoaded('images')
-            ? $this->images->sortBy('order')->map(fn($img) => [
-                'id' => $img->id,
-                'url' => $img->url,
-                'altText' => $img->alt_text ? $img->getTranslation('alt_text', app()->getLocale()) : null,
-                'isPrimary' => $img->is_primary,
-            ])->values()->toArray()
+            ? $this->images
+                ->filter(function($img) use ($variantImageIds, $hasVariantImages) {
+                    if ($hasVariantImages) {
+                        // Product has variants with images: show ONLY variant images
+                        return in_array($img->id, $variantImageIds);
+                    } else {
+                        // Product has no variant images: show general gallery images
+                        return $img->order < 100;
+                    }
+                })
+                ->sortBy('order')
+                ->values()
+                ->map(fn($img) => [
+                    'id' => $img->id,
+                    'url' => $img->url,
+                    'altText' => $img->alt_text ? $img->getTranslation('alt_text', app()->getLocale()) : null,
+                    'isPrimary' => $img->is_primary,
+                ])
+                ->toArray()
             : [];
 
         $variants = $this->relationLoaded('variants')
@@ -32,6 +55,7 @@ class ProductDetailResource extends ProductResource
                 'stock' => $v->stock,
                 'inStock' => $v->inStock(),
                 'isDefault' => $v->is_default,
+                'image' => $v->image?->url,
             ])->values()->toArray()
             : [];
 

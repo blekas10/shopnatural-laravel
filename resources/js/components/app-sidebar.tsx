@@ -19,7 +19,7 @@ import { useTranslation } from '@/hooks/use-translation';
 
 export function AppSidebar() {
     const { auth } = usePage<{ auth: { user: UserType } }>().props;
-    const { t } = useTranslation();
+    const { t, route } = useTranslation();
 
     // Check if user has admin role
     const isAdmin = auth?.user?.roles?.some((role) => role.name === 'admin') ?? false;
@@ -27,22 +27,22 @@ export function AppSidebar() {
     const simpleUserNavItems: NavItem[] = [
         {
             title: t('sidebar.dashboard', 'Dashboard'),
-            href: dashboard(),
+            href: route('dashboard'),
             icon: LayoutGrid,
         },
         {
             title: t('sidebar.my_orders', 'My Orders'),
-            href: '/orders',
+            href: route('orders.index'),
             icon: Package,
         },
         {
             title: t('sidebar.profile', 'Profile'),
-            href: '/profile',
+            href: route('profile.edit'),
             icon: User,
         },
         {
             title: t('sidebar.shop', 'Shop'),
-            href: '/products',
+            href: route('products.index'),
             icon: ShoppingBag,
         },
     ];
@@ -50,7 +50,7 @@ export function AppSidebar() {
     const adminNavItems: NavItem[] = [
         {
             title: t('sidebar.dashboard', 'Dashboard'),
-            href: dashboard(),
+            href: route('dashboard'),
             icon: LayoutGrid,
         },
         {
@@ -59,31 +59,35 @@ export function AppSidebar() {
             items: [
                 {
                     title: t('sidebar.manage_products.all', 'All Products'),
-                    href: '/admin/products',
+                    href: route('admin.products.index'),
                 },
                 {
                     title: t('sidebar.manage_products.add', 'Add Product'),
-                    href: '/admin/products/create',
+                    href: route('admin.products.create'),
                 },
                 {
                     title: t('sidebar.manage_products.categories', 'Categories'),
-                    href: '/admin/categories',
+                    href: route('admin.categories.index'),
+                },
+                {
+                    title: t('sidebar.manage_products.brands', 'Brands'),
+                    href: route('admin.brands.index'),
                 },
             ],
         },
         {
             title: t('sidebar.manage_orders', 'Manage Orders'),
-            href: '/admin/orders',
+            href: route('orders.index'),
             icon: Package,
         },
         {
             title: t('sidebar.manage_users', 'Manage Users'),
-            href: '/admin/users',
+            href: route('dashboard'),
             icon: Users,
         },
         {
             title: t('sidebar.settings', 'Settings'),
-            href: '/admin/settings',
+            href: route('dashboard'),
             icon: Settings,
         },
     ];
@@ -91,7 +95,7 @@ export function AppSidebar() {
     const footerNavItems: NavItem[] = [
         {
             title: t('sidebar.back_to_store', 'Back to Store'),
-            href: '/',
+            href: route('home'),
             icon: Home,
         },
     ];
@@ -105,7 +109,7 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href={dashboard()} prefetch>
+                            <Link href={route('dashboard')} prefetch>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>

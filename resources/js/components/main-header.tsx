@@ -54,6 +54,45 @@ export default function MainHeader({ className }: MainHeaderProps) {
     });
     const dropdownRef = useRef<HTMLDivElement>(null);
     const headerRef = useRef<HTMLElement>(null);
+    const [headerHeight, setHeaderHeight] = useState(0);
+
+    // Measure header height dynamically
+    useEffect(() => {
+        const updateHeaderHeight = () => {
+            if (headerRef.current) {
+                const height = headerRef.current.offsetHeight;
+                setHeaderHeight(height);
+            }
+        };
+
+        // Initial measurement
+        updateHeaderHeight();
+
+        // Watch for resize changes
+        const resizeObserver = new ResizeObserver(updateHeaderHeight);
+        if (headerRef.current) {
+            resizeObserver.observe(headerRef.current);
+        }
+
+        // Also update on window resize
+        window.addEventListener('resize', updateHeaderHeight);
+
+        return () => {
+            resizeObserver.disconnect();
+            window.removeEventListener('resize', updateHeaderHeight);
+        };
+    }, []);
+
+    // Update height when categories dropdown opens/closes
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (headerRef.current) {
+                setHeaderHeight(headerRef.current.offsetHeight);
+            }
+        }, 300); // Match the transition duration
+
+        return () => clearTimeout(timer);
+    }, [desktopCategoriesOpen]);
 
     // Helper to get user initials
     const getInitials = (name: string) => {
@@ -624,6 +663,7 @@ export default function MainHeader({ className }: MainHeaderProps) {
                     />
                 </div>
             </header>
+            <div style={{ paddingTop: `${headerHeight}px` }}></div>
         </>
     );
 }

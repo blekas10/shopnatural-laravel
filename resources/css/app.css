@@ -159,3 +159,26 @@
         -webkit-overflow-scrolling: touch;
     }
 }
+
+/* Custom scrollbar for sidebar filters */
+.sidebar-filters {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(194, 163, 99, 0.3) transparent;
+}
+
+.sidebar-filters::-webkit-scrollbar {
+    width: 8px;
+}
+
+.sidebar-filters::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidebar-filters::-webkit-scrollbar-thumb {
+    background: rgba(194, 163, 99, 0.3);
+    border-radius: 4px;
+}
+
+.sidebar-filters::-webkit-scrollbar-thumb:hover {
+    background: rgba(194, 163, 99, 0.5);
+}

@@ -50,7 +50,7 @@ export default function Home({ canRegister, products }: HomeProps) {
             <Head title="Home" />
 
             <div className="min-h-screen bg-background">
-                <MainHeader />
+            <MainHeader />
                 <HeroSection />
                 <FeaturesSection />
                 <PromisesSection />

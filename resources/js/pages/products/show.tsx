@@ -1,11 +1,11 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import MainHeader from '@/components/main-header';
 import Footer from '@/components/footer';
 import { useTranslation } from '@/hooks/use-translation';
 import { useCart } from '@/hooks/use-cart';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, ShoppingCart, Check, X, Heart } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import type { ProductDetail, ProductVariant, BaseProduct, ProductListItem } from '@/types/product';
@@ -19,7 +19,6 @@ interface ProductShowProps {
 export default function ProductShow({ product, relatedProducts }: ProductShowProps) {
     const { t, route } = useTranslation();
     const { addItem } = useCart();
-    const [selectedImage, setSelectedImage] = useState(product.images?.[0]);
     const [activeTab, setActiveTab] = useState<'description' | 'additional' | 'ingredients'>('description');
     const [isAdding, setIsAdding] = useState(false);
 
@@ -29,6 +28,65 @@ export default function ProductShow({ product, relatedProducts }: ProductShowPro
         ? product.variants.find(v => v.isDefault) || product.variants[0]
         : null;
     const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(defaultVariant);
+
+    // Initialize selected image based on default variant
+    const getInitialImage = () => {
+        if (defaultVariant?.image) {
+            return {
+                id: defaultVariant.id * 1000,
+                url: defaultVariant.image,
+                altText: `${product.name} - ${defaultVariant.size}`,
+                isPrimary: false,
+            };
+        }
+        return product.images?.[0];
+    };
+    const [selectedImage, setSelectedImage] = useState(getInitialImage());
+    const [showAllCategories, setShowAllCategories] = useState(false);
+
+    // Build gallery images array (product images + variant images)
+    const galleryImages = useMemo(() => {
+        const images = [...(product.images || [])];
+
+        // Add variant images if they exist
+        if (product.variants) {
+            product.variants.forEach(variant => {
+                if (variant.image) {
+                    // Check if this image URL is not already in the gallery
+                    const exists = images.some(img => img.url === variant.image);
+                    if (!exists) {
+                        images.push({
+                            id: variant.id * 1000,
+                            url: variant.image,
+                            altText: `${product.name} - ${variant.size}`,
+                            isPrimary: false,
+                        });
+                    }
+                }
+            });
+        }
+
+        return images;
+    }, [product.images, product.variants, product.name]);
+
+    // Get current image index for navigation
+    const currentImageIndex = useMemo(() => {
+        return galleryImages.findIndex(img => img.id === selectedImage?.id);
+    }, [galleryImages, selectedImage]);
+
+    // Navigate to next/previous image
+    const navigateImage = (direction: 'next' | 'prev') => {
+        if (galleryImages.length <= 1) return;
+
+        let newIndex;
+        if (direction === 'next') {
+            newIndex = currentImageIndex === galleryImages.length - 1 ? 0 : currentImageIndex + 1;
+        } else {
+            newIndex = currentImageIndex === 0 ? galleryImages.length - 1 : currentImageIndex - 1;
+        }
+
+        setSelectedImage(galleryImages[newIndex]);
+    };
 
     // Get current product data based on variant selection
     const currentPrice = selectedVariant?.price ?? product.price;
@@ -43,6 +101,24 @@ export default function ProductShow({ product, relatedProducts }: ProductShowPro
         ? Math.round(((currentCompareAtPrice - currentPrice) / currentCompareAtPrice) * 100)
         : null;
 
+    // Handle variant selection and update image
+    const handleVariantSelect = (variant: ProductVariant) => {
+        setSelectedVariant(variant);
+
+        // If variant has a specific image, show it
+        if (variant.image) {
+            setSelectedImage({
+                id: variant.id * 1000, // Temporary ID for variant image
+                url: variant.image,
+                altText: `${product.name} - ${variant.size}`,
+                isPrimary: false,
+            });
+        } else {
+            // Otherwise, show the first product image
+            setSelectedImage(product.images?.[0]);
+        }
+    };
+
     const handleAddToCart = () => {
         if (!currentInStock) return;
 
@@ -56,6 +132,8 @@ export default function ProductShow({ product, relatedProducts }: ProductShowPro
             slug: product.slug,
             price: product.price,
             compareAtPrice: product.compareAtPrice,
+            minPrice: product.minPrice,
+            maxPrice: product.maxPrice,
             image: product.image,
             isOnSale: product.isOnSale,
             salePercentage: product.salePercentage,
@@ -104,12 +182,23 @@ export default function ProductShow({ product, relatedProducts }: ProductShowPro
                             {/* Main Image */}
                             <motion.div
                                 key={selectedImage?.id || 0}
+                                drag="x"
+                                dragConstraints={{ left: 0, right: 0 }}
+                                dragElastic={0.2}
+                                onDragEnd={(e, { offset, velocity }) => {
+                                    const swipe = Math.abs(offset.x) * velocity.x;
+                                    if (swipe > 10000) {
+                                        navigateImage('prev');
+                                    } else if (swipe < -10000) {
+                                        navigateImage('next');
+                                    }
+                                }}
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 transition={{ duration: 0.3 }}
-                                className="relative overflow-hidden rounded-2xl border-2 border-border bg-background p-6 md:p-8"
+                                className="relative overflow-hidden rounded-2xl border-2 border-border bg-background p-6 md:p-8 cursor-grab active:cursor-grabbing lg:cursor-default"
                             >
-                                <div className="aspect-square w-full">
+                                <div className="aspect-square w-full pointer-events-none">
                                     {selectedImage && (
                                         <img
                                             src={selectedImage.url}
@@ -121,7 +210,7 @@ export default function ProductShow({ product, relatedProducts }: ProductShowPro
 
                                 {/* Sale Badge */}
                                 {isOnSale && salePercentage && (
-                                    <div className="absolute right-3 top-3 md:right-4 md:top-4">
+                                    <div className="absolute right-3 top-3 md:right-4 md:top-4 pointer-events-none">
                                         <span className="rounded-full bg-gold px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm font-bold uppercase tracking-wide text-white shadow-lg shadow-gold/30">
                                             -{salePercentage}%
                                         </span>
@@ -129,9 +218,9 @@ export default function ProductShow({ product, relatedProducts }: ProductShowPro
                                 )}
 
                                 {/* Mobile Image Dots */}
-                                {product.images?.length > 1 && (
-                                    <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 lg:hidden">
-                                        {product.images.map((image) => (
+                                {galleryImages.length > 1 && (
+                                    <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 lg:hidden pointer-events-auto">
+                                        {galleryImages.map((image) => (
                                             <button
                                                 key={image.id}
                                                 onClick={() => setSelectedImage(image)}
@@ -149,9 +238,9 @@ export default function ProductShow({ product, relatedProducts }: ProductShowPro
                             </motion.div>
 
                             {/* Thumbnail Images - Desktop Only */}
-                            {product.images?.length > 1 && (
+                            {galleryImages.length > 1 && (
                                 <div className="hidden lg:grid grid-cols-4 gap-3">
-                                    {product.images.map((image) => (
+                                    {galleryImages.map((image) => (
                                         <button
                                             key={image.id}
                                             onClick={() => setSelectedImage(image)}
@@ -176,19 +265,42 @@ export default function ProductShow({ product, relatedProducts }: ProductShowPro
                         {/* Product Info */}
                         <div className="space-y-6">
                             {/* Categories */}
-                            {product.categories.length > 0 && (
-                                <div className="flex flex-wrap gap-2">
-                                    {product.categories.map((category) => (
-                                        <Link
-                                            key={category.id}
-                                            href={route('products.index') + `?category=${category.id}`}
-                                            className="rounded-full border border-muted-foreground/30 bg-background/95 px-3 py-1 text-xs font-medium uppercase tracking-wide text-muted-foreground backdrop-blur-sm transition-all duration-300 hover:border-gold hover:text-gold hover:shadow-sm hover:shadow-gold/20"
-                                        >
-                                            {category.name}
-                                        </Link>
-                                    ))}
-                                </div>
-                            )}
+                            {product.categories.length > 0 && (() => {
+                                const visibleCategories = showAllCategories
+                                    ? product.categories
+                                    : product.categories.slice(0, 5);
+                                const hasMore = product.categories.length > 5;
+
+                                return (
+                                    <div className="flex flex-wrap gap-2">
+                                        {visibleCategories.map((category) => (
+                                            <Link
+                                                key={category.id}
+                                                href={route('products.index') + `?categories=${category.id}`}
+                                                className="rounded-full border border-muted-foreground/30 bg-background/95 px-3 py-1 text-xs font-medium uppercase tracking-wide text-muted-foreground backdrop-blur-sm transition-all duration-300 hover:border-gold hover:text-gold hover:shadow-sm hover:shadow-gold/20"
+                                            >
+                                                {category.name}
+                                            </Link>
+                                        ))}
+                                        {hasMore && !showAllCategories && (
+                                            <button
+                                                onClick={() => setShowAllCategories(true)}
+                                                className="rounded-full border border-muted-foreground/30 bg-background/95 px-4 py-1 text-xs font-medium uppercase tracking-wide text-muted-foreground backdrop-blur-sm transition-all duration-300 hover:border-gold hover:text-gold hover:shadow-sm hover:shadow-gold/20"
+                                            >
+                                                ...
+                                            </button>
+                                        )}
+                                        {hasMore && showAllCategories && (
+                                            <button
+                                                onClick={() => setShowAllCategories(false)}
+                                                className="rounded-full border border-muted-foreground/30 bg-background/95 px-3 py-1 text-xs font-medium uppercase tracking-wide text-muted-foreground backdrop-blur-sm transition-all duration-300 hover:border-gold hover:text-gold hover:shadow-sm hover:shadow-gold/20"
+                                            >
+                                                <X className="size-3" />
+                                            </button>
+                                        )}
+                                    </div>
+                                );
+                            })()}
 
                             {/* Product Title */}
                             <div className="space-y-2">
@@ -226,9 +338,10 @@ export default function ProductShow({ product, relatedProducts }: ProductShowPro
 
                             {/* Short Description */}
                             {product.shortDescription && (
-                                <p className="text-base leading-relaxed text-muted-foreground">
-                                    {product.shortDescription}
-                                </p>
+                                <div
+                                    className="text-base leading-relaxed text-muted-foreground prose prose-sm max-w-none"
+                                    dangerouslySetInnerHTML={{ __html: product.shortDescription }}
+                                />
                             )}
 
                             {/* Variant Selection */}
@@ -241,7 +354,7 @@ export default function ProductShow({ product, relatedProducts }: ProductShowPro
                                         {product.variants.map((variant) => (
                                             <button
                                                 key={variant.id}
-                                                onClick={() => setSelectedVariant(variant)}
+                                                onClick={() => handleVariantSelect(variant)}
                                                 disabled={!variant.inStock}
                                                 className={cn(
                                                     'rounded-lg border-2 px-4 py-2.5 text-sm font-bold uppercase tracking-wide transition-all duration-300 cursor-pointer',
@@ -372,7 +485,7 @@ export default function ProductShow({ product, relatedProducts }: ProductShowPro
                             </div>
                         </div>
 
-                        <div className="py-8">
+                        <div className="py-8 max-w-[864px]">
                             <AnimatePresence mode="wait">
                                 {activeTab === 'description' && (
                                     <motion.div
@@ -381,12 +494,9 @@ export default function ProductShow({ product, relatedProducts }: ProductShowPro
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, y: -10 }}
                                         transition={{ duration: 0.2 }}
-                                        className="prose prose-neutral max-w-none dark:prose-invert"
-                                    >
-                                        <p className="text-foreground/80 whitespace-pre-line leading-relaxed">
-                                            {product.description}
-                                        </p>
-                                    </motion.div>
+                                        className="prose prose-neutral max-w-none dark:prose-invert prose-p:text-foreground/80 prose-headings:text-foreground"
+                                        dangerouslySetInnerHTML={{ __html: product.description }}
+                                    />
                                 )}
 
                                 {activeTab === 'additional' && product.additionalInformation && (
@@ -396,12 +506,9 @@ export default function ProductShow({ product, relatedProducts }: ProductShowPro
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, y: -10 }}
                                         transition={{ duration: 0.2 }}
-                                        className="prose prose-neutral max-w-none dark:prose-invert"
-                                    >
-                                        <p className="text-foreground/80 whitespace-pre-line leading-relaxed">
-                                            {product.additionalInformation}
-                                        </p>
-                                    </motion.div>
+                                        className="prose prose-neutral max-w-none dark:prose-invert prose-p:text-foreground/80 prose-headings:text-foreground"
+                                        dangerouslySetInnerHTML={{ __html: product.additionalInformation }}
+                                    />
                                 )}
 
                                 {activeTab === 'ingredients' && (
@@ -411,12 +518,9 @@ export default function ProductShow({ product, relatedProducts }: ProductShowPro
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, y: -10 }}
                                         transition={{ duration: 0.2 }}
-                                        className="prose prose-neutral max-w-none dark:prose-invert"
-                                    >
-                                        <p className="text-foreground/80 whitespace-pre-line leading-relaxed">
-                                            {product.ingredients}
-                                        </p>
-                                    </motion.div>
+                                        className="prose prose-neutral max-w-none dark:prose-invert prose-p:text-foreground/80 prose-headings:text-foreground"
+                                        dangerouslySetInnerHTML={{ __html: product.ingredients }}
+                                    />
                                 )}
                             </AnimatePresence>
                         </div>
@@ -496,7 +600,7 @@ export default function ProductShow({ product, relatedProducts }: ProductShowPro
                                     {product.variants.map((variant) => (
                                         <button
                                             key={variant.id}
-                                            onClick={() => setSelectedVariant(variant)}
+                                            onClick={() => handleVariantSelect(variant)}
                                             disabled={!variant.inStock}
                                             className={cn(
                                                 'rounded-lg border-2 px-3 py-2 text-xs font-bold uppercase tracking-wide transition-all duration-300 cursor-pointer',

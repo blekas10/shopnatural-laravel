@@ -58,20 +58,30 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|array',
+            'name.en' => 'required|string|max:255',
+            'name.lt' => 'nullable|string|max:255',
             'slug' => 'nullable|string|unique:categories,slug|max:255',
-            'description' => 'nullable|string',
+            'description' => 'nullable|array',
+            'description.en' => 'nullable|string',
+            'description.lt' => 'nullable|string',
             'parent_id' => 'nullable|exists:categories,id',
             'order' => 'nullable|integer',
             'is_active' => 'boolean',
         ]);
 
-        // Auto-generate slug if not provided
+        // Auto-generate slug if not provided (use English name)
         if (empty($validated['slug'])) {
-            $validated['slug'] = Str::slug($validated['name']);
+            $englishName = $validated['name']['en'] ?? '';
+            $validated['slug'] = Str::slug($englishName);
         }
 
         $validated['is_active'] = $request->boolean('is_active');
+
+        // Ensure description has default values
+        if (!isset($validated['description'])) {
+            $validated['description'] = ['en' => '', 'lt' => ''];
+        }
 
         Category::create($validated);
 
@@ -87,7 +97,7 @@ class CategoryController extends Controller
             ->map(function ($cat) {
                 return [
                     'id' => $cat->id,
-                    'name' => $cat->name,
+                    'name' => $cat->name, // Display name for options
                     'parent_id' => $cat->parent_id,
                 ];
             });
@@ -95,9 +105,9 @@ class CategoryController extends Controller
         return Inertia::render('admin/categories/form', [
             'category' => [
                 'id' => $category->id,
-                'name' => $category->name,
+                'name' => $category->getTranslations('name'),
                 'slug' => $category->slug,
-                'description' => $category->description,
+                'description' => $category->getTranslations('description'),
                 'parent_id' => $category->parent_id,
                 'order' => $category->order,
                 'is_active' => $category->is_active,
@@ -109,20 +119,30 @@ class CategoryController extends Controller
     public function update(Request $request, Category $category)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|array',
+            'name.en' => 'required|string|max:255',
+            'name.lt' => 'nullable|string|max:255',
             'slug' => 'nullable|string|unique:categories,slug,' . $category->id . '|max:255',
-            'description' => 'nullable|string',
+            'description' => 'nullable|array',
+            'description.en' => 'nullable|string',
+            'description.lt' => 'nullable|string',
             'parent_id' => 'nullable|exists:categories,id',
             'order' => 'nullable|integer',
             'is_active' => 'boolean',
         ]);
 
-        // Auto-generate slug if not provided
+        // Auto-generate slug if not provided (use English name)
         if (empty($validated['slug'])) {
-            $validated['slug'] = Str::slug($validated['name']);
+            $englishName = $validated['name']['en'] ?? '';
+            $validated['slug'] = Str::slug($englishName);
         }
 
         $validated['is_active'] = $request->boolean('is_active');
+
+        // Ensure description has default values
+        if (!isset($validated['description'])) {
+            $validated['description'] = ['en' => '', 'lt' => ''];
+        }
 
         // Prevent setting itself as parent
         if (isset($validated['parent_id']) && $validated['parent_id'] == $category->id) {

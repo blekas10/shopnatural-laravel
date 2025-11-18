@@ -27,10 +27,12 @@ class Product extends Model
         'is_featured',
         'meta_title',
         'meta_description',
+        'focus_keyphrase',
     ];
 
     public $translatable = [
         'name',
+        'slug',
         'title',
         'short_description',
         'description',
@@ -38,6 +40,7 @@ class Product extends Model
         'ingredients',
         'meta_title',
         'meta_description',
+        'focus_keyphrase',
     ];
 
     protected $casts = [
@@ -116,7 +119,15 @@ class Product extends Model
      */
     public function inStock(): bool
     {
-        return $this->variants()->where('stock', '>', 0)->exists();
+        // Check if product has any active variants that are in stock
+        return $this->variants()
+            ->where('is_active', true)
+            ->where(function ($query) {
+                // Stock of 0 means unlimited, or stock > 0
+                $query->where('stock', 0)
+                      ->orWhere('stock', '>', 0);
+            })
+            ->exists();
     }
 
     /**

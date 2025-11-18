@@ -6,7 +6,6 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
     Select,
     SelectContent,
@@ -14,47 +13,50 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, Save, Globe } from 'lucide-react';
 import { FormEventHandler, useState } from 'react';
-import { index, store, update } from '@/routes/admin/categories';
+import { index, store, update } from '@/routes/admin/brands';
 
 interface TranslatableField {
     en: string;
     lt: string;
 }
 
-interface Category {
+interface Brand {
     id: number;
     name: TranslatableField;
     slug: string;
     description: TranslatableField;
+    logo: string | null;
     parent_id: number | null;
     order: number;
     is_active: boolean;
 }
 
-interface CategoryOption {
+interface BrandOption {
     id: number;
     name: string;
 }
 
-interface CategoryFormProps {
-    category: Category | null;
-    allCategories: CategoryOption[];
+interface BrandFormProps {
+    brand: Brand | null;
+    allBrands: BrandOption[];
 }
 
-export default function CategoryForm({ category, allCategories }: CategoryFormProps) {
+export default function BrandForm({ brand, allBrands }: BrandFormProps) {
     const { t } = useTranslation();
-    const isEditing = category !== null;
+    const isEditing = brand !== null;
     const [activeTab, setActiveTab] = useState('en');
 
     const { data, setData, post, put, processing, errors, transform } = useForm({
-        name: category?.name || { en: '', lt: '' },
-        slug: category?.slug || '',
-        description: category?.description || { en: '', lt: '' },
-        parent_id: category?.parent_id?.toString() || 'none',
-        order: category?.order || 0,
-        is_active: category?.is_active ?? true,
+        name: brand?.name || { en: '', lt: '' },
+        slug: brand?.slug || '',
+        description: brand?.description || { en: '', lt: '' },
+        logo: brand?.logo || '',
+        parent_id: brand?.parent_id?.toString() || 'none',
+        order: brand?.order || 0,
+        is_active: brand?.is_active ?? true,
     });
 
     // Transform data before sending - convert parent_id to integer or null
@@ -66,8 +68,8 @@ export default function CategoryForm({ category, allCategories }: CategoryFormPr
     const handleSubmit: FormEventHandler = (e) => {
         e.preventDefault();
 
-        if (isEditing && category) {
-            put(update.url(category.id), {
+        if (isEditing && brand) {
+            put(update.url(brand.id), {
                 preserveScroll: true,
             });
         } else {
@@ -86,7 +88,7 @@ export default function CategoryForm({ category, allCategories }: CategoryFormPr
 
     return (
         <AppLayout>
-            <Head title={isEditing ? t('categories.edit', 'Edit Category') : t('categories.create', 'Create Category')} />
+            <Head title={isEditing ? t('brands.edit', 'Edit Brand') : t('brands.create', 'Create Brand')} />
 
             <div className="container mx-auto px-4 py-8 md:px-6 lg:px-8 max-w-3xl">
                 {/* Header */}
@@ -98,12 +100,12 @@ export default function CategoryForm({ category, allCategories }: CategoryFormPr
                         </Link>
                     </Button>
                     <h1 className="text-3xl font-bold uppercase tracking-wide text-foreground">
-                        {isEditing ? t('categories.edit', 'Edit Category') : t('categories.create', 'Create Category')}
+                        {isEditing ? t('brands.edit', 'Edit Brand') : t('brands.create', 'Create Brand')}
                     </h1>
                     <p className="mt-2 text-muted-foreground">
                         {isEditing
-                            ? t('categories.edit_subtitle', 'Update category information')
-                            : t('categories.create_subtitle', 'Add a new category to organize your products')}
+                            ? t('brands.edit_subtitle', 'Update brand information')
+                            : t('brands.create_subtitle', 'Add a new brand to your store')}
                     </p>
                 </div>
 
@@ -130,13 +132,13 @@ export default function CategoryForm({ category, allCategories }: CategoryFormPr
                                 {/* English Name */}
                                 <div className="space-y-2">
                                     <Label htmlFor="name_en">
-                                        {t('categories.name', 'Name')} <span className="text-red-500">*</span>
+                                        {t('brands.name', 'Name')} <span className="text-red-500">*</span>
                                     </Label>
                                     <Input
                                         id="name_en"
                                         value={data.name.en}
                                         onChange={(e) => updateTranslatableField('name', 'en', e.target.value)}
-                                        placeholder={t('categories.name_placeholder', 'e.g., Hair Care, Body Care')}
+                                        placeholder={t('brands.name_placeholder', 'e.g., Naturalmente, MY.ORGANICS')}
                                         className={errors['name.en'] ? 'border-red-500' : ''}
                                     />
                                     {errors['name.en'] && (
@@ -147,13 +149,13 @@ export default function CategoryForm({ category, allCategories }: CategoryFormPr
                                 {/* English Description */}
                                 <div className="space-y-2">
                                     <Label htmlFor="description_en">
-                                        {t('categories.description', 'Description')}
+                                        {t('brands.description', 'Description')}
                                     </Label>
                                     <Textarea
                                         id="description_en"
                                         value={data.description.en}
                                         onChange={(e) => updateTranslatableField('description', 'en', e.target.value)}
-                                        placeholder={t('categories.description_placeholder', 'Brief description of this category...')}
+                                        placeholder={t('brands.description_placeholder', 'Brand story and information...')}
                                         rows={4}
                                         className={errors['description.en'] ? 'border-red-500' : ''}
                                     />
@@ -167,30 +169,33 @@ export default function CategoryForm({ category, allCategories }: CategoryFormPr
                                 {/* Lithuanian Name */}
                                 <div className="space-y-2">
                                     <Label htmlFor="name_lt">
-                                        {t('categories.name', 'Name')}
+                                        {t('brands.name', 'Name')}
                                     </Label>
                                     <Input
                                         id="name_lt"
                                         value={data.name.lt}
                                         onChange={(e) => updateTranslatableField('name', 'lt', e.target.value)}
-                                        placeholder={t('categories.name_placeholder_lt', 'pvz., Plaukų priežiūra, Kūno priežiūra')}
+                                        placeholder={t('brands.name_placeholder_lt', 'Prekės ženklo pavadinimas')}
                                         className={errors['name.lt'] ? 'border-red-500' : ''}
                                     />
                                     {errors['name.lt'] && (
                                         <p className="text-sm text-red-500">{errors['name.lt']}</p>
                                     )}
+                                    <p className="text-xs text-muted-foreground">
+                                        {t('brands.name_lt_hint', 'Brand names usually stay the same across languages')}
+                                    </p>
                                 </div>
 
                                 {/* Lithuanian Description */}
                                 <div className="space-y-2">
                                     <Label htmlFor="description_lt">
-                                        {t('categories.description', 'Description')}
+                                        {t('brands.description', 'Description')}
                                     </Label>
                                     <Textarea
                                         id="description_lt"
                                         value={data.description.lt}
                                         onChange={(e) => updateTranslatableField('description', 'lt', e.target.value)}
-                                        placeholder={t('categories.description_placeholder_lt', 'Trumpas kategorijos aprašymas...')}
+                                        placeholder={t('brands.description_placeholder_lt', 'Prekės ženklo istorija ir informacija...')}
                                         rows={4}
                                         className={errors['description.lt'] ? 'border-red-500' : ''}
                                     />
@@ -204,21 +209,21 @@ export default function CategoryForm({ category, allCategories }: CategoryFormPr
 
                     {/* Non-translatable Fields */}
                     <div className="rounded-lg border border-border bg-card p-6 space-y-6">
-                        <h2 className="text-lg font-semibold mb-4">{t('categories.settings', 'Category Settings')}</h2>
+                        <h2 className="text-lg font-semibold mb-4">{t('brands.settings', 'Brand Settings')}</h2>
 
                         {/* Slug */}
                         <div className="space-y-2">
                             <Label htmlFor="slug">
-                                {t('categories.slug', 'Slug')}
+                                {t('brands.slug', 'Slug')}
                                 <span className="text-muted-foreground text-xs ml-2">
-                                    {t('categories.slug_hint', '(Optional - auto-generated from English name)')}
+                                    {t('brands.slug_hint', '(Optional - auto-generated from English name)')}
                                 </span>
                             </Label>
                             <Input
                                 id="slug"
                                 value={data.slug}
                                 onChange={(e) => setData('slug', e.target.value)}
-                                placeholder={t('categories.slug_placeholder', 'e.g., hair-care')}
+                                placeholder={t('brands.slug_placeholder', 'e.g., naturalmente')}
                                 className={errors.slug ? 'border-red-500' : ''}
                             />
                             {errors.slug && (
@@ -226,12 +231,35 @@ export default function CategoryForm({ category, allCategories }: CategoryFormPr
                             )}
                         </div>
 
-                        {/* Parent Category */}
+                        {/* Logo URL */}
+                        <div className="space-y-2">
+                            <Label htmlFor="logo">
+                                {t('brands.logo', 'Logo URL')}
+                                <span className="text-muted-foreground text-xs ml-2">
+                                    {t('brands.logo_hint', '(Optional)')}
+                                </span>
+                            </Label>
+                            <Input
+                                id="logo"
+                                value={data.logo}
+                                onChange={(e) => setData('logo', e.target.value)}
+                                placeholder={t('brands.logo_placeholder', 'https://example.com/logo.png')}
+                                className={errors.logo ? 'border-red-500' : ''}
+                            />
+                            {errors.logo && (
+                                <p className="text-sm text-red-500">{errors.logo}</p>
+                            )}
+                            <p className="text-xs text-muted-foreground">
+                                {t('brands.logo_info', 'Enter a URL to the brand logo image')}
+                            </p>
+                        </div>
+
+                        {/* Parent Brand */}
                         <div className="space-y-2">
                             <Label htmlFor="parent_id">
-                                {t('categories.parent', 'Parent Category')}
+                                {t('brands.parent_brand', 'Parent Brand')}
                                 <span className="text-muted-foreground text-xs ml-2">
-                                    {t('categories.parent_hint', '(Optional - leave empty for top-level category)')}
+                                    {t('brands.parent_hint', '(Optional - for sub-brands)')}
                                 </span>
                             </Label>
                             <Select
@@ -239,15 +267,15 @@ export default function CategoryForm({ category, allCategories }: CategoryFormPr
                                 onValueChange={(value) => setData('parent_id', value)}
                             >
                                 <SelectTrigger className={errors.parent_id ? 'border-red-500' : ''}>
-                                    <SelectValue placeholder={t('categories.select_parent', 'Select parent category...')} />
+                                    <SelectValue placeholder={t('brands.select_parent', 'Select parent brand')} />
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="none">
-                                        {t('categories.no_parent', 'No parent (top-level)')}
+                                        {t('brands.no_parent', 'None (Top Level)')}
                                     </SelectItem>
-                                    {allCategories.map((cat) => (
-                                        <SelectItem key={cat.id} value={cat.id.toString()}>
-                                            {cat.name}
+                                    {allBrands.map((brandOption) => (
+                                        <SelectItem key={brandOption.id} value={brandOption.id.toString()}>
+                                            {brandOption.name}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
@@ -255,29 +283,26 @@ export default function CategoryForm({ category, allCategories }: CategoryFormPr
                             {errors.parent_id && (
                                 <p className="text-sm text-red-500">{errors.parent_id}</p>
                             )}
-                            <p className="text-xs text-muted-foreground">
-                                {t('categories.parent_info', 'Select a parent to create a subcategory. You can nest categories multiple levels deep.')}
-                            </p>
                         </div>
 
                         {/* Order */}
                         <div className="space-y-2">
                             <Label htmlFor="order">
-                                {t('categories.order', 'Display Order')}
+                                {t('brands.order', 'Display Order')}
                             </Label>
                             <Input
                                 id="order"
                                 type="number"
                                 value={data.order}
                                 onChange={(e) => setData('order', parseInt(e.target.value) || 0)}
-                                placeholder="0"
+                                min={0}
                                 className={errors.order ? 'border-red-500' : ''}
                             />
                             {errors.order && (
                                 <p className="text-sm text-red-500">{errors.order}</p>
                             )}
                             <p className="text-xs text-muted-foreground">
-                                {t('categories.order_info', 'Lower numbers appear first. Use this to control the display order.')}
+                                {t('brands.order_info', 'Lower numbers appear first')}
                             </p>
                         </div>
 
@@ -285,10 +310,10 @@ export default function CategoryForm({ category, allCategories }: CategoryFormPr
                         <div className="flex items-center justify-between rounded-lg border border-border p-4">
                             <div className="space-y-0.5">
                                 <Label htmlFor="is_active" className="cursor-pointer">
-                                    {t('categories.is_active', 'Active')}
+                                    {t('brands.is_active', 'Active')}
                                 </Label>
                                 <p className="text-sm text-muted-foreground">
-                                    {t('categories.is_active_info', 'Inactive categories are hidden from customers')}
+                                    {t('brands.is_active_info', 'Inactive brands are hidden from customers')}
                                 </p>
                             </div>
                             <Switch

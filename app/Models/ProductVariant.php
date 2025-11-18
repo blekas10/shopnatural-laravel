@@ -16,6 +16,8 @@ class ProductVariant extends Model
         'stock',
         'low_stock_threshold',
         'is_default',
+        'is_active',
+        'image_id',
     ];
 
     protected function casts(): array
@@ -27,6 +29,7 @@ class ProductVariant extends Model
             'low_stock_threshold' => 'integer',
             'size' => 'integer',
             'is_default' => 'boolean',
+            'is_active' => 'boolean',
         ];
     }
 
@@ -35,8 +38,24 @@ class ProductVariant extends Model
         return $this->belongsTo(Product::class);
     }
 
+    public function image(): BelongsTo
+    {
+        return $this->belongsTo(ProductImage::class, 'image_id');
+    }
+
     public function inStock(): bool
     {
+        // Check if variant is active first
+        if (!$this->is_active) {
+            return false;
+        }
+
+        // Stock of 0 means unlimited
+        if ($this->stock === 0) {
+            return true;
+        }
+
+        // Otherwise check if stock is positive
         return $this->stock > 0;
     }
 

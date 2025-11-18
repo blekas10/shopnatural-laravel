@@ -22,7 +22,7 @@ class Category extends Model
         'is_active',
     ];
 
-    public $translatable = ['name', 'description'];
+    public $translatable = ['name', 'slug', 'description'];
 
     protected $casts = [
         'is_active' => 'boolean',
@@ -115,5 +115,19 @@ class Category extends Model
     public function scopeRoots($query)
     {
         return $query->whereNull('parent_id');
+    }
+
+    /**
+     * Get all descendant category IDs (children, grandchildren, etc.) recursively
+     */
+    public function getAllDescendantIds(): array
+    {
+        $ids = [$this->id];
+
+        foreach ($this->children as $child) {
+            $ids = array_merge($ids, $child->getAllDescendantIds());
+        }
+
+        return $ids;
     }
 }
