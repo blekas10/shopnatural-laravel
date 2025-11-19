@@ -33,6 +33,10 @@ class PasswordController extends Controller
             'password' => $validated['password'],
         ]);
 
-        return back();
+        // Get locale from session to redirect to correct locale version
+        $locale = session('locale', 'en');
+        $routeName = $locale === 'lt' ? 'lt.profile.edit' : 'profile.edit';
+
+        return to_route($routeName)->with('status', 'password-updated');
     }
 }

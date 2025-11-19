@@ -17,13 +17,15 @@ import {
     CollapsibleContent,
     CollapsibleTrigger,
 } from '@/components/ui/collapsible';
+import { useTranslation } from '@/hooks/use-translation';
 
 export function NavMain({ items = [] }: { items: NavItem[] }) {
     const page = usePage();
+    const { t } = useTranslation();
     return (
         <SidebarGroup className="px-2 py-0">
-            <SidebarGroupLabel className="uppercase tracking-wide text-xs font-bold">
-                Account
+            <SidebarGroupLabel className="uppercase tracking-wide text-xs font-bold text-gold/70">
+                {t('sidebar.account', 'ACCOUNT')}
             </SidebarGroupLabel>
             <SidebarMenu>
                 {items.map((item) => {
@@ -37,11 +39,11 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                                     <CollapsibleTrigger asChild>
                                         <SidebarMenuButton
                                             tooltip={{ children: item.title }}
-                                            className="transition-colors"
+                                            className="transition-colors hover:bg-gold/10 hover:text-gold"
                                         >
-                                            {item.icon && <item.icon />}
+                                            {item.icon && <item.icon className="text-gold/80" />}
                                             <span>{item.title}</span>
-                                            <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                                            <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 text-gold/60" />
                                         </SidebarMenuButton>
                                     </CollapsibleTrigger>
                                     <CollapsibleContent>
@@ -54,9 +56,9 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                                                             asChild
                                                             isActive={isSubActive}
                                                             className={cn(
-                                                                'transition-colors',
+                                                                'transition-colors hover:bg-gold/10 hover:text-gold',
                                                                 isSubActive &&
-                                                                    'bg-gold/10 text-gold hover:bg-gold/20 hover:text-gold font-bold'
+                                                                    'bg-gold/10 text-gold hover:bg-gold/12 hover:text-gold font-bold'
                                                             )}
                                                         >
                                                             <Link href={subItem.href!} prefetch>
@@ -80,13 +82,13 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                                 isActive={isActive}
                                 tooltip={{ children: item.title }}
                                 className={cn(
-                                    'transition-colors',
+                                    'transition-colors hover:bg-gold/10 hover:text-gold',
                                     isActive &&
-                                        'bg-gold/10 text-gold hover:bg-gold/20 hover:text-gold font-bold'
+                                        'bg-gold/10 text-gold hover:bg-gold/12 hover:text-gold font-bold'
                                 )}
                             >
                                 <Link href={item.href!} prefetch>
-                                    {item.icon && <item.icon />}
+                                    {item.icon && <item.icon className={cn('text-gold/80', isActive && 'text-gold')} />}
                                     <span>{item.title}</span>
                                 </Link>
                             </SidebarMenuButton>

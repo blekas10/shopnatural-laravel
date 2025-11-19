@@ -56,6 +56,8 @@ Route::group([], function () {
     Route::middleware('auth')->group(function () {
         Route::get('orders', [OrderController::class, 'index'])->name('en.orders.index');
         Route::get('orders/{orderNumber}', [OrderController::class, 'show'])->name('en.orders.show');
+        Route::get('orders/{orderNumber}/invoice/download', [OrderController::class, 'downloadInvoice'])->name('en.orders.invoice.download');
+        Route::get('orders/{orderNumber}/invoice/view', [OrderController::class, 'viewInvoice'])->name('en.orders.invoice.view');
     });
 
     // Order confirmation - accessible after checkout (uses policy for authorization)
@@ -85,6 +87,8 @@ Route::group(['prefix' => 'lt'], function () {
     Route::middleware('auth')->group(function () {
         Route::get('uzsakymai', [OrderController::class, 'index'])->name('lt.orders.index');
         Route::get('uzsakymai/{orderNumber}', [OrderController::class, 'show'])->name('lt.orders.show');
+        Route::get('uzsakymai/{orderNumber}/saskaita/atsisiusti', [OrderController::class, 'downloadInvoice'])->name('lt.orders.invoice.download');
+        Route::get('uzsakymai/{orderNumber}/saskaita/perziureti', [OrderController::class, 'viewInvoice'])->name('lt.orders.invoice.view');
     });
 
     // Order confirmation - accessible after checkout (uses policy for authorization)

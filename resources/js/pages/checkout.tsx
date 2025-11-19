@@ -1,7 +1,7 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowLeft, Lock, Check, ChevronRight } from 'lucide-react';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useFormStatus } from 'react-dom';
 import MainHeader from '@/components/main-header';
 import Footer from '@/components/footer';
@@ -24,6 +24,7 @@ import type {
     CardDetails,
     CheckoutPageProps,
 } from '@/types/checkout';
+import type { SharedData } from '@/types';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { CheckoutValidator } from '@/utils/checkout-validation';
@@ -64,6 +65,7 @@ export default function Checkout({
 }: CheckoutPageProps) {
     const { items, totalPrice } = useCart();
     const { t, route } = useTranslation();
+    const { auth } = usePage<SharedData>().props;
 
     // Initialize validator
     const validator = useMemo(() => new CheckoutValidator(t), [t]);
@@ -87,6 +89,75 @@ export default function Checkout({
         postalCode: '',
         country: '',
     });
+
+    // Autofill form with user data if authenticated
+    useEffect(() => {
+        if (auth?.user) {
+            const user = auth.user as any;
+
+            setContact({
+                fullName: auth.user.name ?? '',
+                email: auth.user.email ?? '',
+                phone: user.phone ?? '',
+            });
+
+            // Check if user has different billing and shipping addresses
+            const hasBillingAddress = user.billing_address && user.billing_city;
+            const hasShippingAddress = user.shipping_address && user.shipping_city;
+            const addressesAreDifferent = hasBillingAddress && hasShippingAddress && (
+                user.billing_address !== user.shipping_address ||
+                user.billing_city !== user.shipping_city ||
+                user.billing_postal_code !== user.shipping_postal_code
+            );
+
+            if (addressesAreDifferent) {
+                // Show billing address in main form
+                setShippingAddress({
+                    fullName: auth.user.name ?? '',
+                    addressLine1: user.billing_address ?? '',
+                    addressLine2: '',
+                    city: user.billing_city ?? '',
+                    state: user.billing_state ?? '',
+                    postalCode: user.billing_postal_code ?? '',
+                    country: user.billing_country ?? 'LT',
+                });
+
+                // Uncheck "same as shipping" and show shipping address separately
+                setBillingSameAsShipping(false);
+                setBillingAddress({
+                    fullName: auth.user.name ?? '',
+                    addressLine1: user.shipping_address ?? '',
+                    addressLine2: '',
+                    city: user.shipping_city ?? '',
+                    state: user.shipping_state ?? '',
+                    postalCode: user.shipping_postal_code ?? '',
+                    country: user.shipping_country ?? 'LT',
+                });
+            } else if (hasBillingAddress) {
+                // Only billing address exists, use it
+                setShippingAddress({
+                    fullName: auth.user.name ?? '',
+                    addressLine1: user.billing_address ?? '',
+                    addressLine2: '',
+                    city: user.billing_city ?? '',
+                    state: user.billing_state ?? '',
+                    postalCode: user.billing_postal_code ?? '',
+                    country: user.billing_country ?? 'LT',
+                });
+            } else if (hasShippingAddress) {
+                // Only shipping address exists, use it
+                setShippingAddress({
+                    fullName: auth.user.name ?? '',
+                    addressLine1: user.shipping_address ?? '',
+                    addressLine2: '',
+                    city: user.shipping_city ?? '',
+                    state: user.shipping_state ?? '',
+                    postalCode: user.shipping_postal_code ?? '',
+                    country: user.shipping_country ?? 'LT',
+                });
+            }
+        }
+    }, [auth]);
 
     // Get shipping methods based on selected country
     const shippingMethods = useMemo(() => {

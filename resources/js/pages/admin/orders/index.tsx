@@ -110,13 +110,13 @@ export default function OrdersIndex({ orders, filters, statuses, paymentStatuses
 
     const getStatusBadgeVariant = (status: string) => {
         switch (status) {
-            case 'pending':
-                return 'bg-yellow-500 text-white hover:bg-yellow-600';
-            case 'processing':
+            case 'confirmed':
                 return 'bg-blue-500 text-white hover:bg-blue-600';
+            case 'processing':
+                return 'bg-yellow-500 text-white hover:bg-yellow-600';
             case 'shipped':
                 return 'bg-purple-500 text-white hover:bg-purple-600';
-            case 'delivered':
+            case 'completed':
                 return 'bg-green-500 text-white hover:bg-green-600';
             case 'cancelled':
                 return 'bg-red-500 text-white hover:bg-red-600';

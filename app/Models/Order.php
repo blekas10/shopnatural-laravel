@@ -124,11 +124,11 @@ class Order extends Model
     }
 
     /**
-     * Check if order is pending
+     * Check if order is confirmed
      */
-    public function isPending(): bool
+    public function isConfirmed(): bool
     {
-        return $this->status === 'pending';
+        return $this->status === 'confirmed';
     }
 
     /**
@@ -148,11 +148,11 @@ class Order extends Model
     }
 
     /**
-     * Check if order is delivered
+     * Check if order is completed
      */
-    public function isDelivered(): bool
+    public function isCompleted(): bool
     {
-        return $this->status === 'delivered';
+        return $this->status === 'completed';
     }
 
     /**
@@ -176,7 +176,7 @@ class Order extends Model
      */
     public function canBeCancelled(): bool
     {
-        return in_array($this->status, ['pending', 'processing']);
+        return in_array($this->status, ['confirmed', 'processing']);
     }
 
     /**
@@ -221,12 +221,12 @@ class Order extends Model
     }
 
     /**
-     * Mark as delivered
+     * Mark as completed
      */
-    public function markAsDelivered(): void
+    public function markAsCompleted(): void
     {
         $this->update([
-            'status' => 'delivered',
+            'status' => 'completed',
             'delivered_at' => now(),
         ]);
     }
@@ -254,11 +254,11 @@ class Order extends Model
     }
 
     /**
-     * Scope: Only pending orders
+     * Scope: Only confirmed orders
      */
-    public function scopePending($query)
+    public function scopeConfirmed($query)
     {
-        return $query->where('status', 'pending');
+        return $query->where('status', 'confirmed');
     }
 
     /**
@@ -278,11 +278,11 @@ class Order extends Model
     }
 
     /**
-     * Scope: Only delivered orders
+     * Scope: Only completed orders
      */
-    public function scopeDelivered($query)
+    public function scopeCompleted($query)
     {
-        return $query->where('status', 'delivered');
+        return $query->where('status', 'completed');
     }
 
     /**

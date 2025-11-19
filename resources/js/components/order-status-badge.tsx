@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/hooks/use-translation';
 import type { OrderStatus } from '@/types/checkout';
 import {
     Package,
@@ -15,39 +16,30 @@ interface OrderStatusBadgeProps {
 }
 
 const statusConfig = {
-    pending: {
-        label: 'Pending',
-        icon: Clock,
-        className: 'bg-gray-100 text-gray-800 border-gray-300 dark:bg-gray-900 dark:text-gray-200',
-    },
-    processing: {
-        label: 'Processing',
-        icon: Package,
-        className: 'bg-gold/10 text-gold border-gold/30',
-    },
     confirmed: {
-        label: 'Confirmed',
         icon: CheckCircle2,
         className: 'bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-950 dark:text-blue-200',
     },
+    processing: {
+        icon: Package,
+        className: 'bg-gold/10 text-gold border-gold/30',
+    },
     shipped: {
-        label: 'Shipped',
         icon: Truck,
         className: 'bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-950 dark:text-purple-200',
     },
-    delivered: {
-        label: 'Delivered',
+    completed: {
         icon: PackageCheck,
         className: 'bg-teal-100 text-teal-800 border-teal-300 dark:bg-teal-950 dark:text-teal-200',
     },
     cancelled: {
-        label: 'Cancelled',
         icon: XCircle,
         className: 'bg-red-100 text-red-800 border-red-300 dark:bg-red-950 dark:text-red-200',
     },
 };
 
 export function OrderStatusBadge({ status, className }: OrderStatusBadgeProps) {
+    const { t } = useTranslation();
     const config = statusConfig[status];
     const Icon = config.icon;
 
@@ -60,7 +52,7 @@ export function OrderStatusBadge({ status, className }: OrderStatusBadgeProps) {
             )}
         >
             <Icon className="size-3.5" />
-            {config.label}
+            {t(`orders.status.${status}`, status)}
         </span>
     );
 }

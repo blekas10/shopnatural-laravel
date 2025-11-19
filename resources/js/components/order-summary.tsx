@@ -63,7 +63,7 @@ export function OrderSummary({
                                         alt={item.product.name}
                                         className="h-full w-full object-contain"
                                     />
-                                    <div className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-gold text-xs font-bold text-white">
+                                    <div className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full border-2 border-background bg-gold text-xs font-bold text-white">
                                         {item.quantity}
                                     </div>
                                 </div>

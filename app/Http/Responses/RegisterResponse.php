@@ -1,0 +1,26 @@
+<?php
+
+namespace App\Http\Responses;
+
+use Illuminate\Http\JsonResponse;
+use Laravel\Fortify\Contracts\RegisterResponse as RegisterResponseContract;
+use Symfony\Component\HttpFoundation\Response;
+
+class RegisterResponse implements RegisterResponseContract
+{
+    /**
+     * Create an HTTP response that represents the object.
+     */
+    public function toResponse($request): Response
+    {
+        // Get locale from session (set by SetLocale middleware)
+        $locale = session('locale', config('app.locale'));
+
+        // Build locale-aware dashboard URL
+        $dashboardPath = $locale === 'en' ? '/dashboard' : '/' . $locale . '/dashboard';
+
+        return $request->wantsJson()
+            ? new JsonResponse('', 201)
+            : redirect()->intended($dashboardPath);
+    }
+}

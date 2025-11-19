@@ -23,7 +23,7 @@ interface DashboardProps {
         pendingOrders: number;
         completedOrders: number;
     };
-    recentOrders: Order[];
+    recentOrders: Order[] | { data: Order[] };
     emailVerified?: boolean;
     status?: string;
 }
@@ -41,9 +41,12 @@ const cardVariants = {
     }),
 };
 
-export default function Dashboard({ auth, stats, recentOrders, emailVerified = true, status }: DashboardProps) {
-    const { t } = useTranslation();
+export default function Dashboard({ auth, stats, recentOrders: recentOrdersData, emailVerified = true, status }: DashboardProps) {
+    const { t, route } = useTranslation();
     const [resending, setResending] = useState(false);
+
+    // Normalize orders data - handle both array and ResourceCollection format
+    const recentOrders = Array.isArray(recentOrdersData) ? recentOrdersData : (recentOrdersData as { data: Order[] }).data;
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -209,7 +212,7 @@ export default function Dashboard({ auth, stats, recentOrders, emailVerified = t
                 >
                     <div className="flex items-center justify-between">
                         <h2 className="text-xl font-bold uppercase tracking-wide">{t('dashboard.recent_orders', 'Recent Orders')}</h2>
-                        <Link href="/orders">
+                        <Link href={route('orders.index')}>
                             <Button
                                 variant="ghost"
                                 className="group text-gold hover:text-gold/90"
@@ -255,20 +258,20 @@ export default function Dashboard({ auth, stats, recentOrders, emailVerified = t
 
                                         <div className="flex items-center gap-4">
                                             <div className="text-right">
-                                                <p className="text-lg font-bold">
-                                                    ${order.total.toFixed(2)}
+                                                <p className="text-lg font-bold text-gold">
+                                                    €{order.total.toFixed(2)}
                                                 </p>
                                                 <p className="text-xs text-muted-foreground">
-                                                    {order.items.reduce((sum, item) => sum + item.quantity, 0)} items
+                                                    {order.items.reduce((sum, item) => sum + item.quantity, 0)} {t('dashboard.items', 'items')}
                                                 </p>
                                             </div>
-                                            <Link href={`/orders/${order.id}`}>
+                                            <Link href={route('orders.show', { orderNumber: order.orderNumber })}>
                                                 <Button
                                                     size="sm"
                                                     variant="outline"
                                                     className="border-gold text-gold hover:bg-gold hover:text-white"
                                                 >
-                                                    View
+                                                    {t('dashboard.view', 'View')}
                                                 </Button>
                                             </Link>
                                         </div>
@@ -288,7 +291,7 @@ export default function Dashboard({ auth, stats, recentOrders, emailVerified = t
                             <p className="mb-6 text-sm text-muted-foreground">
                                 {t('dashboard.no_orders_description', 'Start shopping to see your orders here')}
                             </p>
-                            <Link href="/products">
+                            <Link href={route('products.index')}>
                                 <Button className="bg-gold hover:bg-gold/90 text-white font-bold uppercase tracking-wide">
                                     {t('dashboard.start_shopping', 'Start Shopping')}
                                 </Button>
@@ -306,7 +309,7 @@ export default function Dashboard({ auth, stats, recentOrders, emailVerified = t
                 >
                     <h2 className="text-xl font-bold uppercase tracking-wide">{t('dashboard.quick_actions', 'Quick Actions')}</h2>
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                        <Link href="/orders">
+                        <Link href={route('orders.index')}>
                             <Button
                                 variant="outline"
                                 className="h-auto w-full flex-col items-start gap-2 p-6 text-left hover:border-gold hover:bg-gold/5"
@@ -318,7 +321,7 @@ export default function Dashboard({ auth, stats, recentOrders, emailVerified = t
                                 </span>
                             </Button>
                         </Link>
-                        <Link href="/profile">
+                        <Link href={route('profile.edit')}>
                             <Button
                                 variant="outline"
                                 className="h-auto w-full flex-col items-start gap-2 p-6 text-left hover:border-gold hover:bg-gold/5"
@@ -330,7 +333,7 @@ export default function Dashboard({ auth, stats, recentOrders, emailVerified = t
                                 </span>
                             </Button>
                         </Link>
-                        <Link href="/products">
+                        <Link href={route('products.index')}>
                             <Button
                                 variant="outline"
                                 className="h-auto w-full flex-col items-start gap-2 p-6 text-left hover:border-gold hover:bg-gold/5"

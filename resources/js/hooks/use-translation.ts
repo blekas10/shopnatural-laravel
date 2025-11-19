@@ -24,7 +24,7 @@ export function useTranslation(): TranslationHook {
         [translations]
     );
 
-    const switchLocale = (newLocale: string) => {
+    const switchLocale = useCallback((newLocale: string) => {
         // Get current path
         const currentPath = window.location.pathname;
         const segments = currentPath.split('/').filter(Boolean);
@@ -47,6 +47,10 @@ export function useTranslation(): TranslationHook {
             'prisijungti': { en: 'login', lt: 'prisijungti' },
             'register': { en: 'register', lt: 'registruotis' },
             'registruotis': { en: 'register', lt: 'registruotis' },
+            // Non-translatable routes (stay the same)
+            'dashboard': { en: 'dashboard', lt: 'dashboard' },
+            'settings': { en: 'settings', lt: 'settings' },
+            'admin': { en: 'admin', lt: 'admin' },
         };
 
         // Remove current locale if present
@@ -77,7 +81,7 @@ export function useTranslation(): TranslationHook {
         }
 
         router.visit(newPath);
-    };
+    }, [availableLocales]);
 
     const route = useCallback(
         (name: string, params?: Record<string, any>) => {

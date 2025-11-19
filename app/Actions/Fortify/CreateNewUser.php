@@ -23,7 +23,8 @@ class CreateNewUser implements CreatesNewUsers
             'email' => [
                 'required',
                 'string',
-                'email',
+                'lowercase',
+                'email:rfc',
                 'max:255',
                 Rule::unique(User::class),
             ],

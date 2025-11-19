@@ -37,7 +37,11 @@ class ProfileController extends Controller
 
         $request->user()->save();
 
-        return to_route('profile.edit');
+        // Get locale from session to redirect to correct locale version
+        $locale = session('locale', 'en');
+        $routeName = $locale === 'lt' ? 'lt.profile.edit' : 'profile.edit';
+
+        return to_route($routeName)->with('status', 'profile-updated');
     }
 
     /**

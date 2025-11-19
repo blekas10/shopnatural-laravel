@@ -20,7 +20,7 @@ class SetLocale
 
         // Check if the first segment is a valid locale
         if (!in_array($locale, config('app.available_locales'))) {
-            // If not a valid locale, use default
+            // If not a valid locale in URL, default to English (not session)
             $locale = config('app.locale');
         }
 

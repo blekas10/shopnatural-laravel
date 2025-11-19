@@ -22,11 +22,10 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
 const statusIcons: Record<OrderStatus, React.ElementType> = {
-    pending: Clock,
-    processing: Package,
     confirmed: CheckCircle2,
+    processing: Package,
     shipped: Truck,
-    delivered: CheckCircle2,
+    completed: CheckCircle2,
     cancelled: CheckCircle2,
 };
 
@@ -46,7 +45,7 @@ export default function OrderDetails({ order }: OrderDetailsProps) {
     };
 
     const canCancelOrder = () => {
-        return ['pending', 'processing', 'confirmed'].includes(order.status);
+        return ['confirmed', 'processing'].includes(order.status);
     };
 
     const handleCancelOrder = () => {

@@ -5,10 +5,8 @@ import {
     Package,
     Mail,
     Download,
-    ArrowRight,
     Copy,
     Check,
-    Printer,
 } from 'lucide-react';
 import { useState } from 'react';
 import MainHeader from '@/components/main-header';
@@ -31,17 +29,6 @@ export default function OrderConfirmation({
         setCopied(true);
         toast.success(t('order.order_number_copied', 'Order number copied!'));
         setTimeout(() => setCopied(false), 2000);
-    };
-
-    const handlePrint = () => {
-        window.print();
-        toast.success(t('order.print_initiated', 'Print dialog opened'));
-    };
-
-    const handleDownloadInvoice = () => {
-        // In production, this would download from backend
-        toast.success(t('order.invoice_downloading', 'Invoice will be downloaded shortly'));
-        // router.get(route('orders.invoice', { id: order.id }));
     };
 
     return (
@@ -168,9 +155,9 @@ export default function OrderConfirmation({
                                             >
                                                 <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-border bg-muted">
                                                     <img
-                                                        src={item.product.image}
+                                                        src={item.variant?.image || item.product.image}
                                                         alt={item.product.name}
-                                                        className="h-full w-full object-contain p-2"
+                                                        className="h-full w-full object-cover"
                                                     />
                                                 </div>
                                                 <div className="flex flex-1 items-start justify-between">
@@ -332,30 +319,17 @@ export default function OrderConfirmation({
 
                                 {/* Action Buttons */}
                                 <div className="space-y-3">
-                                    <Link href={route('orders.show', { id: order.id })}>
+                                    <a
+                                        href={route('orders.invoice.download', { orderNumber: order.orderNumber })}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="w-full"
+                                    >
                                         <Button className="w-full bg-gold text-white hover:bg-gold/90">
-                                            {t('order.view_order_details', 'View Order Details')}
-                                            <ArrowRight className="ml-2 size-4" />
+                                            <Download className="mr-2 size-4" />
+                                            {t('order.download_invoice', 'Download Invoice')}
                                         </Button>
-                                    </Link>
-
-                                    <Button
-                                        onClick={handleDownloadInvoice}
-                                        variant="outline"
-                                        className="w-full border-2"
-                                    >
-                                        <Download className="mr-2 size-4" />
-                                        {t('order.download_invoice', 'Download Invoice')}
-                                    </Button>
-
-                                    <Button
-                                        onClick={handlePrint}
-                                        variant="outline"
-                                        className="w-full border-2 print:hidden"
-                                    >
-                                        <Printer className="mr-2 size-4" />
-                                        {t('order.print_receipt', 'Print Receipt')}
-                                    </Button>
+                                    </a>
 
                                     <Link href={route('products.index')}>
                                         <Button

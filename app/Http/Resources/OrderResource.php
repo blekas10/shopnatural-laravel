@@ -62,10 +62,11 @@ class OrderResource extends JsonResource
             'customerEmail' => $this->customer_email,
             'customerNotes' => $this->customer_notes,
 
-            // Order items (when loaded)
-            $this->mergeWhen($this->relationLoaded('items'), [
-                'items' => OrderItemResource::collection($this->items),
-            ]),
+            // Order items (always include as array, empty if not loaded)
+            'items' => $this->when($this->relationLoaded('items'),
+                OrderItemResource::collection($this->items),
+                []
+            ),
 
             // Payment info (when loaded, but without sensitive details)
             $this->mergeWhen($this->relationLoaded('payment'), [
@@ -76,17 +77,19 @@ class OrderResource extends JsonResource
                 ] : null,
             ]),
 
-            // Tracking info
+            // Shipping/Delivery info
+            'shippingMethod' => $this->shipping_method,
+            'venipakPickupPoint' => $this->venipak_pickup_point,
             'trackingNumber' => $this->tracking_number,
             'shippedAt' => $this->shipped_at?->toIso8601String(),
-            'deliveredAt' => $this->delivered_at?->toIso8601String(),
+            'completedAt' => $this->delivered_at?->toIso8601String(),
 
             // Timeline for frontend display
             'timeline' => [
                 'ordered' => $this->created_at->toIso8601String(),
-                'processing' => $this->isProcessing() || $this->isShipped() || $this->isDelivered() ? $this->updated_at->toIso8601String() : null,
+                'processing' => $this->isProcessing() || $this->isShipped() || $this->isCompleted() ? $this->updated_at->toIso8601String() : null,
                 'shipped' => $this->shipped_at?->toIso8601String(),
-                'delivered' => $this->delivered_at?->toIso8601String(),
+                'completed' => $this->delivered_at?->toIso8601String(),
                 'cancelled' => $this->isCancelled() ? $this->updated_at->toIso8601String() : null,
             ],
 

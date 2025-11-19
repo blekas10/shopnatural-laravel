@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\OrderResource;
 use App\Models\Order;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -20,12 +21,12 @@ class OrderController extends Controller
         // Only show orders that belong to the authenticated user
         $orders = Order::query()
             ->where('user_id', auth()->id())
-            ->with(['items.product.primaryImage', 'items.variant'])
+            ->with(['items.product.primaryImage', 'items.variant.image'])
             ->latest()
             ->paginate(15);
 
         return Inertia::render('orders/index', [
-            'orders' => OrderResource::collection($orders->items())->resolve(),
+            'orders' => OrderResource::collection(collect($orders->items())),
             'pagination' => [
                 'currentPage' => $orders->currentPage(),
                 'lastPage' => $orders->lastPage(),
@@ -47,7 +48,7 @@ class OrderController extends Controller
         $order = Order::where('order_number', $orderNumber)
             ->with([
                 'items.product.primaryImage',
-                'items.variant',
+                'items.variant.image',
                 'payment'
             ])
             ->firstOrFail();
@@ -58,7 +59,7 @@ class OrderController extends Controller
         }
 
         return Inertia::render('orders/show', [
-            'order' => (new OrderResource($order))->resolve(),
+            'order' => new OrderResource($order),
         ]);
     }
 
@@ -74,7 +75,7 @@ class OrderController extends Controller
         $order = Order::where('order_number', $orderNumber)
             ->with([
                 'items.product.primaryImage',
-                'items.variant',
+                'items.variant.image',
             ])
             ->firstOrFail();
 
@@ -109,6 +110,7 @@ class OrderController extends Controller
                         'variant' => $item->variant_size ? [
                             'size' => $item->variant_size,
                             'price' => (float) $item->unit_price,
+                            'image' => $item->variant?->image?->url,
                         ] : null,
                     ];
                 })->toArray(),
@@ -147,5 +149,55 @@ class OrderController extends Controller
                 'createdAt' => $order->created_at->toISOString(),
             ],
         ]);
+    }
+
+    /**
+     * Download invoice PDF
+     */
+    public function downloadInvoice(Request $request, string $orderNumber)
+    {
+        // Find order by order_number
+        $order = Order::where('order_number', $orderNumber)
+            ->with(['items.product.primaryImage', 'items.variant.image'])
+            ->firstOrFail();
+
+        // Authorization: check if user owns the order
+        if ($order->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized access to order');
+        }
+
+        // Generate PDF using the same template as admin
+        $pdf = Pdf::loadView('emails.invoice-pdf', [
+            'order' => $order,
+            'locale' => app()->getLocale(), // Use current locale
+        ]);
+
+        $filename = 'invoice-' . $order->order_number . '.pdf';
+
+        return $pdf->download($filename);
+    }
+
+    /**
+     * View invoice in browser
+     */
+    public function viewInvoice(Request $request, string $orderNumber)
+    {
+        // Find order by order_number
+        $order = Order::where('order_number', $orderNumber)
+            ->with(['items.product.primaryImage', 'items.variant.image'])
+            ->firstOrFail();
+
+        // Authorization: check if user owns the order
+        if ($order->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized access to order');
+        }
+
+        // Generate PDF using the same template as admin
+        $pdf = Pdf::loadView('emails.invoice-pdf', [
+            'order' => $order,
+            'locale' => app()->getLocale(),
+        ]);
+
+        return $pdf->stream('invoice-' . $order->order_number . '.pdf');
     }
 }

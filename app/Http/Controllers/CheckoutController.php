@@ -72,7 +72,7 @@ class CheckoutController extends Controller
     {
         $validated = $request->validate([
             'contact.fullName' => 'required|string',
-            'contact.email' => 'required|email',
+            'contact.email' => 'required|email:rfc',
             'contact.phone' => 'nullable|string',
             'shippingAddress.addressLine1' => 'required|string',
             'shippingAddress.addressLine2' => 'nullable|string',
@@ -126,7 +126,7 @@ class CheckoutController extends Controller
             $order = Order::create([
                 'order_number' => 'ORD-' . strtoupper(Str::random(10)),
                 'user_id' => auth()->id(), // null for guests
-                'status' => 'pending',
+                'status' => 'confirmed',
                 'payment_status' => 'pending',
                 'subtotal' => $validated['subtotal'],
                 'tax' => $validated['tax'],
@@ -146,7 +146,7 @@ class CheckoutController extends Controller
                 'shipping_state' => $validated['shippingAddress']['state'] ?? null,
                 'shipping_postal_code' => $validated['shippingAddress']['postalCode'],
                 'shipping_country' => $validated['shippingAddress']['country'],
-                'shipping_phone' => $validated['contact']['phone'] ?? null,
+                'shipping_phone' => $validated['contact']['phone'] ?? '',
 
                 // Billing address
                 'billing_first_name' => $contactName[0],
@@ -157,7 +157,7 @@ class CheckoutController extends Controller
                 'billing_state' => $billingAddress['state'] ?? null,
                 'billing_postal_code' => $billingAddress['postalCode'],
                 'billing_country' => $billingAddress['country'],
-                'billing_phone' => $validated['contact']['phone'] ?? null,
+                'billing_phone' => $validated['contact']['phone'] ?? '',
 
                 'customer_email' => $validated['contact']['email'],
             ]);
@@ -213,8 +213,14 @@ class CheckoutController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
+            // Log the actual error for debugging
+            \Log::error('Checkout failed: ' . $e->getMessage(), [
+                'exception' => $e,
+                'trace' => $e->getTraceAsString()
+            ]);
+
             return back()->withErrors([
-                'error' => __('checkout.error', 'Failed to process order. Please try again.'),
+                'error' => __('checkout.error'),
             ]);
         }
     }

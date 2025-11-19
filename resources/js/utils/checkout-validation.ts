@@ -35,8 +35,9 @@ export class CheckoutValidator {
         this.t = translationFunction;
     }
 
-    // Email validation
+    // Email validation - requires proper email format with TLD
     private isValidEmail(email: string): boolean {
+        // Requires @ symbol and at least one dot after @
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return emailRegex.test(email);
     }

@@ -19,12 +19,12 @@ class OrderController extends Controller
             ->orderBy('created_at', 'desc');
 
         // Filter by status
-        if ($request->filled('status')) {
+        if ($request->filled('status') && $request->status !== 'all') {
             $query->where('status', $request->status);
         }
 
         // Filter by payment status
-        if ($request->filled('payment_status')) {
+        if ($request->filled('payment_status') && $request->payment_status !== 'all') {
             $query->where('payment_status', $request->payment_status);
         }
 
@@ -73,10 +73,10 @@ class OrderController extends Controller
                 'date_to' => $request->date_to,
             ],
             'statuses' => [
-                'pending' => __('order.status.pending'),
+                'confirmed' => __('order.status.confirmed'),
                 'processing' => __('order.status.processing'),
                 'shipped' => __('order.status.shipped'),
-                'delivered' => __('order.status.delivered'),
+                'completed' => __('order.status.completed'),
                 'cancelled' => __('order.status.cancelled'),
             ],
             'paymentStatuses' => [
@@ -167,10 +167,10 @@ class OrderController extends Controller
                 }),
             ],
             'statuses' => [
-                'pending' => __('order.status.pending'),
+                'confirmed' => __('order.status.confirmed'),
                 'processing' => __('order.status.processing'),
                 'shipped' => __('order.status.shipped'),
-                'delivered' => __('order.status.delivered'),
+                'completed' => __('order.status.completed'),
                 'cancelled' => __('order.status.cancelled'),
             ],
             'paymentStatuses' => [
@@ -188,7 +188,7 @@ class OrderController extends Controller
     public function updateStatus(Request $request, Order $order)
     {
         $validated = $request->validate([
-            'status' => 'required|in:pending,processing,shipped,delivered,cancelled',
+            'status' => 'required|in:confirmed,processing,shipped,completed,cancelled',
             'tracking_number' => 'nullable|string|max:255',
         ]);
 
@@ -206,8 +206,8 @@ class OrderController extends Controller
             ]);
         }
 
-        // Update delivered timestamp
-        if ($validated['status'] === 'delivered') {
+        // Update completed timestamp
+        if ($validated['status'] === 'completed') {
             $order->update([
                 'delivered_at' => now(),
             ]);

@@ -77,11 +77,10 @@ export interface CheckoutFormData {
 }
 
 export type OrderStatus =
-    | 'pending'
-    | 'processing'
     | 'confirmed'
+    | 'processing'
     | 'shipped'
-    | 'delivered'
+    | 'completed'
     | 'cancelled';
 
 export interface OrderTimeline {

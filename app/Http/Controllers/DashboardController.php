@@ -19,13 +19,13 @@ class DashboardController extends Controller
         }
 
         // Get all user orders with relationships
-        $orders = $user->orders()->with(['items.product', 'items.variant'])->get();
+        $orders = $user->orders()->with(['items.product.primaryImage', 'items.variant'])->get();
 
         // Calculate statistics
         $stats = [
             'totalOrders' => $orders->count(),
-            'pendingOrders' => $orders->whereIn('status', ['pending', 'processing'])->count(),
-            'completedOrders' => $orders->where('status', 'delivered')->count(),
+            'pendingOrders' => $orders->whereIn('status', ['confirmed', 'processing'])->count(),
+            'completedOrders' => $orders->where('status', 'completed')->count(),
             'totalSpent' => $orders->where('payment_status', 'paid')->sum('total'),
         ];
 

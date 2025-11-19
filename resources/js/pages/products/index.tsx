@@ -203,21 +203,30 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
         }
 
         // Filter by categories (include children and grandchildren)
+        // Use AND logic: product must match ALL selected category groups
         if (filters.categoryIds.length > 0) {
-            // Get all category IDs including descendants
-            const allCategoryIds = filters.categoryIds.flatMap(id => getAllDescendantIds(id));
-            filtered = filtered.filter(p =>
-                p.categoryIds.some(id => allCategoryIds.includes(id))
-            );
+            filtered = filtered.filter(p => {
+                // For each selected category, check if product is in that category or its descendants
+                return filters.categoryIds.every(selectedCategoryId => {
+                    const categoryIdsWithDescendants = getAllDescendantIds(selectedCategoryId);
+                    return p.categoryIds.some(productCategoryId =>
+                        categoryIdsWithDescendants.includes(productCategoryId)
+                    );
+                });
+            });
         }
 
         // Filter by brands (include children and grandchildren)
+        // Use AND logic: product must match ALL selected brand groups
         if (filters.brandIds.length > 0) {
-            // Get all brand IDs including descendants
-            const allBrandIds = filters.brandIds.flatMap(id => getAllBrandDescendantIds(id));
-            filtered = filtered.filter(p =>
-                p.brandId && allBrandIds.includes(p.brandId)
-            );
+            filtered = filtered.filter(p => {
+                if (!p.brandId) return false;
+                // For each selected brand, check if product brand is in that brand or its descendants
+                return filters.brandIds.every(selectedBrandId => {
+                    const brandIdsWithDescendants = getAllBrandDescendantIds(selectedBrandId);
+                    return brandIdsWithDescendants.includes(p.brandId);
+                });
+            });
         }
 
         // Filter by price range

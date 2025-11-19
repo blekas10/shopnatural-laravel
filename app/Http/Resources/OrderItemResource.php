@@ -37,7 +37,10 @@ class OrderItemResource extends JsonResource
                     'id' => $this->product->id,
                     'name' => $this->product->getTranslation('name', app()->getLocale()),
                     'slug' => $this->product->slug,
-                    'image' => $this->product->primaryImage?->url ?? asset('images/placeholder.jpg'),
+                    // Use variant image if available, otherwise use product primary image
+                    'image' => $this->variant?->image?->url
+                        ?? $this->product->primaryImage?->url
+                        ?? asset('images/placeholder.jpg'),
                 ] : null,
             ]),
 
@@ -47,6 +50,7 @@ class OrderItemResource extends JsonResource
                     'size' => $this->variant->size . 'ml',
                     'currentPrice' => (float) $this->variant->price,
                     'inStock' => $this->variant->inStock(),
+                    'image' => $this->variant->image?->url,
                 ] : null,
             ]),
         ];

@@ -14,8 +14,12 @@ class EmailVerificationController extends Controller
      */
     public function verify(EmailVerificationRequest $request)
     {
+        // Get locale from session
+        $locale = session('locale', app()->getLocale()) ?? 'en';
+        $dashboardRoute = $locale === 'lt' ? 'lt.dashboard' : 'dashboard';
+
         if ($request->user()->hasVerifiedEmail()) {
-            return redirect()->intended(route('dashboard'))
+            return redirect()->intended(route($dashboardRoute))
                 ->with('status', 'email-already-verified');
         }
 
@@ -24,7 +28,7 @@ class EmailVerificationController extends Controller
         }
 
         // Redirect to dashboard with success message
-        return redirect()->route('dashboard')
+        return redirect()->route($dashboardRoute)
             ->with('status', 'email-verified');
     }
 
@@ -36,6 +40,10 @@ class EmailVerificationController extends Controller
         if ($request->user()->hasVerifiedEmail()) {
             return back()->with('status', 'email-already-verified');
         }
+
+        // Get locale from session and set app locale
+        $locale = session('locale', 'en');
+        app()->setLocale($locale);
 
         $request->user()->sendEmailVerificationNotification();
 

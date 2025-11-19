@@ -27,6 +27,22 @@ class ProfileUpdateRequest extends FormRequest
                 'max:255',
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
+
+            'phone' => ['nullable', 'string', 'max:255', 'regex:/^[0-9+\-\s()]+$/'],
+
+            // Billing address
+            'billing_address' => ['nullable', 'string', 'max:255'],
+            'billing_city' => ['nullable', 'string', 'max:255'],
+            'billing_state' => ['nullable', 'string', 'max:255'],
+            'billing_postal_code' => ['nullable', 'string', 'max:255'],
+            'billing_country' => ['nullable', 'string', 'max:255'],
+
+            // Shipping address
+            'shipping_address' => ['nullable', 'string', 'max:255'],
+            'shipping_city' => ['nullable', 'string', 'max:255'],
+            'shipping_state' => ['nullable', 'string', 'max:255'],
+            'shipping_postal_code' => ['nullable', 'string', 'max:255'],
+            'shipping_country' => ['nullable', 'string', 'max:255'],
         ];
     }
 }

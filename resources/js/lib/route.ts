@@ -12,6 +12,8 @@ const routeMap: Record<string, Record<string, string>> = {
     'checkout.store': { en: 'checkout', lt: 'apmokejimas' },
     'orders.index': { en: 'orders', lt: 'uzsakymai' },
     'orders.show': { en: 'orders', lt: 'uzsakymai' },
+    'orders.invoice.download': { en: 'orders', lt: 'uzsakymai' },
+    'orders.invoice.view': { en: 'orders', lt: 'uzsakymai' },
     'order.confirmation': { en: 'order/confirmation', lt: 'uzsakymas/patvirtinimas' },
     'about': { en: 'about', lt: 'apie-mus' },
     'contact': { en: 'contact', lt: 'kontaktai' },
@@ -21,9 +23,11 @@ const routeMap: Record<string, Record<string, string>> = {
     'logout': { en: 'logout', lt: 'logout' },
     'password.email': { en: 'forgot-password', lt: 'forgot-password' },
     'password.update': { en: 'reset-password', lt: 'reset-password' },
-    // Dashboard
+    // User Dashboard & Settings
     'dashboard': { en: 'dashboard', lt: 'dashboard' },
     'profile.edit': { en: 'settings/profile', lt: 'settings/profile' },
+    'profile.update': { en: 'settings/profile', lt: 'settings/profile' },
+    'user-password.update': { en: 'settings/password', lt: 'settings/password' },
     // Admin routes
     'admin.categories.index': { en: 'admin/categories', lt: 'admin/categories' },
     'admin.categories.create': { en: 'admin/categories/create', lt: 'admin/categories/create' },
@@ -105,19 +109,19 @@ export function route(name: string, params: Record<string, any> = {}, locale: st
         path += `/${params.id}`;
     }
 
-    // Add /edit suffix for edit routes
-    if (name.endsWith('.edit')) {
+    // Add /edit suffix for edit routes (except profile and password settings)
+    if (name.endsWith('.edit') && !name.startsWith('profile') && !name.startsWith('user-password') && !name.startsWith('appearance') && !name.startsWith('two-factor')) {
         path += '/edit';
     }
 
-    // Add /invoice/download suffix for invoice download routes
+    // Add /invoice/download suffix for invoice download routes (localized)
     if (name.endsWith('.invoice.download')) {
-        path += '/invoice/download';
+        path += locale === 'lt' ? '/saskaita/atsisiusti' : '/invoice/download';
     }
 
-    // Add /invoice/view suffix for invoice view routes
+    // Add /invoice/view suffix for invoice view routes (localized)
     if (name.endsWith('.invoice.view')) {
-        path += '/invoice/view';
+        path += locale === 'lt' ? '/saskaita/perziureti' : '/invoice/view';
     }
 
     // Add /status suffix for status update routes
