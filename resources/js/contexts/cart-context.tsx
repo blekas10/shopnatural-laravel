@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useCallback, useEffect, useMemo, useState } from 'react';
+import { router } from '@inertiajs/react';
 import type { CartItem } from '@/types';
 import type { ProductListItem, ProductVariant } from '@/types/product';
 
@@ -65,6 +66,12 @@ export function CartProvider({ children }: CartProviderProps) {
         variant: ProductVariant | null,
         quantity: number = 1
     ) => {
+        if (!variant) {
+            console.error('Variant is required');
+            return;
+        }
+
+        // Update localStorage immediately for instant UI
         setItems((currentItems) => {
             const itemId = generateItemId(product.id, variant?.id || null);
             const existingItemIndex = currentItems.findIndex(item => item.id === itemId);
@@ -89,6 +96,17 @@ export function CartProvider({ children }: CartProviderProps) {
                 };
                 return [...currentItems, newItem];
             }
+        });
+
+        // Save to database in background (no need to wait)
+        router.post('/cart/add', {
+            product_id: product.id,
+            variant_id: variant.id,
+            quantity,
+        }, {
+            preserveState: true,
+            preserveScroll: true,
+            only: [],
         });
     }, [generateItemId]);
 

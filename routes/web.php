@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\BrandController as AdminBrandController;
 use App\Http\Controllers\Admin\ProductImageController as AdminProductImageController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Auth\EmailVerificationController;
+use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
@@ -29,6 +30,12 @@ Route::prefix('api')->group(function () {
     Route::get('venipak/pickup-points', [VenipakController::class, 'getPickupPoints'])->name('api.venipak.pickup-points');
     Route::post('venipak/clear-cache', [VenipakController::class, 'clearCache'])->middleware('auth')->name('api.venipak.clear-cache');
 });
+
+// Cart routes (accessible without locale prefix)
+Route::post('cart/add', [CartController::class, 'addItem'])->name('cart.add');
+Route::patch('cart/items/{item}', [CartController::class, 'updateItem'])->name('cart.update');
+Route::delete('cart/items/{item}', [CartController::class, 'removeItem'])->name('cart.remove');
+Route::delete('cart/clear', [CartController::class, 'clear'])->name('cart.clear');
 
 // English routes (default, no prefix)
 Route::group([], function () {
