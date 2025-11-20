@@ -15,7 +15,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { Fragment } from 'react';
-import { create, edit, destroy } from '@/routes/admin/categories';
+import { adminCategoriesCreate as create, adminCategoriesEdit as edit, adminCategoriesDestroy as destroy } from '@/routes';
 
 interface Category {
     id: number;

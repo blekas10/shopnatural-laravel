@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/select';
 import { ArrowLeft, Save, Globe } from 'lucide-react';
 import { FormEventHandler, useState } from 'react';
-import { index, store, update } from '@/routes/admin/categories';
+import { adminCategoriesIndex as index, adminCategoriesStore as store, adminCategoriesUpdate as update } from '@/routes';
 
 interface TranslatableField {
     en: string;

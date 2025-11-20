@@ -15,7 +15,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { Fragment } from 'react';
-import { create, edit, destroy } from '@/routes/admin/brands';
+import { adminBrandsCreate as create, adminBrandsEdit as edit, adminBrandsDestroy as destroy } from '@/routes';
 
 interface Brand {
     id: number;

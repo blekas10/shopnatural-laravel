@@ -16,7 +16,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, Save, Globe } from 'lucide-react';
 import { FormEventHandler, useState } from 'react';
-import { index, store, update } from '@/routes/admin/brands';
+import { adminBrandsIndex as index, adminBrandsStore as store, adminBrandsUpdate as update } from '@/routes';
 
 interface TranslatableField {
     en: string;
