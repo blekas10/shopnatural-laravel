@@ -15,6 +15,7 @@ use App\Http\Controllers\PayseraController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\VenipakController;
+use App\Http\Controllers\WishlistController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -38,6 +39,11 @@ Route::prefix('api')->group(function () {
     Route::get('venipak/pickup-points', [VenipakController::class, 'getPickupPoints'])->name('api.venipak.pickup-points');
     Route::post('venipak/clear-cache', [VenipakController::class, 'clearCache'])->middleware('auth')->name('api.venipak.clear-cache');
     Route::get('cart/status', [\App\Http\Controllers\Api\CartStatusController::class, 'status'])->name('api.cart.status');
+
+    // Wishlist routes
+    Route::get('wishlist/items', [\App\Http\Controllers\Api\WishlistController::class, 'items'])->name('api.wishlist.items');
+    Route::post('wishlist/add', [\App\Http\Controllers\Api\WishlistController::class, 'add'])->middleware('auth')->name('api.wishlist.add');
+    Route::post('wishlist/remove', [\App\Http\Controllers\Api\WishlistController::class, 'remove'])->middleware('auth')->name('api.wishlist.remove');
 });
 
 // Cart routes (accessible without locale prefix)
@@ -54,6 +60,7 @@ Route::group([], function () {
     Route::get('products', [ProductController::class, 'index'])->name('en.products.index');
     Route::get('products/{slug}', [ProductController::class, 'show'])->name('en.products.show');
     Route::get('cart', fn() => Inertia::render('cart'))->name('en.cart');
+    Route::get('wishlist', [WishlistController::class, 'index'])->name('en.wishlist');
 
     // Auth routes - redirect to home with modal (handled by Fortify for default locale)
     // The /login and /register routes are automatically handled by FortifyServiceProvider
@@ -88,6 +95,7 @@ Route::group(['prefix' => 'lt'], function () {
     Route::get('produktai', [ProductController::class, 'index'])->name('lt.products.index');
     Route::get('produktai/{slug}', [ProductController::class, 'show'])->name('lt.products.show');
     Route::get('krepselis', fn() => Inertia::render('cart'))->name('lt.cart');
+    Route::get('pageidavimu-sarasas', [WishlistController::class, 'index'])->name('lt.wishlist');
 
     // Auth routes (translated) - redirect to home with modal
     Route::get('prisijungti', function () {

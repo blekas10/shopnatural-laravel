@@ -43,6 +43,8 @@ export function useTranslation(): TranslationHook {
             'produktai': { en: 'products', lt: 'produktai' },
             'cart': { en: 'cart', lt: 'krepselis' },
             'krepselis': { en: 'cart', lt: 'krepselis' },
+            'wishlist': { en: 'wishlist', lt: 'pageidavimu-sarasas' },
+            'pageidavimu-sarasas': { en: 'wishlist', lt: 'pageidavimu-sarasas' },
             'checkout': { en: 'checkout', lt: 'apmokejimas' },
             'apmokejimas': { en: 'checkout', lt: 'apmokejimas' },
             'orders': { en: 'orders', lt: 'uzsakymai' },

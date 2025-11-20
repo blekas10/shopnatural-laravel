@@ -8,6 +8,7 @@ const routeMap: Record<string, Record<string, string>> = {
     'products.index': { en: 'products', lt: 'produktai' },
     'products.show': { en: 'products', lt: 'produktai' },
     'cart': { en: 'cart', lt: 'krepselis' },
+    'wishlist': { en: 'wishlist', lt: 'pageidavimu-sarasas' },
     'checkout': { en: 'checkout', lt: 'apmokejimas' },
     'checkout.store': { en: 'checkout', lt: 'apmokejimas' },
     'orders.index': { en: 'orders', lt: 'uzsakymai' },

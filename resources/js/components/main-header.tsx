@@ -23,11 +23,12 @@ import {
 } from '@/components/ui/sheet';
 import { UserMenuContent } from '@/components/user-menu-content';
 import { useCart } from '@/hooks/use-cart';
+import { useWishlist } from '@/contexts/wishlist-context';
 import { useTranslation } from '@/hooks/use-translation';
 import { cn } from '@/lib/utils';
 import { Link, usePage } from '@inertiajs/react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronDown, LogOut, Menu, ShoppingCart, User } from 'lucide-react';
+import { ChevronDown, Heart, LogOut, Menu, ShoppingCart, User } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 interface MainHeaderProps {
@@ -37,6 +38,7 @@ interface MainHeaderProps {
 export default function MainHeader({ className }: MainHeaderProps) {
     const { t, route } = useTranslation();
     const { itemCount } = useCart();
+    const { itemCount: wishlistCount } = useWishlist();
     const { auth } = usePage().props as any;
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [cartDrawerOpen, setCartDrawerOpen] = useState(false);
@@ -349,6 +351,27 @@ export default function MainHeader({ className }: MainHeaderProps) {
                                 </button>
                             )}
 
+                            {/* Desktop Wishlist Icon */}
+                            {auth?.user && wishlistCount > 0 && (
+                                <Link
+                                    href={route('wishlist')}
+                                    className="relative rounded-md p-2 transition-colors hover:bg-muted"
+                                    aria-label="Wishlist"
+                                >
+                                    <Heart className="size-6 text-foreground" />
+                                    <AnimatePresence>
+                                        <motion.span
+                                            initial={{ scale: 0 }}
+                                            animate={{ scale: 1 }}
+                                            exit={{ scale: 0 }}
+                                            className="absolute -top-1 -right-1 flex size-5 items-center justify-center rounded-full bg-gold text-xs font-bold text-white"
+                                        >
+                                            {wishlistCount}
+                                        </motion.span>
+                                    </AnimatePresence>
+                                </Link>
+                            )}
+
                             {/* Desktop Cart Icon */}
                             <button
                                 onClick={() => setCartDrawerOpen(true)}
@@ -374,6 +397,27 @@ export default function MainHeader({ className }: MainHeaderProps) {
                         {/* Mobile Actions */}
                         <div className="flex items-center gap-2 md:hidden">
                             <LocaleSwitcher />
+
+                            {/* Mobile Wishlist Icon */}
+                            {auth?.user && wishlistCount > 0 && (
+                                <Link
+                                    href={route('wishlist')}
+                                    className="relative rounded-md p-2 transition-colors hover:bg-muted"
+                                    aria-label="Wishlist"
+                                >
+                                    <Heart className="size-6 text-foreground" />
+                                    <AnimatePresence>
+                                        <motion.span
+                                            initial={{ scale: 0 }}
+                                            animate={{ scale: 1 }}
+                                            exit={{ scale: 0 }}
+                                            className="absolute -top-1 -right-1 flex size-5 items-center justify-center rounded-full bg-gold text-xs font-bold text-white"
+                                        >
+                                            {wishlistCount}
+                                        </motion.span>
+                                    </AnimatePresence>
+                                </Link>
+                            )}
 
                             {/* Mobile Cart Icon */}
                             <button

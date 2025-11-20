@@ -3,6 +3,7 @@ import MainHeader from '@/components/main-header';
 import Footer from '@/components/footer';
 import { useTranslation } from '@/hooks/use-translation';
 import { useCart } from '@/hooks/use-cart';
+import { useWishlist } from '@/contexts/wishlist-context';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, ShoppingCart, Check, X, Heart } from 'lucide-react';
 import { useState, useMemo } from 'react';
@@ -19,6 +20,7 @@ interface ProductShowProps {
 export default function ProductShow({ product, relatedProducts }: ProductShowProps) {
     const { t, route } = useTranslation();
     const { addItem } = useCart();
+    const { toggleItem, isInWishlist } = useWishlist();
     const [activeTab, setActiveTab] = useState<'description' | 'additional' | 'ingredients'>('description');
     const [isAdding, setIsAdding] = useState(false);
 
@@ -149,6 +151,17 @@ export default function ProductShow({ product, relatedProducts }: ProductShowPro
 
         setTimeout(() => setIsAdding(false), 500);
     };
+
+    // Handle wishlist toggle
+    const handleWishlistToggle = async () => {
+        if (selectedVariant) {
+            await toggleItem(product.id, selectedVariant.id, product.name);
+            // No toast - user sees visual feedback from heart icon
+        }
+    };
+
+    // Check if current variant is in wishlist
+    const inWishlist = selectedVariant ? isInWishlist(product.id, selectedVariant.id) : false;
 
     return (
         <>
@@ -425,9 +438,15 @@ export default function ProductShow({ product, relatedProducts }: ProductShowPro
                                 <Button
                                     size="icon"
                                     variant="outline"
-                                    className="h-14 w-14 rounded-lg border-2 border-border transition-all duration-300 hover:border-gold hover:text-gold cursor-pointer"
+                                    onClick={handleWishlistToggle}
+                                    className={cn(
+                                        "h-14 w-14 rounded-lg border-2 transition-all duration-300 cursor-pointer",
+                                        inWishlist
+                                            ? "border-gold bg-gold/10 text-gold hover:border-gold/60"
+                                            : "border-border hover:border-gold hover:text-gold"
+                                    )}
                                 >
-                                    <Heart className="size-5" />
+                                    <Heart className={cn("size-5", inWishlist && "fill-current")} />
                                 </Button>
 
                                 <Button
@@ -589,9 +608,15 @@ export default function ProductShow({ product, relatedProducts }: ProductShowPro
                         <div className="flex items-center gap-3">
                             {/* Wishlist Button */}
                             <button
-                                className="flex size-12 shrink-0 items-center justify-center rounded-lg border-2 border-border text-foreground transition-all duration-300 hover:border-gold hover:text-gold"
+                                onClick={handleWishlistToggle}
+                                className={cn(
+                                    "flex size-12 shrink-0 items-center justify-center rounded-lg border-2 transition-all duration-300",
+                                    inWishlist
+                                        ? "border-gold bg-gold/10 text-gold"
+                                        : "border-border text-foreground hover:border-gold hover:text-gold"
+                                )}
                             >
-                                <Heart className="size-5" />
+                                <Heart className={cn("size-5", inWishlist && "fill-current")} />
                             </button>
 
                             {/* Variant Selector - Mobile Compact */}
