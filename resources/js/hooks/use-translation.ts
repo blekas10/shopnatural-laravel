@@ -45,6 +45,8 @@ export function useTranslation(): TranslationHook {
             'krepselis': { en: 'cart', lt: 'krepselis' },
             'wishlist': { en: 'wishlist', lt: 'pageidavimu-sarasas' },
             'pageidavimu-sarasas': { en: 'wishlist', lt: 'pageidavimu-sarasas' },
+            'contact': { en: 'contact', lt: 'kontaktai' },
+            'kontaktai': { en: 'contact', lt: 'kontaktai' },
             'checkout': { en: 'checkout', lt: 'apmokejimas' },
             'apmokejimas': { en: 'checkout', lt: 'apmokejimas' },
             'orders': { en: 'orders', lt: 'uzsakymai' },

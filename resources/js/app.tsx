@@ -39,9 +39,9 @@ createInertiaApp({
                             position="top-right"
                             toastOptions={{
                                 style: {
-                                    background: 'hsl(var(--background))',
-                                    color: 'hsl(var(--foreground))',
-                                    border: '2px solid hsl(var(--border))',
+                                    background: 'white',
+                                    color: '#18181b',
+                                    border: '2px solid #e4e4e7',
                                     fontSize: '14px',
                                     fontWeight: '500',
                                     padding: '16px 20px',
@@ -49,7 +49,6 @@ createInertiaApp({
                                 },
                                 className: 'toast',
                             }}
-                            richColors
                             expand={false}
                             duration={4000}
                         />

@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OrderController;
@@ -44,6 +45,9 @@ Route::prefix('api')->group(function () {
     Route::get('wishlist/items', [\App\Http\Controllers\Api\WishlistController::class, 'items'])->name('api.wishlist.items');
     Route::post('wishlist/add', [\App\Http\Controllers\Api\WishlistController::class, 'add'])->middleware('auth')->name('api.wishlist.add');
     Route::post('wishlist/remove', [\App\Http\Controllers\Api\WishlistController::class, 'remove'])->middleware('auth')->name('api.wishlist.remove');
+
+    // Contact form route
+    Route::post('contact', [\App\Http\Controllers\Api\ContactController::class, 'send'])->name('api.contact.send');
 });
 
 // Cart routes (accessible without locale prefix)
@@ -61,6 +65,7 @@ Route::group([], function () {
     Route::get('products/{slug}', [ProductController::class, 'show'])->name('en.products.show');
     Route::get('cart', fn() => Inertia::render('cart'))->name('en.cart');
     Route::get('wishlist', [WishlistController::class, 'index'])->name('en.wishlist');
+    Route::get('contact', [ContactController::class, 'index'])->name('en.contact');
 
     // Auth routes - redirect to home with modal (handled by Fortify for default locale)
     // The /login and /register routes are automatically handled by FortifyServiceProvider
@@ -96,6 +101,7 @@ Route::group(['prefix' => 'lt'], function () {
     Route::get('produktai/{slug}', [ProductController::class, 'show'])->name('lt.products.show');
     Route::get('krepselis', fn() => Inertia::render('cart'))->name('lt.cart');
     Route::get('pageidavimu-sarasas', [WishlistController::class, 'index'])->name('lt.wishlist');
+    Route::get('kontaktai', [ContactController::class, 'index'])->name('lt.contact');
 
     // Auth routes (translated) - redirect to home with modal
     Route::get('prisijungti', function () {
