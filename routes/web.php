@@ -11,7 +11,9 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PayseraController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\VenipakController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -24,6 +26,12 @@ Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 've
 Route::post('/email/verification-notification', [EmailVerificationController::class, 'resend'])
     ->middleware(['auth', 'throttle:6,1'])
     ->name('verification.send');
+
+// Payment webhooks and callbacks (must be accessible without CSRF protection)
+Route::post('stripe/webhook', [StripeWebhookController::class, 'handle'])->name('stripe.webhook');
+Route::get('paysera/accept', [PayseraController::class, 'accept'])->name('paysera.accept');
+Route::get('paysera/cancel', [PayseraController::class, 'cancel'])->name('paysera.cancel');
+Route::post('paysera/callback', [PayseraController::class, 'callback'])->name('paysera.callback');
 
 // API routes for Venipak (accessible without locale prefix)
 Route::prefix('api')->group(function () {

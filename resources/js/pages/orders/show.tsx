@@ -221,7 +221,7 @@ export default function OrderShow({ order: orderData }: OrderShowProps) {
                                             {t('orders.payment_status', 'Payment')}
                                         </p>
                                         <p className="text-sm font-bold uppercase">
-                                            {order.isPaid ? t('orders.paid', 'Paid') : t('orders.pending', 'Pending')}
+                                            {t(`orders.payment.${order.paymentStatus}`, order.paymentStatus)}
                                         </p>
                                     </div>
                                 </div>

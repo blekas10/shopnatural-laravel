@@ -29,7 +29,15 @@ export function useTranslation(): TranslationHook {
         const currentPath = window.location.pathname;
         const segments = currentPath.split('/').filter(Boolean);
 
-        // Route translations map
+        // Remove current locale if present
+        if (availableLocales.includes(segments[0])) {
+            segments.shift();
+        }
+
+        // Check if this is an admin route - admin routes don't translate their segments
+        const isAdminRoute = segments[0] === 'admin';
+
+        // Route translations map (only for non-admin public routes)
         const routeMap: Record<string, Record<string, string>> = {
             'products': { en: 'products', lt: 'produktai' },
             'produktai': { en: 'products', lt: 'produktai' },
@@ -50,22 +58,18 @@ export function useTranslation(): TranslationHook {
             // Non-translatable routes (stay the same)
             'dashboard': { en: 'dashboard', lt: 'dashboard' },
             'settings': { en: 'settings', lt: 'settings' },
-            'admin': { en: 'admin', lt: 'admin' },
         };
 
-        // Remove current locale if present
-        if (availableLocales.includes(segments[0])) {
-            segments.shift();
-        }
-
-        // Translate route segments
-        const translatedSegments = segments.map((segment) => {
-            // Check if this segment is a translatable route
-            if (routeMap[segment]) {
-                return routeMap[segment][newLocale];
-            }
-            return segment; // Keep product slugs and other segments as-is
-        });
+        // Translate route segments (but not for admin routes)
+        const translatedSegments = isAdminRoute
+            ? segments // Keep admin routes as-is
+            : segments.map((segment) => {
+                // Check if this segment is a translatable route
+                if (routeMap[segment]) {
+                    return routeMap[segment][newLocale];
+                }
+                return segment; // Keep product slugs and other segments as-is
+            });
 
         // Build new path with locale prefix (skip for default 'en')
         let newPath;

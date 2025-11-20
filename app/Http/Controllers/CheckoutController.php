@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cart;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -48,14 +50,14 @@ class CheckoutController extends Controller
 
         $paymentMethods = [
             [
-                'id' => 'cash',
-                'name' => 'Cash on Delivery',
-                'description' => 'Pay with cash when you receive your order',
+                'id' => 'stripe',
+                'name' => 'Credit / Debit Card',
+                'description' => 'Pay securely with Stripe',
             ],
             [
-                'id' => 'card',
-                'name' => 'Credit / Debit Card',
-                'description' => 'Pay securely with your card',
+                'id' => 'paysera',
+                'name' => 'Paysera',
+                'description' => 'Pay with Paysera (Bank transfer, cards)',
             ],
         ];
 
@@ -94,12 +96,7 @@ class CheckoutController extends Controller
             'venipakPickupPoint.address' => 'nullable|string',
             'venipakPickupPoint.city' => 'nullable|string',
             'venipakPickupPoint.zip' => 'nullable|string',
-            'paymentMethod' => 'required|string',
-            'cardDetails' => 'nullable|array',
-            'cardDetails.cardNumber' => 'required_if:paymentMethod,card|nullable|string',
-            'cardDetails.expiryDate' => 'required_if:paymentMethod,card|nullable|string',
-            'cardDetails.cvv' => 'required_if:paymentMethod,card|nullable|string',
-            'cardDetails.cardholderName' => 'required_if:paymentMethod,card|nullable|string',
+            'paymentMethod' => 'required|string|in:stripe,paysera',
             'items' => 'required|array|min:1',
             'items.*.productId' => 'required|integer|exists:products,id',
             'items.*.variantId' => 'nullable|integer|exists:product_variants,id',
@@ -122,12 +119,13 @@ class CheckoutController extends Controller
                 ? $validated['shippingAddress']
                 : $validated['billingAddress'];
 
-            // Create the order
+            // Create the order with pending status (will be confirmed after payment)
             $order = Order::create([
                 'order_number' => 'ORD-' . strtoupper(Str::random(10)),
                 'user_id' => auth()->id(), // null for guests
-                'status' => 'confirmed',
+                'status' => 'pending',
                 'payment_status' => 'pending',
+                'payment_method' => $validated['paymentMethod'],
                 'subtotal' => $validated['subtotal'],
                 'tax' => $validated['tax'],
                 'shipping_cost' => $validated['shipping'],
@@ -197,18 +195,120 @@ class CheckoutController extends Controller
 
             DB::commit();
 
-            // Send order confirmation emails to customer and admin
-            $order->sendOrderConfirmationEmails();
+            // Log before clearing cart
+            \Log::info('Order created successfully, attempting to clear cart', [
+                'order_id' => $order->id,
+                'order_number' => $order->order_number,
+                'user_id' => auth()->id(),
+                'session_id' => Session::getId(),
+            ]);
+
+            // Clear cart after order is successfully created
+            $this->clearCart();
+
+            \Log::info('Cart cleared after order creation', [
+                'order_id' => $order->id,
+            ]);
 
             // For guest orders, store the email in session to allow confirmation page access
             if (!auth()->check()) {
                 $request->session()->put('guest_order_email', $validated['contact']['email']);
             }
 
-            // Clear cart (will be handled by frontend)
-            // Redirect to order confirmation page with locale
             $locale = app()->getLocale();
-            return redirect()->route($locale . '.order.confirmation', ['orderNumber' => $order->order_number]);
+            $paymentMethod = $validated['paymentMethod'];
+
+            // Handle payment based on selected method
+            if ($paymentMethod === 'stripe') {
+                // Create Stripe Checkout Session
+                \Stripe\Stripe::setApiKey(config('stripe.secret'));
+
+                $lineItems = $order->items->map(function ($item) {
+                    return [
+                        'price_data' => [
+                            'currency' => config('stripe.currency'),
+                            'product_data' => [
+                                'name' => $item->product_name,
+                                'description' => $item->variant_size,
+                            ],
+                            'unit_amount' => (int)($item->unit_price * 100), // Convert to cents
+                        ],
+                        'quantity' => $item->quantity,
+                    ];
+                })->toArray();
+
+                // Add shipping as a line item if applicable
+                if ($order->shipping_cost > 0) {
+                    $lineItems[] = [
+                        'price_data' => [
+                            'currency' => config('stripe.currency'),
+                            'product_data' => [
+                                'name' => __('checkout.shipping'),
+                                'description' => ucfirst(str_replace('_', ' ', $order->shipping_method)),
+                            ],
+                            'unit_amount' => (int)($order->shipping_cost * 100),
+                        ],
+                        'quantity' => 1,
+                    ];
+                }
+
+                $session = \Stripe\Checkout\Session::create([
+                    'line_items' => $lineItems,
+                    'mode' => 'payment',
+                    'success_url' => route($locale . '.order.confirmation', ['orderNumber' => $order->order_number]),
+                    'cancel_url' => route($locale . '.checkout'),
+                    'customer_email' => $order->customer_email,
+                    'locale' => $locale, // Set Stripe interface language based on site locale
+                    'metadata' => [
+                        'order_number' => $order->order_number,
+                        'order_id' => $order->id,
+                    ],
+                ]);
+
+                // Store session ID for reference
+                $order->update(['payment_intent_id' => $session->id]);
+
+                // Redirect to Stripe Checkout (external redirect for Inertia)
+                return \Inertia\Inertia::location($session->url);
+            } elseif ($paymentMethod === 'paysera') {
+                // Create Paysera payment request
+                $payseraData = [
+                    'projectid' => config('paysera.project_id'),
+                    'sign_password' => config('paysera.sign_password'),
+                    'orderid' => $order->order_number,
+                    'amount' => (int)($order->total * 100), // Convert to cents
+                    'currency' => config('paysera.currency'),
+                    'country' => 'LT',
+                    'accepturl' => route('paysera.accept'),
+                    'cancelurl' => route('paysera.cancel'),
+                    'callbackurl' => route('paysera.callback'),
+                    'test' => config('paysera.test_mode') ? '1' : '0',
+                    'p_email' => $order->customer_email,
+                    'p_firstname' => $order->shipping_first_name,
+                    'p_lastname' => $order->shipping_last_name,
+                ];
+
+                try {
+                    // Build signed request data
+                    $requestData = \WebToPay::buildRequest($payseraData);
+
+                    // Get payment URL
+                    $paymentUrl = \WebToPay::getPaymentUrl();
+
+                    // Build full URL with query parameters
+                    $fullUrl = $paymentUrl . '?' . http_build_query($requestData);
+
+                    // Redirect to Paysera payment page
+                    return \Inertia\Inertia::location($fullUrl);
+                } catch (\WebToPayException $e) {
+                    DB::rollBack();
+                    \Log::error('Paysera payment creation failed: ' . $e->getMessage());
+
+                    return back()->withErrors([
+                        'error' => __('checkout.payment_error'),
+                    ]);
+                }
+            }
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -222,6 +322,73 @@ class CheckoutController extends Controller
             return back()->withErrors([
                 'error' => __('checkout.error'),
             ]);
+        }
+    }
+
+    /**
+     * Clear cart for current user/session
+     */
+    protected function clearCart(): void
+    {
+        $user = auth()->user();
+
+        if ($user) {
+            // Clear cart for authenticated user
+            \Log::info('Clearing cart for authenticated user', [
+                'user_id' => $user->id,
+            ]);
+
+            $cart = Cart::where('user_id', $user->id)->first();
+
+            if ($cart) {
+                $itemCount = $cart->items()->count();
+                \Log::info('Cart found for user', [
+                    'cart_id' => $cart->id,
+                    'items_count' => $itemCount,
+                ]);
+
+                $deletedCount = $cart->items()->delete();
+
+                \Log::info('Cart items deleted for user', [
+                    'cart_id' => $cart->id,
+                    'deleted_count' => $deletedCount,
+                    'remaining_items' => $cart->items()->count(),
+                ]);
+            } else {
+                \Log::warning('No cart found for authenticated user', [
+                    'user_id' => $user->id,
+                ]);
+            }
+        } else {
+            // Clear cart for guest session
+            $sessionId = Session::getId();
+
+            \Log::info('Clearing cart for guest session', [
+                'session_id' => $sessionId,
+            ]);
+
+            $cart = Cart::where('session_id', $sessionId)->first();
+
+            if ($cart) {
+                $itemCount = $cart->items()->count();
+                \Log::info('Cart found for guest', [
+                    'cart_id' => $cart->id,
+                    'session_id' => $sessionId,
+                    'items_count' => $itemCount,
+                ]);
+
+                $deletedCount = $cart->items()->delete();
+
+                \Log::info('Cart items deleted for guest', [
+                    'cart_id' => $cart->id,
+                    'deleted_count' => $deletedCount,
+                    'remaining_items' => $cart->items()->count(),
+                ]);
+            } else {
+                \Log::warning('No cart found for guest session', [
+                    'session_id' => $sessionId,
+                ]);
+            }
         }
     }
 }

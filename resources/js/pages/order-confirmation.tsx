@@ -1,28 +1,90 @@
-import { Head, Link } from '@inertiajs/react';
+import Footer from '@/components/footer';
+import MainHeader from '@/components/main-header';
+import { OrderStatusBadge } from '@/components/order-status-badge';
+import { Button } from '@/components/ui/button';
+import { useCart } from '@/hooks/use-cart';
+import { useTranslation } from '@/hooks/use-translation';
+import { cn } from '@/lib/utils';
+import type { SharedData } from '@/types';
+import type { OrderConfirmationProps } from '@/types/checkout';
+import { Head, Link, usePage } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import {
-    CheckCircle2,
-    Package,
-    Mail,
-    Download,
-    Copy,
     Check,
+    CheckCircle2,
+    Clock,
+    Copy,
+    Download,
+    Mail,
+    Package,
+    ShoppingBag,
 } from 'lucide-react';
-import { useState } from 'react';
-import MainHeader from '@/components/main-header';
-import Footer from '@/components/footer';
-import { useTranslation } from '@/hooks/use-translation';
-import { Button } from '@/components/ui/button';
-import { OrderStatusBadge } from '@/components/order-status-badge';
-import type { OrderConfirmationProps } from '@/types/checkout';
-import { cn } from '@/lib/utils';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
-export default function OrderConfirmation({
-    order,
-}: OrderConfirmationProps) {
+export default function OrderConfirmation({ order }: OrderConfirmationProps) {
     const { t, route } = useTranslation();
+    const { clearCart } = useCart();
+    const { auth } = usePage<SharedData>().props;
     const [copied, setCopied] = useState(false);
+
+    // Clear cart when order confirmation page loads (after successful payment)
+    useEffect(() => {
+        // Only clear once per order
+        const cleared = sessionStorage.getItem(
+            `cart_cleared_${order.orderNumber}`,
+        );
+        if (!cleared) {
+            console.log('Clearing cart for order:', order.orderNumber);
+            clearCart();
+            sessionStorage.setItem(`cart_cleared_${order.orderNumber}`, 'true');
+        }
+    }, [order.orderNumber, clearCart]);
+
+    // Determine icon and colors based on order status
+    const getStatusDisplay = () => {
+        switch (order.status) {
+            case 'pending':
+                return {
+                    icon: Clock,
+                    bgColor: 'bg-yellow-100 dark:bg-yellow-950',
+                    iconColor: 'text-yellow-600 dark:text-yellow-400',
+                    title: t('order.pending_payment', 'Awaiting Payment'),
+                    message: t(
+                        'order.pending_message',
+                        'Your order will be confirmed once payment is received.',
+                    ),
+                };
+            case 'confirmed':
+            case 'processing':
+            case 'shipped':
+            case 'completed':
+                return {
+                    icon: CheckCircle2,
+                    bgColor: 'bg-teal-100 dark:bg-teal-950',
+                    iconColor: 'text-teal-600 dark:text-teal-400',
+                    title: t('order.thank_you', 'Thank You For Your Order!'),
+                    message: t(
+                        'order.confirmation_sent',
+                        'A confirmation email has been sent to',
+                    ),
+                };
+            default:
+                return {
+                    icon: CheckCircle2,
+                    bgColor: 'bg-teal-100 dark:bg-teal-950',
+                    iconColor: 'text-teal-600 dark:text-teal-400',
+                    title: t('order.thank_you', 'Thank You For Your Order!'),
+                    message: t(
+                        'order.confirmation_sent',
+                        'A confirmation email has been sent to',
+                    ),
+                };
+        }
+    };
+
+    const statusDisplay = getStatusDisplay();
+    const StatusIcon = statusDisplay.icon;
 
     const copyOrderNumber = () => {
         navigator.clipboard.writeText(order.orderNumber);
@@ -33,9 +95,7 @@ export default function OrderConfirmation({
 
     return (
         <>
-            <Head
-                title={t('order.confirmation_title', 'Order Confirmed')}
-            />
+            <Head title={t('order.confirmation_title', 'Order Confirmed')} />
 
             <div className="min-h-screen bg-background">
                 <MainHeader />
@@ -60,14 +120,22 @@ export default function OrderConfirmation({
                                 stiffness: 200,
                                 damping: 15,
                             }}
-                            className="mb-6 flex size-24 items-center justify-center rounded-full bg-teal-100 dark:bg-teal-950"
+                            className={cn(
+                                'mb-6 flex size-24 items-center justify-center rounded-full',
+                                statusDisplay.bgColor,
+                            )}
                         >
                             <motion.div
                                 initial={{ pathLength: 0 }}
                                 animate={{ pathLength: 1 }}
                                 transition={{ delay: 0.4, duration: 0.6 }}
                             >
-                                <CheckCircle2 className="size-14 text-teal-600 dark:text-teal-400" />
+                                <StatusIcon
+                                    className={cn(
+                                        'size-14',
+                                        statusDisplay.iconColor,
+                                    )}
+                                />
                             </motion.div>
                         </motion.div>
 
@@ -75,9 +143,9 @@ export default function OrderConfirmation({
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.3 }}
-                            className="mb-3 text-3xl font-bold uppercase tracking-wide md:text-4xl"
+                            className="mb-3 text-3xl font-bold tracking-wide uppercase md:text-4xl"
                         >
-                            {t('order.thank_you', 'Thank You For Your Order!')}
+                            {statusDisplay.title}
                         </motion.h1>
 
                         <motion.p
@@ -86,13 +154,15 @@ export default function OrderConfirmation({
                             transition={{ delay: 0.4 }}
                             className="mb-8 text-lg text-muted-foreground"
                         >
-                            {t(
-                                'order.confirmation_sent',
-                                'A confirmation email has been sent to',
-                            )}{' '}
-                            <span className="font-medium text-foreground">
-                                {order.contact.email}
-                            </span>
+                            {statusDisplay.message}
+                            {order.status !== 'pending' && (
+                                <>
+                                    {' '}
+                                    <span className="font-medium text-foreground">
+                                        {order.contact.email}
+                                    </span>
+                                </>
+                            )}
                         </motion.p>
 
                         {/* Order Number */}
@@ -102,7 +172,7 @@ export default function OrderConfirmation({
                             transition={{ delay: 0.5 }}
                             className="rounded-2xl border-2 border-gold/30 bg-gold/5 p-6"
                         >
-                            <p className="mb-2 text-sm font-medium uppercase tracking-wide text-muted-foreground">
+                            <p className="mb-2 text-sm font-medium tracking-wide text-muted-foreground uppercase">
                                 {t('order.order_number', 'Order Number')}
                             </p>
                             <div className="flex items-center gap-3">
@@ -135,8 +205,11 @@ export default function OrderConfirmation({
                                 className="rounded-2xl border-2 border-border bg-background p-6"
                             >
                                 <div className="mb-6 flex items-center justify-between">
-                                    <h2 className="text-xl font-bold uppercase tracking-wide">
-                                        {t('order.order_summary', 'Order Summary')}
+                                    <h2 className="text-xl font-bold tracking-wide uppercase">
+                                        {t(
+                                            'order.order_summary',
+                                            'Order Summary',
+                                        )}
                                     </h2>
                                     <OrderStatusBadge status={order.status} />
                                 </div>
@@ -155,23 +228,34 @@ export default function OrderConfirmation({
                                             >
                                                 <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-border bg-muted">
                                                     <img
-                                                        src={item.variant?.image || item.product.image}
+                                                        src={
+                                                            item.variant
+                                                                ?.image ||
+                                                            item.product.image
+                                                        }
                                                         alt={item.product.name}
                                                         className="h-full w-full object-cover"
                                                     />
                                                 </div>
                                                 <div className="flex flex-1 items-start justify-between">
                                                     <div>
-                                                        <p className="font-bold uppercase tracking-wide text-foreground">
+                                                        <p className="font-bold tracking-wide text-foreground uppercase">
                                                             {item.product.name}
                                                         </p>
                                                         {item.variant && (
                                                             <p className="text-sm text-muted-foreground">
-                                                                {item.variant.size}
+                                                                {
+                                                                    item.variant
+                                                                        .size
+                                                                }
                                                             </p>
                                                         )}
                                                         <p className="mt-1 text-sm text-muted-foreground">
-                                                            {t('order.quantity', 'Qty')}: {item.quantity}
+                                                            {t(
+                                                                'order.quantity',
+                                                                'Qty',
+                                                            )}
+                                                            : {item.quantity}
                                                         </p>
                                                     </div>
                                                     <p className="font-bold text-gold">
@@ -206,7 +290,10 @@ export default function OrderConfirmation({
                                     {order.discount > 0 && (
                                         <div className="flex items-center justify-between text-sm">
                                             <span className="text-teal-600 dark:text-teal-400">
-                                                {t('order.discount', 'Discount')}
+                                                {t(
+                                                    'order.discount',
+                                                    'Discount',
+                                                )}
                                             </span>
                                             <span className="font-medium text-teal-600 dark:text-teal-400">
                                                 -€{order.discount.toFixed(2)}
@@ -233,17 +320,27 @@ export default function OrderConfirmation({
                             >
                                 {/* Shipping Address */}
                                 <div className="rounded-2xl border-2 border-border bg-background p-6">
-                                    <h3 className="mb-4 flex items-center gap-2 text-lg font-bold uppercase tracking-wide">
+                                    <h3 className="mb-4 flex items-center gap-2 text-lg font-bold tracking-wide uppercase">
                                         <Package className="size-5 text-gold" />
-                                        {t('order.shipping_address', 'Shipping Address')}
+                                        {t(
+                                            'order.shipping_address',
+                                            'Shipping Address',
+                                        )}
                                     </h3>
                                     <div className="space-y-1 text-sm text-muted-foreground">
                                         <p className="font-medium text-foreground">
                                             {order.shippingAddress.fullName}
                                         </p>
-                                        <p>{order.shippingAddress.addressLine1}</p>
+                                        <p>
+                                            {order.shippingAddress.addressLine1}
+                                        </p>
                                         {order.shippingAddress.addressLine2 && (
-                                            <p>{order.shippingAddress.addressLine2}</p>
+                                            <p>
+                                                {
+                                                    order.shippingAddress
+                                                        .addressLine2
+                                                }
+                                            </p>
                                         )}
                                         <p>
                                             {order.shippingAddress.city},{' '}
@@ -255,13 +352,16 @@ export default function OrderConfirmation({
 
                                 {/* Payment Method */}
                                 <div className="rounded-2xl border-2 border-border bg-background p-6">
-                                    <h3 className="mb-4 flex items-center gap-2 text-lg font-bold uppercase tracking-wide">
+                                    <h3 className="mb-4 flex items-center gap-2 text-lg font-bold tracking-wide uppercase">
                                         <Mail className="size-5 text-gold" />
-                                        {t('order.contact_payment', 'Contact & Payment')}
+                                        {t(
+                                            'order.contact_payment',
+                                            'Contact & Payment',
+                                        )}
                                     </h3>
                                     <div className="space-y-3 text-sm">
                                         <div>
-                                            <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                                            <p className="text-xs tracking-wide text-muted-foreground uppercase">
                                                 {t('order.email', 'Email')}
                                             </p>
                                             <p className="font-medium text-foreground">
@@ -270,7 +370,7 @@ export default function OrderConfirmation({
                                         </div>
                                         {order.contact.phone && (
                                             <div>
-                                                <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                                                <p className="text-xs tracking-wide text-muted-foreground uppercase">
                                                     {t('order.phone', 'Phone')}
                                                 </p>
                                                 <p className="font-medium text-foreground">
@@ -279,8 +379,11 @@ export default function OrderConfirmation({
                                             </div>
                                         )}
                                         <div>
-                                            <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                                                {t('order.payment_method', 'Payment Method')}
+                                            <p className="text-xs tracking-wide text-muted-foreground uppercase">
+                                                {t(
+                                                    'order.payment_method',
+                                                    'Payment Method',
+                                                )}
                                             </p>
                                             <p className="font-medium text-foreground">
                                                 {order.paymentMethod.name}
@@ -302,14 +405,21 @@ export default function OrderConfirmation({
                                 {/* Estimated Delivery */}
                                 {order.estimatedDelivery && (
                                     <div className="rounded-2xl border-2 border-border bg-background p-6">
-                                        <h3 className="mb-3 text-sm font-bold uppercase tracking-wide">
-                                            {t('order.estimated_delivery', 'Estimated Delivery')}
+                                        <h3 className="mb-3 text-sm font-bold tracking-wide uppercase">
+                                            {t(
+                                                'order.estimated_delivery',
+                                                'Estimated Delivery',
+                                            )}
                                         </h3>
                                         <p className="text-2xl font-bold text-gold">
                                             {order.estimatedDelivery}
                                         </p>
                                         <p className="mt-2 text-sm text-muted-foreground">
-                                            {t('order.shipping_method', 'Shipping Method')}:{' '}
+                                            {t(
+                                                'order.shipping_method',
+                                                'Shipping Method',
+                                            )}
+                                            :{' '}
                                             <span className="font-medium text-foreground">
                                                 {order.shippingMethod.name}
                                             </span>
@@ -319,26 +429,61 @@ export default function OrderConfirmation({
 
                                 {/* Action Buttons */}
                                 <div className="space-y-3">
-                                    <a
-                                        href={route('orders.invoice.download', { orderNumber: order.orderNumber })}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="w-full"
-                                    >
-                                        <Button className="w-full bg-gold text-white hover:bg-gold/90">
-                                            <Download className="mr-2 size-4" />
-                                            {t('order.download_invoice', 'Download Invoice')}
-                                        </Button>
-                                    </a>
-
-                                    <Link href={route('products.index')}>
-                                        <Button
-                                            variant="outline"
-                                            className="w-full border-2"
+                                    <div>
+                                        <a
+                                            href={route(
+                                                'orders.invoice.download',
+                                                {
+                                                    orderNumber:
+                                                        order.orderNumber,
+                                                },
+                                            )}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="w-full"
                                         >
-                                            {t('order.continue_shopping', 'Continue Shopping')}
-                                        </Button>
-                                    </Link>
+                                            <Button className="w-full bg-gold text-white hover:bg-gold/90">
+                                                <Download className="mr-2 size-4" />
+                                                {t(
+                                                    'order.download_invoice',
+                                                    'Download Invoice',
+                                                )}
+                                            </Button>
+                                        </a>
+                                    </div>
+                                    <div>
+                                        <Link
+                                            href={
+                                                auth?.user
+                                                    ? route('orders.index')
+                                                    : route('register')
+                                            }
+                                        >
+                                            <Button
+                                                variant="outline"
+                                                className="w-full border-2"
+                                            >
+                                                <ShoppingBag className="mr-2 size-4" />
+                                                {t(
+                                                    'order.my_orders',
+                                                    'My Orders',
+                                                )}
+                                            </Button>
+                                        </Link>
+                                    </div>
+                                    <div>
+                                        <Link href={route('products.index')}>
+                                            <Button
+                                                variant="outline"
+                                                className="w-full border-2"
+                                            >
+                                                {t(
+                                                    'order.continue_shopping',
+                                                    'Continue Shopping',
+                                                )}
+                                            </Button>
+                                        </Link>
+                                    </div>
                                 </div>
 
                                 {/* Help Section */}
@@ -349,7 +494,10 @@ export default function OrderConfirmation({
                                             href="/contact"
                                             className="font-medium text-gold hover:underline"
                                         >
-                                            {t('order.contact_us', 'Contact us')}
+                                            {t(
+                                                'order.contact_us',
+                                                'Contact us',
+                                            )}
                                         </Link>
                                     </p>
                                 </div>

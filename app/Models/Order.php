@@ -17,6 +17,8 @@ class Order extends Model
         'user_id',
         'status',
         'payment_status',
+        'payment_method',
+        'payment_intent_id',
         'subtotal',
         'tax',
         'shipping_cost',

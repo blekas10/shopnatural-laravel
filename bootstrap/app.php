@@ -17,6 +17,11 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
 
+        $middleware->validateCsrfTokens(except: [
+            'stripe/webhook',
+            'paysera/callback',
+        ]);
+
         $middleware->web(append: [
             SetLocale::class,
             HandleAppearance::class,

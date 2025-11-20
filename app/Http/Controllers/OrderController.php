@@ -140,10 +140,10 @@ class OrderController extends Controller
                     'country' => $order->billing_country,
                 ],
                 'shippingMethod' => [
-                    'name' => 'Standard Shipping', // You could store this in the order
+                    'name' => $this->getShippingMethodName($order->shipping_method),
                 ],
                 'paymentMethod' => [
-                    'name' => 'Cash on Delivery', // You could store this in the order
+                    'name' => $this->getPaymentMethodName($order->payment_method),
                 ],
                 'estimatedDelivery' => null,
                 'createdAt' => $order->created_at->toISOString(),
@@ -199,5 +199,33 @@ class OrderController extends Controller
         ]);
 
         return $pdf->stream('invoice-' . $order->order_number . '.pdf');
+    }
+
+    /**
+     * Get formatted payment method name
+     */
+    private function getPaymentMethodName(?string $paymentMethod): string
+    {
+        return match($paymentMethod) {
+            'stripe' => __('Stripe (Credit/Debit Card)'),
+            'paysera' => __('Paysera'),
+            default => __('N/A'),
+        };
+    }
+
+    /**
+     * Get formatted shipping method name
+     */
+    private function getShippingMethodName(?string $shippingMethod): string
+    {
+        return match($shippingMethod) {
+            'pickup' => __('Pick Up'),
+            'standard' => __('Standard Shipping'),
+            'express' => __('Express Shipping'),
+            'venipak_courier' => __('Venipak Courier'),
+            'venipak_pickup' => __('Venipak Pickup Location'),
+            'courier' => __('Courier Shipping'),
+            default => __('N/A'),
+        };
     }
 }

@@ -16,6 +16,10 @@ interface OrderStatusBadgeProps {
 }
 
 const statusConfig = {
+    pending: {
+        icon: Clock,
+        className: 'bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-950 dark:text-yellow-200',
+    },
     confirmed: {
         icon: CheckCircle2,
         className: 'bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-950 dark:text-blue-200',

@@ -355,6 +355,10 @@ export default function Checkout({
             return;
         }
 
+        // Clear cart from localStorage BEFORE submitting (will redirect to payment)
+        console.log('Clearing cart before checkout submission');
+        localStorage.removeItem('shop-natural-cart');
+
         const checkoutData: CheckoutFormData = {
             contact,
             shippingAddress,
@@ -384,6 +388,8 @@ export default function Checkout({
         router.post(route('checkout.store'), checkoutData, {
             preserveScroll: true,
             onError: (errors) => {
+                // If checkout fails, restore the cart
+                console.log('Checkout failed - cart was already cleared but form failed');
                 const firstError = Object.values(errors)[0];
                 if (firstError) {
                     toast.error(firstError as string);
