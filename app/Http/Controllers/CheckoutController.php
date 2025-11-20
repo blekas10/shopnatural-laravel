@@ -2,14 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Cart;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -195,21 +193,6 @@ class CheckoutController extends Controller
 
             DB::commit();
 
-            // Log before clearing cart
-            \Log::info('Order created successfully, attempting to clear cart', [
-                'order_id' => $order->id,
-                'order_number' => $order->order_number,
-                'user_id' => auth()->id(),
-                'session_id' => Session::getId(),
-            ]);
-
-            // Clear cart after order is successfully created
-            $this->clearCart();
-
-            \Log::info('Cart cleared after order creation', [
-                'order_id' => $order->id,
-            ]);
-
             // For guest orders, store the email in session to allow confirmation page access
             if (!auth()->check()) {
                 $request->session()->put('guest_order_email', $validated['contact']['email']);
@@ -322,73 +305,6 @@ class CheckoutController extends Controller
             return back()->withErrors([
                 'error' => __('checkout.error'),
             ]);
-        }
-    }
-
-    /**
-     * Clear cart for current user/session
-     */
-    protected function clearCart(): void
-    {
-        $user = auth()->user();
-
-        if ($user) {
-            // Clear cart for authenticated user
-            \Log::info('Clearing cart for authenticated user', [
-                'user_id' => $user->id,
-            ]);
-
-            $cart = Cart::where('user_id', $user->id)->first();
-
-            if ($cart) {
-                $itemCount = $cart->items()->count();
-                \Log::info('Cart found for user', [
-                    'cart_id' => $cart->id,
-                    'items_count' => $itemCount,
-                ]);
-
-                $deletedCount = $cart->items()->delete();
-
-                \Log::info('Cart items deleted for user', [
-                    'cart_id' => $cart->id,
-                    'deleted_count' => $deletedCount,
-                    'remaining_items' => $cart->items()->count(),
-                ]);
-            } else {
-                \Log::warning('No cart found for authenticated user', [
-                    'user_id' => $user->id,
-                ]);
-            }
-        } else {
-            // Clear cart for guest session
-            $sessionId = Session::getId();
-
-            \Log::info('Clearing cart for guest session', [
-                'session_id' => $sessionId,
-            ]);
-
-            $cart = Cart::where('session_id', $sessionId)->first();
-
-            if ($cart) {
-                $itemCount = $cart->items()->count();
-                \Log::info('Cart found for guest', [
-                    'cart_id' => $cart->id,
-                    'session_id' => $sessionId,
-                    'items_count' => $itemCount,
-                ]);
-
-                $deletedCount = $cart->items()->delete();
-
-                \Log::info('Cart items deleted for guest', [
-                    'cart_id' => $cart->id,
-                    'deleted_count' => $deletedCount,
-                    'remaining_items' => $cart->items()->count(),
-                ]);
-            } else {
-                \Log::warning('No cart found for guest session', [
-                    'session_id' => $sessionId,
-                ]);
-            }
         }
     }
 }

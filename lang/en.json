@@ -542,6 +542,7 @@
     "venipak.please_select": "Please select a Venipak pickup point",
     "checkout.please_select_shipping": "Please select a delivery method",
     "checkout.please_accept_terms": "Please accept the terms and conditions",
+    "checkout.data_restored": "Your checkout information has been restored",
     "sidebar.orders": "Orders",
     "sidebar.manage_orders": "Manage Orders",
     "orders.title": "Orders",

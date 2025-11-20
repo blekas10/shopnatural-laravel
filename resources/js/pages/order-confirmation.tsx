@@ -22,13 +22,15 @@ import {
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
+const CHECKOUT_DATA_KEY = 'shop-natural-checkout-data';
+
 export default function OrderConfirmation({ order }: OrderConfirmationProps) {
     const { t, route } = useTranslation();
     const { clearCart } = useCart();
     const { auth } = usePage<SharedData>().props;
     const [copied, setCopied] = useState(false);
 
-    // Clear cart when order confirmation page loads (after successful payment)
+    // Clear cart and saved checkout data when order confirmation page loads (after successful payment)
     useEffect(() => {
         // Only clear once per order
         const cleared = sessionStorage.getItem(
@@ -37,6 +39,11 @@ export default function OrderConfirmation({ order }: OrderConfirmationProps) {
         if (!cleared) {
             console.log('Clearing cart for order:', order.orderNumber);
             clearCart();
+
+            // Also clear saved checkout data
+            localStorage.removeItem(CHECKOUT_DATA_KEY);
+            console.log('Cleared saved checkout data');
+
             sessionStorage.setItem(`cart_cleared_${order.orderNumber}`, 'true');
         }
     }, [order.orderNumber, clearCart]);

@@ -30,6 +30,8 @@ import { toast } from 'sonner';
 import { CheckoutValidator } from '@/utils/checkout-validation';
 import { getShippingMethods, calculateShippingCost } from '@/utils/shipping-methods';
 
+const CHECKOUT_DATA_KEY = 'shop-natural-checkout-data';
+
 function SubmitButton() {
     const { pending } = useFormStatus();
     const { t } = useTranslation();
@@ -158,6 +160,43 @@ export default function Checkout({
             }
         }
     }, [auth]);
+
+    // Load saved checkout data if user returns from canceled payment
+    useEffect(() => {
+        try {
+            const savedData = localStorage.getItem(CHECKOUT_DATA_KEY);
+            if (savedData) {
+                const parsed = JSON.parse(savedData);
+
+                // Only restore if auth user matches or is guest
+                const canRestore = !auth?.user || !parsed.userId || parsed.userId === auth.user.id;
+
+                if (canRestore) {
+                    console.log('Restoring saved checkout data');
+
+                    // Restore form data
+                    setContact(parsed.contact);
+                    setShippingAddress(parsed.shippingAddress);
+                    setBillingAddress(parsed.billingAddress);
+                    setBillingSameAsShipping(parsed.billingSameAsShipping);
+                    setSelectedShippingMethod(parsed.selectedShippingMethod);
+                    setSelectedPaymentMethod(parsed.selectedPaymentMethod);
+                    if (parsed.selectedVenipakPoint) {
+                        setSelectedVenipakPoint(parsed.selectedVenipakPoint);
+                    }
+                    setAgreeToTerms(parsed.agreeToTerms || false);
+
+                    // Mark all previous steps as completed and go to payment
+                    setCompletedSteps([1, 2, 3]);
+                    setCurrentStep(4);
+
+                    toast.success(t('checkout.data_restored', 'Your checkout information has been restored'));
+                }
+            }
+        } catch (error) {
+            console.error('Failed to restore checkout data:', error);
+        }
+    }, [auth, t]);
 
     // Get shipping methods based on selected country
     const shippingMethods = useMemo(() => {
@@ -355,9 +394,25 @@ export default function Checkout({
             return;
         }
 
-        // Clear cart from localStorage BEFORE submitting (will redirect to payment)
-        console.log('Clearing cart before checkout submission');
-        localStorage.removeItem('shop-natural-cart');
+        // Save form data to localStorage before submitting (in case payment is canceled)
+        try {
+            const dataToSave = {
+                contact,
+                shippingAddress,
+                billingAddress,
+                billingSameAsShipping,
+                selectedShippingMethod,
+                selectedPaymentMethod,
+                selectedVenipakPoint,
+                agreeToTerms,
+                userId: auth?.user?.id || null,
+                timestamp: Date.now(),
+            };
+            localStorage.setItem(CHECKOUT_DATA_KEY, JSON.stringify(dataToSave));
+            console.log('Checkout data saved to localStorage');
+        } catch (error) {
+            console.error('Failed to save checkout data:', error);
+        }
 
         const checkoutData: CheckoutFormData = {
             contact,

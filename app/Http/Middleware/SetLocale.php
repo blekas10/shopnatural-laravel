@@ -20,8 +20,13 @@ class SetLocale
 
         // Check if the first segment is a valid locale
         if (!in_array($locale, config('app.available_locales'))) {
-            // If not a valid locale in URL, default to English (not session)
-            $locale = config('app.locale');
+            // For Fortify auth routes (register, login, etc.) preserve session locale
+            // Otherwise default to English
+            if ($this->isFortifyRoute($request)) {
+                $locale = session('locale', config('app.locale'));
+            } else {
+                $locale = config('app.locale');
+            }
         }
 
         app()->setLocale($locale);
@@ -30,5 +35,14 @@ class SetLocale
         session(['locale' => $locale]);
 
         return $next($request);
+    }
+
+    /**
+     * Check if request is for a Fortify authentication route
+     */
+    private function isFortifyRoute(Request $request): bool
+    {
+        // Only preserve locale for register POST requests
+        return $request->is('register') && $request->isMethod('POST');
     }
 }

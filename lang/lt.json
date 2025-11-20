@@ -554,6 +554,7 @@
     "venipak.please_select": "Prašome pasirinkti Venipak atsiėmimo punktą",
     "checkout.please_select_shipping": "Prašome pasirinkti pristatymo būdą",
     "checkout.please_accept_terms": "Prašome sutikti su taisyklėmis ir sąlygomis",
+    "checkout.data_restored": "Jūsų apmokėjimo informacija buvo atkurta",
     "sidebar.orders": "Užsakymai",
     "sidebar.manage_orders": "Valdyti užsakymus",
     "orders.title": "Užsakymai",
