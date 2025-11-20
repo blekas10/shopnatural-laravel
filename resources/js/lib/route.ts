@@ -18,6 +18,9 @@ const routeMap: Record<string, Record<string, string>> = {
     'order.confirmation': { en: 'order/confirmation', lt: 'uzsakymas/patvirtinimas' },
     'about': { en: 'about', lt: 'apie-mus' },
     'contact': { en: 'contact', lt: 'kontaktai' },
+    'return-policy': { en: 'return-policy', lt: 'grazinimo-politika' },
+    'shipping-policy': { en: 'shipping-policy', lt: 'pristatymo-politika' },
+    'privacy-policy': { en: 'privacy-policy', lt: 'privatumo-politika' },
     // Auth routes (not localized)
     'login': { en: 'login', lt: 'login' },
     'register': { en: 'register', lt: 'register' },

@@ -11,6 +11,7 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\PageController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PayseraController;
 use App\Http\Controllers\ProductController;
@@ -67,6 +68,12 @@ Route::group([], function () {
     Route::get('wishlist', [WishlistController::class, 'index'])->name('en.wishlist');
     Route::get('contact', [ContactController::class, 'index'])->name('en.contact');
 
+    // Static pages
+    Route::get('about', [PageController::class, 'about'])->name('en.about');
+    Route::get('return-policy', [PageController::class, 'returnPolicy'])->name('en.return-policy');
+    Route::get('shipping-policy', [PageController::class, 'shippingPolicy'])->name('en.shipping-policy');
+    Route::get('privacy-policy', [PageController::class, 'privacyPolicy'])->name('en.privacy-policy');
+
     // Auth routes - redirect to home with modal (handled by Fortify for default locale)
     // The /login and /register routes are automatically handled by FortifyServiceProvider
 
@@ -102,6 +109,12 @@ Route::group(['prefix' => 'lt'], function () {
     Route::get('krepselis', fn() => Inertia::render('cart'))->name('lt.cart');
     Route::get('pageidavimu-sarasas', [WishlistController::class, 'index'])->name('lt.wishlist');
     Route::get('kontaktai', [ContactController::class, 'index'])->name('lt.contact');
+
+    // Static pages
+    Route::get('apie-mus', [PageController::class, 'about'])->name('lt.about');
+    Route::get('grazinimo-politika', [PageController::class, 'returnPolicy'])->name('lt.return-policy');
+    Route::get('pristatymo-politika', [PageController::class, 'shippingPolicy'])->name('lt.shipping-policy');
+    Route::get('privatumo-politika', [PageController::class, 'privacyPolicy'])->name('lt.privacy-policy');
 
     // Auth routes (translated) - redirect to home with modal
     Route::get('prisijungti', function () {
