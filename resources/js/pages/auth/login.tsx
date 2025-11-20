@@ -13,10 +13,8 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import AuthLayout from '@/layouts/auth-layout';
-import { register } from '@/routes';
-import { store } from '@/routes/login';
-import { email } from '@/routes/password';
-import { Form, Head, useForm } from '@inertiajs/react';
+import { register, login as loginRoute, passwordEmail } from '@/routes';
+import { router, useForm, Head } from '@inertiajs/react';
 import { useTranslation } from '@/hooks/use-translation';
 import { useState } from 'react';
 
@@ -33,18 +31,32 @@ export default function Login({
 }: LoginProps) {
     const { t } = useTranslation();
     const [showForgotPassword, setShowForgotPassword] = useState(false);
-    const { data, setData, post, processing, errors: forgotPasswordErrors, reset } = useForm({
+
+    // Forgot password form
+    const { data: forgotData, setData: setForgotData, post, processing: forgotProcessing, errors: forgotPasswordErrors, reset } = useForm({
         email: '',
+    });
+
+    // Login form
+    const { data: loginData, setData: setLoginData, post: loginPost, processing: loginProcessing, errors: loginErrors } = useForm({
+        email: '',
+        password: '',
+        remember: false,
     });
 
     const handleForgotPasswordSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post(email(), {
+        post(passwordEmail(), {
             onSuccess: () => {
                 reset();
                 setShowForgotPassword(false);
             },
         });
+    };
+
+    const handleLoginSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        loginPost(loginRoute());
     };
 
     return (
@@ -54,12 +66,14 @@ export default function Login({
         >
             <Head title={t('auth.login', 'Log in')} />
 
-            <Form
-                {...store.form()}
-                resetOnSuccess={['password']}
+            <form
+                onSubmit={handleLoginSubmit}
                 className="flex flex-col gap-6"
             >
-                {({ processing, errors }) => (
+                {(() => {
+                    const processing = loginProcessing;
+                    const errors = loginErrors;
+                    return (
                     <>
                         <div className="grid gap-6">
                             <div className="grid gap-2">
@@ -68,6 +82,8 @@ export default function Login({
                                     id="email"
                                     type="email"
                                     name="email"
+                                    value={loginData.email}
+                                    onChange={(e) => setLoginData('email', e.target.value)}
                                     required
                                     autoFocus
                                     tabIndex={1}
@@ -95,6 +111,8 @@ export default function Login({
                                     id="password"
                                     type="password"
                                     name="password"
+                                    value={loginData.password}
+                                    onChange={(e) => setLoginData('password', e.target.value)}
                                     required
                                     tabIndex={2}
                                     autoComplete="current-password"
@@ -107,6 +125,8 @@ export default function Login({
                                 <Checkbox
                                     id="remember"
                                     name="remember"
+                                    checked={loginData.remember}
+                                    onCheckedChange={(checked) => setLoginData('remember', checked as boolean)}
                                     tabIndex={3}
                                 />
                                 <Label htmlFor="remember">{t('auth.remember_me', 'Remember me')}</Label>
@@ -133,8 +153,9 @@ export default function Login({
                             </div>
                         )}
                     </>
-                )}
-            </Form>
+                    );
+                })()}
+            </form>
 
             {status && (
                 <div className="mb-4 text-center text-sm font-medium text-green-600">
@@ -161,11 +182,11 @@ export default function Login({
                                 id="forgot-email"
                                 type="email"
                                 name="email"
-                                value={data.email}
+                                value={forgotData.email}
                                 autoComplete="off"
                                 autoFocus
                                 placeholder="email@example.com"
-                                onChange={(e) => setData('email', e.target.value)}
+                                onChange={(e) => setForgotData('email', e.target.value)}
                             />
                             <InputError message={forgotPasswordErrors.email} />
                         </div>
@@ -173,9 +194,9 @@ export default function Login({
                         <Button
                             type="submit"
                             className="w-full bg-gold hover:bg-gold/90 text-white font-bold uppercase tracking-wide"
-                            disabled={processing}
+                            disabled={forgotProcessing}
                         >
-                            {processing && <Spinner />}
+                            {forgotProcessing && <Spinner />}
                             {t('auth.send_reset_link', 'Email password reset link')}
                         </Button>
                     </form>

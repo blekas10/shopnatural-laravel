@@ -6,6 +6,10 @@ export const login = () => route('login');
 export const register = () => route('register');
 export const logout = () => route('logout');
 
+// Password reset routes
+export const passwordEmail = () => route('password.email');
+export const passwordReset = (token?: string) => route('password.reset', token ? { token } : undefined);
+
 // Admin routes
 export const adminDashboard = () => route('admin.dashboard');
 export const adminProducts = () => route('admin.products.index');
