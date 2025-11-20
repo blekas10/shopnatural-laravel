@@ -163,7 +163,7 @@ export function OrderSummary({
                 {data.tax > 0 && (
                     <div className="flex items-center justify-between text-sm">
                         <span className="text-muted-foreground">
-                            {t('checkout.tax', 'Tax')}
+                            {t('checkout.tax', 'Tax (VAT 21%)')}
                         </span>
                         <span className="font-medium text-foreground">
                             €{data.tax.toFixed(2)}

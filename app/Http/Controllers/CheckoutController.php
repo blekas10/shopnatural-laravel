@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cart;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -193,6 +195,9 @@ class CheckoutController extends Controller
 
             DB::commit();
 
+            // Mark cart as completed and link to order
+            $this->completeCart($order);
+
             // For guest orders, store the email in session to allow confirmation page access
             if (!auth()->check()) {
                 $request->session()->put('guest_order_email', $validated['contact']['email']);
@@ -304,6 +309,37 @@ class CheckoutController extends Controller
 
             return back()->withErrors([
                 'error' => __('checkout.error'),
+            ]);
+        }
+    }
+
+    /**
+     * Mark cart as completed and link to order
+     */
+    protected function completeCart(Order $order): void
+    {
+        $user = auth()->user();
+
+        if ($user) {
+            // Find active cart for authenticated user
+            $cart = Cart::active()
+                ->where('user_id', $user->id)
+                ->first();
+        } else {
+            // Find active cart for guest session
+            $sessionId = Session::getId();
+            $cart = Cart::active()
+                ->where('session_id', $sessionId)
+                ->first();
+        }
+
+        // Mark cart as completed if found
+        if ($cart) {
+            $cart->complete($order);
+            \Log::info('Cart marked as completed', [
+                'cart_id' => $cart->id,
+                'order_id' => $order->id,
+                'order_number' => $order->order_number,
             ]);
         }
     }

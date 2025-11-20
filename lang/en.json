@@ -191,7 +191,7 @@
     "checkout.apply": "Apply",
     "checkout.subtotal": "Subtotal",
     "checkout.shipping": "Shipping",
-    "checkout.tax": "Tax",
+    "checkout.tax": "Tax (VAT 21%)",
     "checkout.discount": "Discount",
     "checkout.total": "Total",
     "checkout.field_required": "{field} is required",

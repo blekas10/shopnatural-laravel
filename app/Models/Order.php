@@ -77,6 +77,14 @@ class Order extends Model
     }
 
     /**
+     * Get the cart that created this order
+     */
+    public function cart(): HasOne
+    {
+        return $this->hasOne(Cart::class);
+    }
+
+    /**
      * Get order items
      */
     public function items(): HasMany

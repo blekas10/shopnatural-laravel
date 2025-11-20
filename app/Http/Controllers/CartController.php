@@ -55,11 +55,78 @@ class CartController extends Controller
             \Log::info('Cart item created', ['cart_item_id' => $newItem->id]);
         }
 
-        return back();
+        return response()->json(['success' => true]);
     }
 
     /**
-     * Update cart item quantity
+     * Update cart item quantity by product and variant
+     */
+    public function updateQuantity(Request $request)
+    {
+        $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'variant_id' => 'required|exists:product_variants,id',
+            'quantity' => 'required|integer|min:0|max:100',
+        ]);
+
+        $cart = $this->getOrCreateCart();
+
+        $cartItem = $cart->items()
+            ->where('product_id', $request->product_id)
+            ->where('product_variant_id', $request->variant_id)
+            ->first();
+
+        if (!$cartItem) {
+            // Item not in database cart - this is okay, frontend already updated
+            \Log::info('Update quantity: Item not found in database cart', [
+                'product_id' => $request->product_id,
+                'variant_id' => $request->variant_id,
+            ]);
+            return response()->json(['success' => true, 'message' => 'Item not in database cart']);
+        }
+
+        if ($request->quantity > 0) {
+            $cartItem->update(['quantity' => $request->quantity]);
+        } else {
+            $cartItem->delete();
+        }
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Remove item from cart by product and variant
+     */
+    public function removeByProduct(Request $request)
+    {
+        $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'variant_id' => 'required|exists:product_variants,id',
+        ]);
+
+        $cart = $this->getOrCreateCart();
+
+        $cartItem = $cart->items()
+            ->where('product_id', $request->product_id)
+            ->where('product_variant_id', $request->variant_id)
+            ->first();
+
+        if (!$cartItem) {
+            // Item not in database cart - this is okay, frontend already removed it
+            \Log::info('Remove: Item not found in database cart', [
+                'product_id' => $request->product_id,
+                'variant_id' => $request->variant_id,
+            ]);
+            return response()->json(['success' => true, 'message' => 'Item not in database cart']);
+        }
+
+        $cartItem->delete();
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Update cart item quantity (legacy - by cart item ID)
      */
     public function updateItem(Request $request, CartItem $item)
     {
@@ -80,11 +147,11 @@ class CartController extends Controller
             $item->delete();
         }
 
-        return back();
+        return response()->json(['success' => true]);
     }
 
     /**
-     * Remove item from cart
+     * Remove item from cart (legacy - by cart item ID)
      */
     public function removeItem(CartItem $item)
     {
@@ -97,7 +164,7 @@ class CartController extends Controller
 
         $item->delete();
 
-        return back();
+        return response()->json(['success' => true]);
     }
 
     /**
@@ -108,30 +175,48 @@ class CartController extends Controller
         $cart = $this->getOrCreateCart();
         $cart->items()->delete();
 
-        return back();
+        return response()->json(['success' => true]);
     }
 
     /**
-     * Get or create cart for current user/session
+     * Get or create ACTIVE cart for current user/session
      */
     protected function getOrCreateCart(): Cart
     {
         $user = auth()->user();
 
         if ($user) {
-            // Get or create cart for authenticated user
-            return Cart::firstOrCreate(
-                ['user_id' => $user->id],
-                ['expires_at' => null]
-            );
+            // Get or create ACTIVE cart for authenticated user
+            $cart = Cart::active()
+                ->where('user_id', $user->id)
+                ->first();
+
+            if (!$cart) {
+                $cart = Cart::create([
+                    'user_id' => $user->id,
+                    'expires_at' => null,
+                    'status' => 'active',
+                ]);
+            }
+
+            return $cart;
         }
 
-        // Get or create cart for guest session
+        // Get or create ACTIVE cart for guest session
         $sessionId = Session::getId();
 
-        return Cart::firstOrCreate(
-            ['session_id' => $sessionId],
-            ['expires_at' => now()->addHours(12)]
-        );
+        $cart = Cart::active()
+            ->where('session_id', $sessionId)
+            ->first();
+
+        if (!$cart) {
+            $cart = Cart::create([
+                'session_id' => $sessionId,
+                'expires_at' => null, // Never expire - keep for analytics
+                'status' => 'active',
+            ]);
+        }
+
+        return $cart;
     }
 }

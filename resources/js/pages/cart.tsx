@@ -54,26 +54,41 @@ export default function Cart() {
         }, 300);
     };
 
-    // Calculate original subtotal (before discounts)
-    const originalSubtotal = optimisticItems.reduce((sum, item) => {
+    // Calculate original subtotal (before discounts) - prices include tax
+    const originalSubtotalWithTax = optimisticItems.reduce((sum, item) => {
         const price = item.variant?.price || item.product.price;
         const compareAtPrice = item.variant?.compareAtPrice || item.product.compareAtPrice;
         const originalPrice = compareAtPrice || price;
         return sum + (originalPrice * item.quantity);
     }, 0);
 
-    // Calculate actual subtotal (with discounts)
-    const subtotal = totalPrice;
+    // Calculate actual subtotal (with discounts) - prices include tax
+    const subtotalWithTax = totalPrice;
 
-    // Calculate total discount
-    const discount = originalSubtotal - subtotal;
+    // VAT rate
+    const VAT_RATE = 0.21;
+
+    // Calculate discount (from prices with tax)
+    const discountWithTax = originalSubtotalWithTax - subtotalWithTax;
+
+    // Convert discount to amount without tax
+    const discount = discountWithTax / (1 + VAT_RATE);
+
+    // Calculate VAT (21% PVM) included in product prices
+    const tax = subtotalWithTax - (subtotalWithTax / (1 + VAT_RATE));
+
+    // Subtotal without tax (for display)
+    const subtotal = subtotalWithTax / (1 + VAT_RATE);
+
+    // Total = products with tax (no shipping in cart)
+    const total = subtotalWithTax;
 
     const orderSummaryData = {
-        subtotal: originalSubtotal,
+        subtotal: subtotal,
         shipping: 0,
-        tax: 0,
+        tax: tax,
         discount: discount,
-        total: subtotal,
+        total: total,
         items: optimisticItems,
     };
 

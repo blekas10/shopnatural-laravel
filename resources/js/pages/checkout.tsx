@@ -260,29 +260,43 @@ export default function Checkout({
     }
 
     // Calculate totals
-    // Calculate original subtotal (before discounts)
-    const originalSubtotal = items.reduce((sum, item) => {
+    // Calculate original subtotal (before discounts) - prices include tax
+    const originalSubtotalWithTax = items.reduce((sum, item) => {
         const price = item.variant?.price || item.product.price;
         const compareAtPrice = item.variant?.compareAtPrice || item.product.compareAtPrice;
         const originalPrice = compareAtPrice || price;
         return sum + (originalPrice * item.quantity);
     }, 0);
 
-    // Calculate actual subtotal (with discounts)
-    const subtotal = totalPrice;
+    // Calculate actual subtotal (with discounts) - prices include tax
+    const subtotalWithTax = totalPrice;
 
-    // Calculate total discount
-    const discount = originalSubtotal - subtotal;
+    // VAT rate
+    const VAT_RATE = 0.21;
+
+    // Calculate discount (from prices with tax)
+    const discountWithTax = originalSubtotalWithTax - subtotalWithTax;
+
+    // Convert discount to amount without tax
+    const discount = discountWithTax / (1 + VAT_RATE);
 
     const shipping = calculateShippingCost(
         selectedShippingMethod,
         shippingMethods
     );
-    const tax = 0;
-    const total = subtotal + shipping + tax;
+
+    // Calculate VAT (21% PVM) included in product prices
+    // Products already include tax, so we extract it: tax = price - (price / 1.21)
+    const tax = subtotalWithTax - (subtotalWithTax / (1 + VAT_RATE));
+
+    // Subtotal without tax (for display)
+    const subtotal = subtotalWithTax / (1 + VAT_RATE);
+
+    // Total = products with tax + shipping (no tax on shipping)
+    const total = subtotalWithTax + shipping;
 
     const orderSummaryData = {
-        subtotal: originalSubtotal,
+        subtotal: subtotal,
         shipping,
         tax,
         discount,

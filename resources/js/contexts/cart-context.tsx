@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useCallback, useEffect, useMemo, useState } from 'react';
-import { router } from '@inertiajs/react';
+import axios from 'axios';
 import type { CartItem } from '@/types';
 import type { ProductListItem, ProductVariant } from '@/types/product';
 
@@ -29,19 +29,45 @@ export function CartProvider({ children }: CartProviderProps) {
     const [items, setItems] = useState<CartItem[]>([]);
     const [isInitialized, setIsInitialized] = useState(false);
 
-    // Load cart from localStorage on mount
+    // Load cart from localStorage on mount and sync with backend
     useEffect(() => {
-        try {
-            const storedCart = localStorage.getItem(CART_STORAGE_KEY);
-            if (storedCart) {
-                const parsedCart = JSON.parse(storedCart);
-                setItems(parsedCart);
+        const initializeCart = async () => {
+            try {
+                // First, check backend cart status
+                const response = await axios.get('/api/cart/status');
+                const { should_clear, cart_status } = response.data;
+
+                if (should_clear && cart_status === 'completed') {
+                    // Backend cart is completed, clear localStorage
+                    console.log('Backend cart is completed, clearing localStorage cart');
+                    localStorage.removeItem(CART_STORAGE_KEY);
+                    setItems([]);
+                } else {
+                    // Load cart from localStorage
+                    const storedCart = localStorage.getItem(CART_STORAGE_KEY);
+                    if (storedCart) {
+                        const parsedCart = JSON.parse(storedCart);
+                        setItems(parsedCart);
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to sync cart with backend:', error);
+                // Fallback: still load from localStorage
+                try {
+                    const storedCart = localStorage.getItem(CART_STORAGE_KEY);
+                    if (storedCart) {
+                        const parsedCart = JSON.parse(storedCart);
+                        setItems(parsedCart);
+                    }
+                } catch (e) {
+                    console.error('Failed to load cart from localStorage:', e);
+                }
+            } finally {
+                setIsInitialized(true);
             }
-        } catch (error) {
-            console.error('Failed to load cart from localStorage:', error);
-        } finally {
-            setIsInitialized(true);
-        }
+        };
+
+        initializeCart();
     }, []);
 
     // Save cart to localStorage whenever it changes
@@ -98,22 +124,34 @@ export function CartProvider({ children }: CartProviderProps) {
             }
         });
 
-        // Save to database in background (no need to wait)
-        router.post('/cart/add', {
+        // Save to database in background using axios
+        axios.post('/cart/add', {
             product_id: product.id,
             variant_id: variant.id,
             quantity,
-        }, {
-            preserveState: true,
-            preserveScroll: true,
-            only: [],
+        }).catch(error => {
+            console.error('Failed to sync cart to database:', error);
         });
     }, [generateItemId]);
 
     // Remove item from cart
     const removeItem = useCallback((itemId: string) => {
+        // Get the item before removing from state
+        const item = items.find(i => i.id === itemId);
+
+        // Update localStorage immediately for instant UI
         setItems((currentItems) => currentItems.filter(item => item.id !== itemId));
-    }, []);
+
+        // Sync to backend using axios
+        if (item) {
+            axios.post('/cart/remove', {
+                product_id: item.productId,
+                variant_id: item.variantId,
+            }).catch(error => {
+                console.error('Failed to remove item from database cart:', error);
+            });
+        }
+    }, [items]);
 
     // Update item quantity
     const updateQuantity = useCallback((itemId: string, quantity: number) => {
@@ -122,6 +160,10 @@ export function CartProvider({ children }: CartProviderProps) {
             return;
         }
 
+        // Get the item before updating state
+        const item = items.find(i => i.id === itemId);
+
+        // Update localStorage immediately for instant UI
         setItems((currentItems) => {
             const itemIndex = currentItems.findIndex(item => item.id === itemId);
             if (itemIndex === -1) return currentItems;
@@ -133,7 +175,18 @@ export function CartProvider({ children }: CartProviderProps) {
             };
             return newItems;
         });
-    }, [removeItem]);
+
+        // Sync to backend using axios
+        if (item) {
+            axios.post('/cart/update-quantity', {
+                product_id: item.productId,
+                variant_id: item.variantId,
+                quantity,
+            }).catch(error => {
+                console.error('Failed to update quantity in database cart:', error);
+            });
+        }
+    }, [items, removeItem]);
 
     // Clear entire cart
     const clearCart = useCallback(() => {

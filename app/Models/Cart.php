@@ -12,6 +12,8 @@ class Cart extends Model
         'user_id',
         'session_id',
         'expires_at',
+        'status',
+        'order_id',
     ];
 
     protected function casts(): array
@@ -27,6 +29,14 @@ class Cart extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the order this cart created (if completed)
+     */
+    public function order(): BelongsTo
+    {
+        return $this->belongsTo(Order::class);
     }
 
     /**
@@ -72,22 +82,21 @@ class Cart extends Model
     }
 
     /**
-     * Check if cart has expired (for guest carts)
+     * Check if cart has expired
+     * Note: Always returns false - carts never expire (kept for analytics)
      */
     public function hasExpired(): bool
     {
-        return $this->expires_at && $this->expires_at->isPast();
+        return false;
     }
 
     /**
-     * Scope: Only active carts (not expired)
+     * Scope: Only active carts (status = active)
+     * Note: Carts never expire - all are permanent for analytics
      */
     public function scopeActive($query)
     {
-        return $query->where(function ($q) {
-            $q->whereNull('expires_at')
-                ->orWhere('expires_at', '>', now());
-        });
+        return $query->where('status', 'active');
     }
 
     /**
@@ -104,5 +113,40 @@ class Cart extends Model
     public function scopeUser($query)
     {
         return $query->whereNotNull('user_id');
+    }
+
+    /**
+     * Mark cart as completed and link to order
+     */
+    public function complete(Order $order): void
+    {
+        $this->update([
+            'status' => 'completed',
+            'order_id' => $order->id,
+        ]);
+    }
+
+    /**
+     * Mark cart as abandoned
+     */
+    public function abandon(): void
+    {
+        $this->update(['status' => 'abandoned']);
+    }
+
+    /**
+     * Check if cart is active
+     */
+    public function isActive(): bool
+    {
+        return $this->status === 'active';
+    }
+
+    /**
+     * Check if cart is completed
+     */
+    public function isCompleted(): bool
+    {
+        return $this->status === 'completed';
     }
 }

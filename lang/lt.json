@@ -191,7 +191,7 @@
     "checkout.apply": "Pritaikyti",
     "checkout.subtotal": "Tarpinė suma",
     "checkout.shipping": "Pristatymas",
-    "checkout.tax": "Mokesčiai",
+    "checkout.tax": "PVM (21%)",
     "checkout.discount": "Nuolaida",
     "checkout.total": "Viso",
     "checkout.field_required": "{field} yra privalomas",

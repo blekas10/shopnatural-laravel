@@ -37,10 +37,13 @@ Route::post('paysera/callback', [PayseraController::class, 'callback'])->name('p
 Route::prefix('api')->group(function () {
     Route::get('venipak/pickup-points', [VenipakController::class, 'getPickupPoints'])->name('api.venipak.pickup-points');
     Route::post('venipak/clear-cache', [VenipakController::class, 'clearCache'])->middleware('auth')->name('api.venipak.clear-cache');
+    Route::get('cart/status', [\App\Http\Controllers\Api\CartStatusController::class, 'status'])->name('api.cart.status');
 });
 
 // Cart routes (accessible without locale prefix)
 Route::post('cart/add', [CartController::class, 'addItem'])->name('cart.add');
+Route::post('cart/update-quantity', [CartController::class, 'updateQuantity'])->name('cart.update-quantity');
+Route::post('cart/remove', [CartController::class, 'removeByProduct'])->name('cart.remove-product');
 Route::patch('cart/items/{item}', [CartController::class, 'updateItem'])->name('cart.update');
 Route::delete('cart/items/{item}', [CartController::class, 'removeItem'])->name('cart.remove');
 Route::delete('cart/clear', [CartController::class, 'clear'])->name('cart.clear');
