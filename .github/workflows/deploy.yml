@@ -1,0 +1,86 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:  # Allows manual deployment from GitHub UI
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Deploy to server
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        port: ${{ secrets.PORT }}
+        script: |
+          echo "🚀 Starting deployment..."
+
+          # Navigate to project directory
+          cd ${{ secrets.PROJECT_PATH }}
+
+          # Backup current state (optional but recommended)
+          echo "📦 Creating backup..."
+          php artisan down || true
+
+          # Pull latest changes
+          echo "⬇️ Pulling latest code..."
+          git fetch origin main
+          git reset --hard origin/main
+
+          # Install/update Composer dependencies (production only)
+          echo "📚 Installing Composer dependencies..."
+          composer install --no-dev --optimize-autoloader --no-interaction
+
+          # Install/update NPM dependencies and build assets
+          echo "🎨 Building frontend assets..."
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+          npm ci --production=false
+          npm run build
+
+          # Run database migrations
+          echo "🗄️ Running migrations..."
+          php artisan migrate --force
+
+          # Clear all caches
+          echo "🧹 Clearing caches..."
+          php artisan cache:clear
+          php artisan config:clear
+          php artisan route:clear
+          php artisan view:clear
+
+          # Recreate optimized caches
+          echo "⚡ Optimizing application..."
+          php artisan config:cache
+          php artisan route:cache
+          php artisan view:cache
+          php artisan event:cache
+
+          # Restart queue workers
+          echo "🔄 Restarting queue workers..."
+          php artisan queue:restart
+
+          # Bring application back up
+          echo "✅ Bringing application online..."
+          php artisan up
+
+          echo "🎉 Deployment completed successfully!"
+          echo "📅 Deployed at: $(date)"
+
+    - name: Deployment notification
+      if: always()
+      run: |
+        if [ ${{ job.status }} == 'success' ]; then
+          echo "✅ Deployment succeeded!"
+        else
+          echo "❌ Deployment failed!"
+        fi
