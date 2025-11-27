@@ -177,8 +177,8 @@ export function PaymentForm({
                                                 const formatted = formatCardNumber(
                                                     e.target.value,
                                                 );
-                                                const maxLength = detectCardType(formatted) === 'amex' ? 17 : 19;
-                                                if (formatted.replace(/\s/g, '').length <= (detectCardType(formatted) === 'amex' ? 15 : 16)) {
+                                                const maxDigits = detectCardType(formatted) === 'amex' ? 15 : 16;
+                                                if (formatted.replace(/\s/g, '').length <= maxDigits) {
                                                     onCardDetailsChange(
                                                         'cardNumber',
                                                         formatted,

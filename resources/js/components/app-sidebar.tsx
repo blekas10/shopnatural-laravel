@@ -10,7 +10,6 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
 import { type NavItem, type User as UserType } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { LayoutGrid, Package, User, ShoppingBag, Home, Settings, Users, BoxIcon } from 'lucide-react';

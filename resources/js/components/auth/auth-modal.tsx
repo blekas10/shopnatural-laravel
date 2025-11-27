@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { LoginForm } from '@/components/auth/login-form';
 import { RegisterForm } from '@/components/auth/register-form';
@@ -13,13 +13,23 @@ interface AuthModalProps {
 
 export function AuthModal({ isOpen, onClose, initialView = 'login' }: AuthModalProps) {
     const { t } = useTranslation();
-    const [view, setView] = useState<'login' | 'register' | 'forgot-password'>(initialView);
+    // Use initialView directly when modal opens, track internal changes with view state
+    const [internalView, setInternalView] = useState<'login' | 'register' | 'forgot-password' | null>(null);
 
-    useEffect(() => {
-        if (isOpen) {
-            setView(initialView);
-        }
-    }, [isOpen, initialView]);
+    // When modal closes, reset internal view. When open, use internal view if set, otherwise initial.
+    const view = useMemo(() => {
+        if (!isOpen) return initialView;
+        return internalView ?? initialView;
+    }, [isOpen, internalView, initialView]);
+
+    const setView = (newView: 'login' | 'register' | 'forgot-password') => {
+        setInternalView(newView);
+    };
+
+    const handleClose = () => {
+        setInternalView(null);
+        onClose();
+    };
 
     const handleSwitchToRegister = () => setView('register');
     const handleSwitchToLogin = () => setView('login');
@@ -39,7 +49,7 @@ export function AuthModal({ isOpen, onClose, initialView = 'login' }: AuthModalP
     };
 
     return (
-        <Dialog open={isOpen} onOpenChange={onClose}>
+        <Dialog open={isOpen} onOpenChange={handleClose}>
             <DialogContent className="sm:max-w-[480px] p-0">
                 <DialogHeader className="px-6 pt-6">
                     <DialogTitle className="text-2xl font-bold uppercase tracking-wide text-center">

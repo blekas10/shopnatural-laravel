@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/dialog';
 import AuthLayout from '@/layouts/auth-layout';
 import { register, login as loginRoute, passwordEmail } from '@/routes';
-import { router, useForm, Head } from '@inertiajs/react';
+import { useForm, Head } from '@inertiajs/react';
 import { useTranslation } from '@/hooks/use-translation';
 import { useState } from 'react';
 

@@ -1,4 +1,4 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import MainHeader from '@/components/main-header';
 import Footer from '@/components/footer';
 import { useTranslation } from '@/hooks/use-translation';
@@ -95,7 +95,7 @@ export default function Contact() {
             } else {
                 toast.error(data.message || t('contact.error_message', 'Failed to send message. Please try again.'));
             }
-        } catch (error) {
+        } catch {
             toast.error(t('contact.error_message', 'Failed to send message. Please try again.'));
         } finally {
             setIsSubmitting(false);

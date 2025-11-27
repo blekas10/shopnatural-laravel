@@ -50,6 +50,20 @@ function SubmitButton() {
     );
 }
 
+interface UserWithAddress {
+    phone?: string;
+    billing_address?: string;
+    billing_city?: string;
+    billing_state?: string;
+    billing_postal_code?: string;
+    billing_country?: string;
+    shipping_address?: string;
+    shipping_city?: string;
+    shipping_state?: string;
+    shipping_postal_code?: string;
+    shipping_country?: string;
+}
+
 export default function Checkout({
     paymentMethods = [
         {
@@ -63,7 +77,6 @@ export default function Checkout({
             description: 'Fast and secure PayPal checkout',
         },
     ],
-    errors = {},
 }: CheckoutPageProps) {
     const { items, totalPrice } = useCart();
     const { t, route } = useTranslation();
@@ -76,7 +89,7 @@ export default function Checkout({
     const [currentStep, setCurrentStep] = useState(1);
     const [completedSteps, setCompletedSteps] = useState<number[]>([]);
 
-    // Form State
+    // Form State - ALL useState declarations BEFORE useEffects
     const [contact, setContact] = useState<ContactInformation & { fullName: string }>({
         email: '',
         phone: '',
@@ -92,11 +105,66 @@ export default function Checkout({
         country: '',
     });
 
+    const [billingAddress, setBillingAddress] = useState<Omit<ShippingAddress, 'fullName'> & { fullName?: string }>({
+        addressLine1: '',
+        addressLine2: '',
+        city: '',
+        state: '',
+        postalCode: '',
+        country: '',
+    });
+
+    const [billingSameAsShipping, setBillingSameAsShipping] = useState(true);
+    const [selectedShippingMethod, setSelectedShippingMethod] = useState('');
+    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('cash');
+    const [selectedVenipakPoint, setSelectedVenipakPoint] = useState<VenipakPickupPoint | null>(null);
+    const [cardDetails, setCardDetails] = useState<CardDetails>({
+        cardNumber: '',
+        expiryDate: '',
+        cvv: '',
+        cardholderName: '',
+    });
+    const [agreeToTerms, setAgreeToTerms] = useState(false);
+
+    // Validation Errors
+    const [contactErrors, setContactErrors] = useState<{
+        fullName?: string;
+        email?: string;
+        phone?: string;
+    }>({});
+
+    const [shippingAddressErrors, setShippingAddressErrors] = useState<{
+        country?: string;
+        addressLine1?: string;
+        city?: string;
+        state?: string;
+        postalCode?: string;
+    }>({});
+
+    const [billingAddressErrors, setBillingAddressErrors] = useState<{
+        country?: string;
+        addressLine1?: string;
+        city?: string;
+        state?: string;
+        postalCode?: string;
+    }>({});
+
+    // Get shipping methods based on selected country
+    const shippingMethods = useMemo(() => {
+        const country = shippingAddress.country;
+        if (!country) {
+            // Default to Lithuania if no country selected yet
+            return getShippingMethods('LT', t);
+        }
+        return getShippingMethods(country, t);
+    }, [shippingAddress.country, t]);
+
     // Autofill form with user data if authenticated
     useEffect(() => {
         if (auth?.user) {
-            const user = auth.user as any;
+            const user = auth.user as UserWithAddress;
 
+            // eslint-disable-next-line react-hooks/set-state-in-effect -- Legitimate initialization from user data
             setContact({
                 fullName: auth.user.name ?? '',
                 email: auth.user.email ?? '',
@@ -175,6 +243,7 @@ export default function Checkout({
                     console.log('Restoring saved checkout data');
 
                     // Restore form data
+                    // eslint-disable-next-line react-hooks/set-state-in-effect -- Legitimate restoration from localStorage
                     setContact(parsed.contact);
                     setShippingAddress(parsed.shippingAddress);
                     setBillingAddress(parsed.billingAddress);
@@ -197,61 +266,6 @@ export default function Checkout({
             console.error('Failed to restore checkout data:', error);
         }
     }, [auth, t]);
-
-    // Get shipping methods based on selected country
-    const shippingMethods = useMemo(() => {
-        const country = shippingAddress.country;
-        if (!country) {
-            // Default to Lithuania if no country selected yet
-            return getShippingMethods('LT', t);
-        }
-        return getShippingMethods(country, t);
-    }, [shippingAddress.country, t]);
-
-    const [billingAddress, setBillingAddress] = useState<Omit<ShippingAddress, 'fullName'> & { fullName?: string }>({
-        addressLine1: '',
-        addressLine2: '',
-        city: '',
-        state: '',
-        postalCode: '',
-        country: '',
-    });
-
-    const [billingSameAsShipping, setBillingSameAsShipping] = useState(true);
-    const [selectedShippingMethod, setSelectedShippingMethod] =
-        useState('');
-    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('cash');
-    const [selectedVenipakPoint, setSelectedVenipakPoint] = useState<VenipakPickupPoint | null>(null);
-    const [cardDetails, setCardDetails] = useState<CardDetails>({
-        cardNumber: '',
-        expiryDate: '',
-        cvv: '',
-        cardholderName: '',
-    });
-    const [agreeToTerms, setAgreeToTerms] = useState(false);
-
-    // Validation Errors
-    const [contactErrors, setContactErrors] = useState<{
-        fullName?: string;
-        email?: string;
-        phone?: string;
-    }>({});
-
-    const [shippingAddressErrors, setShippingAddressErrors] = useState<{
-        country?: string;
-        addressLine1?: string;
-        city?: string;
-        state?: string;
-        postalCode?: string;
-    }>({});
-
-    const [billingAddressErrors, setBillingAddressErrors] = useState<{
-        country?: string;
-        addressLine1?: string;
-        city?: string;
-        state?: string;
-        postalCode?: string;
-    }>({});
 
     // Redirect to cart if empty
     if (items.length === 0) {
@@ -493,8 +507,8 @@ export default function Checkout({
         setCardDetails((prev) => ({ ...prev, [field]: value }));
     };
 
-    // Step indicator component
-    const StepIndicator = ({ step, title, isCompleted, isCurrent }: { step: number; title: string; isCompleted: boolean; isCurrent: boolean }) => (
+    // Render step indicator
+    const renderStepIndicator = (step: number, title: string, isCompleted: boolean, isCurrent: boolean) => (
         <div className="flex items-center gap-3">
             <div
                 className={cn(
@@ -552,13 +566,13 @@ export default function Checkout({
                                     className="hidden rounded-2xl border-2 border-border bg-background p-4 md:block"
                                 >
                                     <div className="flex items-center justify-between gap-2">
-                                        <StepIndicator step={1} title={t('checkout.contact', 'Contact')} isCompleted={completedSteps.includes(1)} isCurrent={currentStep === 1} />
+                                        {renderStepIndicator(1, t('checkout.contact', 'Contact'), completedSteps.includes(1), currentStep === 1)}
                                         <div className="h-px flex-1 bg-border" />
-                                        <StepIndicator step={2} title={t('checkout.address', 'Address')} isCompleted={completedSteps.includes(2)} isCurrent={currentStep === 2} />
+                                        {renderStepIndicator(2, t('checkout.address', 'Address'), completedSteps.includes(2), currentStep === 2)}
                                         <div className="h-px flex-1 bg-border" />
-                                        <StepIndicator step={3} title={t('checkout.delivery', 'Delivery')} isCompleted={completedSteps.includes(3)} isCurrent={currentStep === 3} />
+                                        {renderStepIndicator(3, t('checkout.delivery', 'Delivery'), completedSteps.includes(3), currentStep === 3)}
                                         <div className="h-px flex-1 bg-border" />
-                                        <StepIndicator step={4} title={t('checkout.payment', 'Payment')} isCompleted={completedSteps.includes(4)} isCurrent={currentStep === 4} />
+                                        {renderStepIndicator(4, t('checkout.payment', 'Payment'), completedSteps.includes(4), currentStep === 4)}
                                     </div>
                                 </motion.div>
 

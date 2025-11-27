@@ -1,7 +1,6 @@
 import { Head, Link, router } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { dashboard } from '@/routes';
 import { useTranslation } from '@/hooks/use-translation';
 import { Button } from '@/components/ui/button';
 import {
@@ -15,7 +14,6 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { Fragment } from 'react';
-import { adminCategoriesCreate as create, adminCategoriesEdit as edit, adminCategoriesDestroy as destroy } from '@/routes';
 
 interface Category {
     id: number;

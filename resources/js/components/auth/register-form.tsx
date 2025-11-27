@@ -33,17 +33,17 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
             length: password.length >= 8,
             uppercase: /[A-Z]/.test(password),
             number: /[0-9]/.test(password),
-            special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password),
+            special: /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password),
         };
     };
 
     const requirements = checkPasswordRequirements(data.password);
-    const allRequirementsMet = Object.values(requirements).every(Boolean);
 
     useEffect(() => {
         return () => {
             reset('password', 'password_confirmation');
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const submit = (e: React.FormEvent) => {

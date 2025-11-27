@@ -7,7 +7,7 @@ interface TranslationHook {
     locale: string;
     availableLocales: string[];
     switchLocale: (locale: string) => void;
-    route: (name: string, params?: Record<string, any>) => string;
+    route: (name: string, params?: Record<string, string | number | boolean>) => string;
 }
 
 export function useTranslation(): TranslationHook {
@@ -100,7 +100,7 @@ export function useTranslation(): TranslationHook {
     }, [availableLocales]);
 
     const route = useCallback(
-        (name: string, params?: Record<string, any>) => {
+        (name: string, params?: Record<string, string | number | boolean>) => {
             return routeHelper(name, params, locale);
         },
         [locale]

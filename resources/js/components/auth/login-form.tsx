@@ -26,6 +26,7 @@ export function LoginForm({ onSwitchToRegister, onSwitchToForgotPassword }: Logi
         return () => {
             reset('password');
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const submit = (e: React.FormEvent) => {

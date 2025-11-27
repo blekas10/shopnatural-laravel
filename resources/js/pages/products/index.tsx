@@ -1,4 +1,4 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import MainHeader from '@/components/main-header';
 import Footer from '@/components/footer';
 import { useTranslation } from '@/hooks/use-translation';
@@ -100,11 +100,17 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
         window.history.replaceState({}, '', newUrl);
     }, [priceExtent]);
 
-    // Update URL and reset visible count when filters change
+    // Update URL when filters change
     useEffect(() => {
         updateURL(filters);
-        setVisibleProductCount(20);
     }, [filters, updateURL]);
+
+    // Reset visible count when filters change - use key based on filter string
+    const filterKey = useMemo(() => JSON.stringify(filters), [filters]);
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- Legitimate reset on filter change
+        setVisibleProductCount(20);
+    }, [filterKey]);
 
 
     // Helper to find a brand by ID in hierarchical structure
@@ -132,17 +138,17 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
     };
 
     // Get all descendant category IDs (children and grandchildren)
-    const getAllDescendantIds = (categoryId: number): number[] => {
+    const getAllDescendantIds = useCallback((categoryId: number): number[] => {
         const result: number[] = [categoryId];
 
-        const findDescendants = (cats: any[]) => {
+        const findDescendants = (cats: Category[]) => {
             for (const cat of cats) {
                 if (cat.id === categoryId) {
                     // Add all children
-                    cat.children?.forEach((child: any) => {
+                    cat.children?.forEach((child: Category) => {
                         result.push(child.id);
                         // Add all grandchildren
-                        child.children?.forEach((grandchild: any) => {
+                        child.children?.forEach((grandchild: Category) => {
                             result.push(grandchild.id);
                         });
                     });
@@ -157,20 +163,20 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
 
         findDescendants(categories);
         return result;
-    };
+    }, [categories]);
 
     // Get all descendant brand IDs (children and grandchildren)
-    const getAllBrandDescendantIds = (brandId: number): number[] => {
+    const getAllBrandDescendantIds = useCallback((brandId: number): number[] => {
         const result: number[] = [brandId];
 
-        const findDescendants = (brandList: any[]) => {
+        const findDescendants = (brandList: Brand[]) => {
             for (const brand of brandList) {
                 if (brand.id === brandId) {
                     // Add all children
-                    brand.children?.forEach((child: any) => {
+                    brand.children?.forEach((child: Brand) => {
                         result.push(child.id);
                         // Add all grandchildren
-                        child.children?.forEach((grandchild: any) => {
+                        child.children?.forEach((grandchild: Brand) => {
                             result.push(grandchild.id);
                         });
                     });
@@ -185,7 +191,7 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
 
         findDescendants(brands);
         return result;
-    };
+    }, [brands]);
 
     // Client-side filtering logic
     const filteredProducts = useMemo(() => {
@@ -254,7 +260,7 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
         }
 
         return filtered;
-    }, [allProducts, filters]);
+    }, [allProducts, filters, getAllDescendantIds, getAllBrandDescendantIds]);
 
     // Get active filter count
     const activeFilterCount = useMemo(() => {
@@ -370,29 +376,27 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
         );
     };
 
-    // Filter components
-    const CategoryFilter = () => {
-        // Sort categories: items with children first, then items without children
-        const sortedCategories = [...categories].sort((a, b) => {
-            const aHasChildren = a.children && a.children.length > 0;
-            const bHasChildren = b.children && b.children.length > 0;
+    // Sorted categories for filters
+    const sortedCategories = useMemo(() => [...categories].sort((a, b) => {
+        const aHasChildren = a.children && a.children.length > 0;
+        const bHasChildren = b.children && b.children.length > 0;
 
-            if (aHasChildren && !bHasChildren) return -1;
-            if (!aHasChildren && bHasChildren) return 1;
-            return 0;
-        });
+        if (aHasChildren && !bHasChildren) return -1;
+        if (!aHasChildren && bHasChildren) return 1;
+        return 0;
+    }), [categories]);
 
-        return (
-            <div className="rounded-2xl border-2 border-border bg-background p-6 transition-all duration-300">
-                <h3 className="mb-4 text-sm font-bold uppercase tracking-wide text-gold">
-                    {t('products.categories', 'Categories')}
-                </h3>
-                <div className="space-y-0.5">
-                    {sortedCategories.map(category => renderCategory(category, 0))}
-                </div>
+    // Render category filter UI
+    const renderCategoryFilter = () => (
+        <div className="rounded-2xl border-2 border-border bg-background p-6 transition-all duration-300">
+            <h3 className="mb-4 text-sm font-bold uppercase tracking-wide text-gold">
+                {t('products.categories', 'Categories')}
+            </h3>
+            <div className="space-y-0.5">
+                {sortedCategories.map(category => renderCategory(category, 0))}
             </div>
-        );
-    };
+        </div>
+    );
 
     // Render brand recursively with expand/collapse
     const renderBrand = (brand: Brand, level: number = 0) => {
@@ -449,30 +453,30 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
         );
     };
 
-    const BrandFilter = () => {
-        // Sort brands: items with children first, then items without children
-        const sortedBrands = [...brands].sort((a, b) => {
-            const aHasChildren = a.children && a.children.length > 0;
-            const bHasChildren = b.children && b.children.length > 0;
+    // Sorted brands for filters
+    const sortedBrands = useMemo(() => [...brands].sort((a, b) => {
+        const aHasChildren = a.children && a.children.length > 0;
+        const bHasChildren = b.children && b.children.length > 0;
 
-            if (aHasChildren && !bHasChildren) return -1;
-            if (!aHasChildren && bHasChildren) return 1;
-            return 0;
-        });
+        if (aHasChildren && !bHasChildren) return -1;
+        if (!aHasChildren && bHasChildren) return 1;
+        return 0;
+    }), [brands]);
 
-        return (
-            <div className="rounded-2xl border-2 border-border bg-background p-6 transition-all duration-300">
-                <h3 className="mb-4 text-sm font-bold uppercase tracking-wide text-gold">
-                    {t('products.brands', 'Brands')}
-                </h3>
-                <div className="space-y-0.5">
-                    {sortedBrands.map(brand => renderBrand(brand, 0))}
-                </div>
+    // Render brand filter UI
+    const renderBrandFilter = () => (
+        <div className="rounded-2xl border-2 border-border bg-background p-6 transition-all duration-300">
+            <h3 className="mb-4 text-sm font-bold uppercase tracking-wide text-gold">
+                {t('products.brands', 'Brands')}
+            </h3>
+            <div className="space-y-0.5">
+                {sortedBrands.map(brand => renderBrand(brand, 0))}
             </div>
-        );
-    };
+        </div>
+    );
 
-    const PriceRangeFilter = () => (
+    // Render price range filter UI
+    const renderPriceRangeFilter = () => (
         <div className="rounded-2xl border-2 border-border bg-background p-6 transition-all duration-300">
             <h3 className="mb-6 text-sm font-bold uppercase tracking-wide text-gold">
                 {t('products.price_range', 'Price Range')}
@@ -554,9 +558,9 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
                                     </div>
                                 </div>
 
-                                <CategoryFilter />
-                                <BrandFilter />
-                                <PriceRangeFilter />
+                                {renderCategoryFilter()}
+                                {renderBrandFilter()}
+                                {renderPriceRangeFilter()}
 
                                 {activeFilterCount > 0 && (
                                     <Button
@@ -748,9 +752,9 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
                                 </div>
                             </div>
 
-                            <CategoryFilter />
-                            <BrandFilter />
-                            <PriceRangeFilter />
+                            {renderCategoryFilter()}
+                            {renderBrandFilter()}
+                            {renderPriceRangeFilter()}
                         </div>
 
                         <SheetFooter className="fixed bottom-0 left-0 right-0 flex-row gap-2 border-t border-border bg-background p-4 shadow-lg">

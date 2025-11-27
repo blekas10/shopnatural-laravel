@@ -76,7 +76,7 @@ const nonLocalizedRoutes = [
  * @param locale Current locale
  * @returns Locale-aware URL
  */
-export function route(name: string, params: Record<string, any> = {}, locale: string = 'en'): string {
+export function route(name: string, params: Record<string, string | number | boolean> = {}, locale: string = 'en'): string {
     // Get the translated route segment
     const segment = routeMap[name]?.[locale];
 

@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { User, Mail, Lock, Check, Info, Eye, EyeOff, CheckCircle, MapPin, Phone } from 'lucide-react';
+import { User, Lock, Check, Info, Eye, EyeOff, CheckCircle, MapPin, Phone } from 'lucide-react';
 import { useState, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { CountrySelector } from '@/components/country-selector';
@@ -20,7 +20,7 @@ interface ProfileProps {
 }
 
 export default function Profile({ mustVerifyEmail, status }: ProfileProps) {
-    const { t, route, locale } = useTranslation();
+    const { t, route } = useTranslation();
     const { auth } = usePage<SharedData>().props;
 
     const [showPassword, setShowPassword] = useState(false);
@@ -71,12 +71,11 @@ export default function Profile({ mustVerifyEmail, status }: ProfileProps) {
             length: password.length >= 8,
             uppercase: /[A-Z]/.test(password),
             number: /[0-9]/.test(password),
-            special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password),
+            special: /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password),
         };
     };
 
     const requirements = checkPasswordRequirements(passwordForm.data.password);
-    const allRequirementsMet = Object.values(requirements).every(Boolean);
 
     const submitProfile = (e: React.FormEvent) => {
         e.preventDefault();

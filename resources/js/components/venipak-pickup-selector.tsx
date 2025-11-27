@@ -166,7 +166,7 @@ export function VenipakPickupSelector({
                         </div>
                         <button
                             type="button"
-                            onClick={() => onSelect(null as any)}
+                            onClick={() => onSelect(null)}
                             className="shrink-0 text-xs text-gold hover:underline"
                         >
                             {t('venipak.change', 'Change')}

@@ -39,7 +39,7 @@ export default function MainHeader({ className }: MainHeaderProps) {
     const { t, route } = useTranslation();
     const { itemCount } = useCart();
     const { itemCount: wishlistCount } = useWishlist();
-    const { auth } = usePage().props as any;
+    const { auth } = usePage<{ auth: { user: { name: string; email: string } | null } }>().props;
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [cartDrawerOpen, setCartDrawerOpen] = useState(false);
     const [mobileCategoriesOpen, setMobileCategoriesOpen] = useState(false);

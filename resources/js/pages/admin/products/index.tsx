@@ -224,7 +224,7 @@ export default function AdminProducts({ products, categories, brands, filters }:
 
     const debouncedSearch = useCallback(
         debounce((value: string) => {
-            const params: Record<string, any> = {
+            const params: Record<string, string | number | null> = {
                 search: value,
                 category_id: filters.category_id,
                 brand_id: filters.brand_id,
@@ -673,7 +673,7 @@ export default function AdminProducts({ products, categories, brands, filters }:
                     </DialogHeader>
 
                     <div className="space-y-4 py-4">
-                        {editingVariants.map((variant, index) => (
+                        {editingVariants.map((variant) => (
                             <div
                                 key={variant.id}
                                 className="grid grid-cols-4 gap-4 p-4 border border-gold/20 rounded-lg bg-gray-50"

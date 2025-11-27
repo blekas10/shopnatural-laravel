@@ -34,7 +34,6 @@ import {
     ExternalLink,
     Package,
     MapPin,
-    CreditCard,
     User,
     FileText,
 } from 'lucide-react';
@@ -74,7 +73,7 @@ interface Order {
     shipping_postal_code: string;
     shipping_country: string;
     shipping_method: string | null;
-    venipak_pickup_point: any | null;
+    venipak_pickup_point: { id: string; name: string; address: string; city: string } | null;
     tracking_number: string | null;
     subtotal: string;
     tax: string;

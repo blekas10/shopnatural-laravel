@@ -2,7 +2,6 @@
 
 import React, { createContext, useCallback, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
-import { router } from '@inertiajs/react';
 
 interface WishlistItem {
     productId: number;
@@ -60,7 +59,7 @@ export function WishlistProvider({ children }: WishlistProviderProps) {
                         setItems(parsedWishlist);
                     }
                 }
-            } catch (error) {
+            } catch {
                 // Not authenticated or error, load from localStorage
                 setIsAuthenticated(false);
                 try {
@@ -85,8 +84,8 @@ export function WishlistProvider({ children }: WishlistProviderProps) {
         if (isInitialized && isAuthenticated === false) {
             try {
                 localStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(items));
-            } catch (error) {
-                console.error('Failed to save wishlist to localStorage:', error);
+            } catch (err) {
+                console.error('Failed to save wishlist to localStorage:', err);
             }
         }
     }, [items, isInitialized, isAuthenticated]);
@@ -115,9 +114,10 @@ export function WishlistProvider({ children }: WishlistProviderProps) {
                 });
                 setIsAuthenticated(true);
                 return { success: true, requiresLogin: false };
-            } catch (error: any) {
+            } catch (err) {
                 // Check if it's an auth error
-                if (error.response?.status === 401) {
+                const axiosError = err as { response?: { status?: number } };
+                if (axiosError.response?.status === 401) {
                     setIsAuthenticated(false);
                     // Revert on auth error
                     setItems(prevItems => prevItems.filter(item =>
@@ -125,7 +125,7 @@ export function WishlistProvider({ children }: WishlistProviderProps) {
                     ));
                     return { success: false, requiresLogin: true };
                 } else {
-                    console.error('Failed to sync wishlist add to database:', error);
+                    console.error('Failed to sync wishlist add to database:', err);
                     return { success: true, requiresLogin: false }; // Still succeeds locally
                 }
             }
@@ -155,10 +155,11 @@ export function WishlistProvider({ children }: WishlistProviderProps) {
                     product_id: productId,
                     product_variant_id: variantId,
                 });
-            } catch (error: any) {
+            } catch (err) {
                 // Only log error, don't revert removal (guest users can still remove)
-                if (error.response?.status !== 401) {
-                    console.error('Failed to sync wishlist remove to database:', error);
+                const axiosError = err as { response?: { status?: number } };
+                if (axiosError.response?.status !== 401) {
+                    console.error('Failed to sync wishlist remove to database:', err);
                 }
             }
             return { success: true };
