@@ -144,11 +144,15 @@
         @apply border-border;
     }
 
+    html,
+    body {
+        overflow-x: hidden; /* Prevent horizontal scroll on mobile */
+    }
+
     html {
         overflow-y: scroll; /* Prevent layout shift from scrollbar */
         overscroll-behavior-y: none; /* Prevent rubber-band bounce on iOS */
     }
-
 }
 
 /* Mobile scroll improvements */
