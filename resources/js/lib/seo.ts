@@ -243,7 +243,7 @@ export function generateAlternateUrls(
     alternateSlug?: string
 ): { locale: string; url: string }[] {
     return locales.map((locale) => {
-        let path = currentPath;
+        const path = currentPath;
 
         // Handle locale prefix in path
         const pathParts = path.split('/').filter(Boolean);
