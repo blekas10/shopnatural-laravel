@@ -392,9 +392,7 @@ export default function ProductShow({ product, relatedProducts }: ProductShowPro
                                 <h1 className="text-2xl font-bold uppercase tracking-wide text-foreground md:text-3xl lg:text-4xl">
                                     {product.name}
                                 </h1>
-                                {product.title && (
-                                    <p className="text-lg text-muted-foreground">{product.title}</p>
-                                )}
+                               
                             </div>
 
                             {/* Price */}
