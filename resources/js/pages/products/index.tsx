@@ -1,6 +1,7 @@
-import { Head, Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import MainHeader from '@/components/main-header';
 import Footer from '@/components/footer';
+import SEO from '@/components/seo';
 import { useTranslation } from '@/hooks/use-translation';
 import { ProductCard } from '@/components/product-card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -12,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { ChevronRight, ChevronDown, Filter, X, Search } from 'lucide-react';
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { cn } from '@/lib/utils';
+import { generateCanonicalUrl, createCollectionSchema } from '@/lib/seo';
 import type { ProductListItem, Brand, Category } from '@/types/product';
 
 interface ProductsIndexProps {
@@ -28,8 +30,17 @@ interface Filters {
     search: string;
 }
 
+interface PageProps {
+    seo: {
+        siteName: string;
+        siteUrl: string;
+    };
+    locale: string;
+}
+
 export default function ProductsIndex({ allProducts, brands, categories }: ProductsIndexProps) {
     const { t, route } = useTranslation();
+    const { seo, locale } = usePage<PageProps>().props;
 
     // Calculate price range from products
     const priceExtent = useMemo(() => {
@@ -505,9 +516,30 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
         </div>
     );
 
+    // SEO data
+    const siteUrl = seo?.siteUrl || '';
+    const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
+    const canonicalUrl = generateCanonicalUrl(siteUrl, currentPath);
+
+    // Collection schema for product listing
+    const collectionSchema = createCollectionSchema(
+        t('products.title', 'Products'),
+        t('products.meta_description', 'Browse our collection of natural, eco-friendly cosmetics and beauty products.'),
+        canonicalUrl,
+        filteredProducts.slice(0, 10).map(p => ({
+            name: p.name,
+            url: `${siteUrl}/${locale === 'lt' ? 'lt/produktai' : 'products'}/${p.slug}`,
+        }))
+    );
+
     return (
         <>
-            <Head title={t('products.title', 'Products')} />
+            <SEO
+                title={t('products.meta_title', 'Products')}
+                description={t('products.meta_description', 'Browse our collection of natural, eco-friendly cosmetics and beauty products.')}
+                canonical={canonicalUrl}
+                additionalSchemas={[collectionSchema]}
+            />
 
             <div className="min-h-screen bg-background">
                 <MainHeader />

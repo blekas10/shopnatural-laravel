@@ -1,4 +1,5 @@
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
+import SEO from '@/components/seo';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowLeft, Lock, Check, ChevronRight } from 'lucide-react';
 import { useState, useMemo, useEffect } from 'react';
@@ -535,7 +536,11 @@ export default function Checkout({
 
     return (
         <>
-            <Head title={t('checkout.title', 'Checkout')} />
+            <SEO
+                title={t('checkout.title', 'Checkout')}
+                noindex={true}
+                nofollow={true}
+            />
 
             <div className="min-h-screen bg-background">
                 <MainHeader />

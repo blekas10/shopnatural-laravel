@@ -1,11 +1,22 @@
-import { Head, Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import MainHeader from '@/components/main-header';
 import Footer from '@/components/footer';
 import { useTranslation } from '@/hooks/use-translation';
 import { ChevronRight, RotateCcw, ShieldCheck, Mail, Package, Truck } from 'lucide-react';
+import SEO from '@/components/seo';
+import { generateCanonicalUrl, type BreadcrumbItem } from '@/lib/seo';
+
+interface PageProps {
+    seo: {
+        siteName: string;
+        siteUrl: string;
+    };
+    locale: string;
+}
 
 export default function ReturnPolicy() {
     const { t, route } = useTranslation();
+    const { seo, locale } = usePage<PageProps>().props;
 
     const sections = [
         {
@@ -35,9 +46,32 @@ export default function ReturnPolicy() {
         }
     ];
 
+    // SEO data
+    const siteUrl = seo?.siteUrl || '';
+    const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
+    const canonicalUrl = generateCanonicalUrl(siteUrl, currentPath);
+
+    // Breadcrumbs for structured data
+    const breadcrumbs: BreadcrumbItem[] = [
+        { name: t('nav.home', 'Home'), url: siteUrl },
+        { name: t('return_policy.title', 'Return Policy'), url: canonicalUrl },
+    ];
+
+    // Alternate URLs for hreflang
+    const alternateUrls = [
+        { locale: 'en', url: `${siteUrl}/return-policy` },
+        { locale: 'lt', url: `${siteUrl}/lt/grazinimo-politika` },
+    ];
+
     return (
         <>
-            <Head title={t('return_policy.title', 'Return Policy')} />
+            <SEO
+                title={t('return_policy.meta_title', 'Return Policy')}
+                description={t('return_policy.meta_description', 'Shop Natural return policy. 14-day return period under EU law. Easy returns and refunds within 5-7 business days.')}
+                canonical={canonicalUrl}
+                alternateUrls={alternateUrls}
+                breadcrumbs={breadcrumbs}
+            />
 
             <div className="min-h-screen bg-background">
                 <MainHeader />

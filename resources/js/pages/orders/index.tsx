@@ -6,7 +6,8 @@ import { OrderStatusBadge } from '@/components/order-status-badge';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import type { Order, OrderStatus } from '@/types/checkout';
-import { Head, Link } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
+import SEO from '@/components/seo';
 import { Package, Filter, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
@@ -76,7 +77,11 @@ export default function OrdersIndex({ orders: ordersData }: OrdersIndexProps) {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title={t('orders.page_title', 'My Orders')} />
+            <SEO
+                title={t('orders.page_title', 'My Orders')}
+                noindex={true}
+                nofollow={true}
+            />
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto p-4 md:p-6 lg:p-8">
                 {/* Header */}
                 <motion.div

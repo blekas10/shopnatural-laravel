@@ -1,11 +1,22 @@
-import { Head, Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import MainHeader from '@/components/main-header';
 import Footer from '@/components/footer';
 import { useTranslation } from '@/hooks/use-translation';
 import { ChevronRight, Truck, Clock, DollarSign, Globe, AlertCircle } from 'lucide-react';
+import SEO from '@/components/seo';
+import { generateCanonicalUrl, type BreadcrumbItem } from '@/lib/seo';
+
+interface PageProps {
+    seo: {
+        siteName: string;
+        siteUrl: string;
+    };
+    locale: string;
+}
 
 export default function ShippingPolicy() {
     const { t, route } = useTranslation();
+    const { seo, locale } = usePage<PageProps>().props;
 
     const sections = [
         {
@@ -38,9 +49,32 @@ export default function ShippingPolicy() {
         }
     ];
 
+    // SEO data
+    const siteUrl = seo?.siteUrl || '';
+    const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
+    const canonicalUrl = generateCanonicalUrl(siteUrl, currentPath);
+
+    // Breadcrumbs for structured data
+    const breadcrumbs: BreadcrumbItem[] = [
+        { name: t('nav.home', 'Home'), url: siteUrl },
+        { name: t('shipping_policy.title', 'Shipping Policy'), url: canonicalUrl },
+    ];
+
+    // Alternate URLs for hreflang
+    const alternateUrls = [
+        { locale: 'en', url: `${siteUrl}/shipping-policy` },
+        { locale: 'lt', url: `${siteUrl}/lt/pristatymo-politika` },
+    ];
+
     return (
         <>
-            <Head title={t('shipping_policy.title', 'Shipping Policy')} />
+            <SEO
+                title={t('shipping_policy.meta_title', 'Shipping Policy')}
+                description={t('shipping_policy.meta_description', 'Shop Natural shipping information. Fast delivery to Lithuania (1-3 days) and EU (3-10 days). Affordable shipping rates.')}
+                canonical={canonicalUrl}
+                alternateUrls={alternateUrls}
+                breadcrumbs={breadcrumbs}
+            />
 
             <div className="min-h-screen bg-background">
                 <MainHeader />

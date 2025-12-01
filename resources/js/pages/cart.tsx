@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, Plus, Minus, Trash2, ShoppingBag, ArrowLeft } from 'lucide-react';
 import { useOptimistic, useState } from 'react';
@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { OrderSummary } from '@/components/order-summary';
 import type { CartItem as CartItemType } from '@/types';
 import { toast } from 'sonner';
+import SEO from '@/components/seo';
 
 export default function Cart() {
     const { items, totalPrice, removeItem, updateQuantity } = useCart();
@@ -94,7 +95,11 @@ export default function Cart() {
 
     return (
         <>
-            <Head title={t('cart.title', 'Shopping Cart')} />
+            <SEO
+                title={t('cart.title', 'Shopping Cart')}
+                noindex={true}
+                nofollow={true}
+            />
 
             <div className="min-h-screen bg-background">
                 <MainHeader />

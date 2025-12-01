@@ -72,6 +72,36 @@ class ProductDetailResource extends ProductResource
         $alternateLocale = $currentLocale === 'en' ? 'lt' : 'en';
         $alternateSlug = $this->getTranslation('slug', $alternateLocale);
 
+        // SEO fields with fallbacks - prefer translated content in current locale
+        // Use getTranslations() to check if translation exists for current locale
+        $metaTitleTranslations = $this->getTranslations('meta_title');
+        $metaDescTranslations = $this->getTranslations('meta_description');
+        $focusKeyphraseTranslations = $this->getTranslations('focus_keyphrase');
+
+        // Meta title: use translated meta_title if exists, otherwise use name
+        $metaTitle = isset($metaTitleTranslations[$currentLocale]) && !empty($metaTitleTranslations[$currentLocale])
+            ? $metaTitleTranslations[$currentLocale]
+            : $this->getTranslation('name', $currentLocale);
+
+        // Meta description: prioritize translated content
+        // 1. Use meta_description if it exists for current locale
+        // 2. Fall back to short_description in current locale
+        // 3. Fall back to description (first 160 chars)
+        if (isset($metaDescTranslations[$currentLocale]) && !empty($metaDescTranslations[$currentLocale])) {
+            $metaDescription = $metaDescTranslations[$currentLocale];
+        } elseif ($this->short_description) {
+            $metaDescription = strip_tags($this->getTranslation('short_description', $currentLocale));
+        } else {
+            $descriptionText = strip_tags($this->getTranslation('description', $currentLocale));
+            $metaDescription = mb_strlen($descriptionText) > 160
+                ? mb_substr($descriptionText, 0, 157) . '...'
+                : $descriptionText;
+        }
+
+        $focusKeyphrase = isset($focusKeyphraseTranslations[$currentLocale]) && !empty($focusKeyphraseTranslations[$currentLocale])
+            ? $focusKeyphraseTranslations[$currentLocale]
+            : null;
+
         return array_merge($baseData, [
             'sku' => $this->defaultVariant?->sku ?? '',
             'shortDescription' => $this->short_description ? $this->getTranslation('short_description', $currentLocale) : null,
@@ -83,6 +113,10 @@ class ProductDetailResource extends ProductResource
             'images' => $images,
             'variants' => $variants,
             'alternateSlug' => $alternateSlug,
+            // SEO fields
+            'metaTitle' => $metaTitle,
+            'metaDescription' => $metaDescription,
+            'focusKeyphrase' => $focusKeyphrase,
         ]);
     }
 }

@@ -56,6 +56,13 @@ class HandleInertiaRequests extends Middleware
             'locale' => app()->getLocale(),
             'availableLocales' => config('app.available_locales'),
             'translations' => $this->loadTranslations(),
+            // SEO shared data
+            'seo' => [
+                'siteName' => config('app.name'),
+                'siteUrl' => config('app.url'),
+                'defaultImage' => config('app.url') . '/images/og-image.jpg',
+                'twitterHandle' => config('seo.twitter_handle', ''),
+            ],
         ];
     }
 

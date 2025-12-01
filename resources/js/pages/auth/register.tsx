@@ -1,6 +1,7 @@
 import { login } from '@/routes';
 import { registerStore as store } from '@/routes';
-import { Form, Head } from '@inertiajs/react';
+import { Form } from '@inertiajs/react';
+import SEO from '@/components/seo';
 
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
@@ -16,7 +17,11 @@ export default function Register() {
             title="Create an account"
             description="Enter your details below to create your account"
         >
-            <Head title="Register" />
+            <SEO
+                title="Register"
+                noindex={true}
+                nofollow={true}
+            />
             <Form
                 {...store.form()}
                 resetOnSuccess={['password', 'password_confirmation']}

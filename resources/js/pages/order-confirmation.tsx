@@ -7,7 +7,8 @@ import { useTranslation } from '@/hooks/use-translation';
 import { cn } from '@/lib/utils';
 import type { SharedData } from '@/types';
 import type { OrderConfirmationProps } from '@/types/checkout';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
+import SEO from '@/components/seo';
 import { motion } from 'framer-motion';
 import {
     Check,
@@ -102,7 +103,11 @@ export default function OrderConfirmation({ order }: OrderConfirmationProps) {
 
     return (
         <>
-            <Head title={t('order.confirmation_title', 'Order Confirmed')} />
+            <SEO
+                title={t('order.confirmation_title', 'Order Confirmed')}
+                noindex={true}
+                nofollow={true}
+            />
 
             <div className="min-h-screen bg-background">
                 <MainHeader />

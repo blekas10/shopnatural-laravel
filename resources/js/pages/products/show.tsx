@@ -1,6 +1,7 @@
-import { Head, Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import MainHeader from '@/components/main-header';
 import Footer from '@/components/footer';
+import SEO from '@/components/seo';
 import { useTranslation } from '@/hooks/use-translation';
 import { useCart } from '@/hooks/use-cart';
 import { useWishlist } from '@/contexts/wishlist-context';
@@ -9,6 +10,7 @@ import { ChevronRight, ShoppingCart, Check, X, Heart } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { truncateDescription, generateCanonicalUrl, generateAlternateUrls, type ProductSEO, type BreadcrumbItem } from '@/lib/seo';
 import type { ProductDetail, ProductVariant, BaseProduct, ProductListItem } from '@/types/product';
 
 
@@ -17,8 +19,18 @@ interface ProductShowProps {
     relatedProducts: BaseProduct[];
 }
 
+interface PageProps {
+    seo: {
+        siteName: string;
+        siteUrl: string;
+    };
+    locale: string;
+    availableLocales: string[];
+}
+
 export default function ProductShow({ product, relatedProducts }: ProductShowProps) {
     const { t, route } = useTranslation();
+    const { seo, locale, availableLocales } = usePage<PageProps>().props;
     const { addItem } = useCart();
     const { toggleItem, isInWishlist } = useWishlist();
     const [activeTab, setActiveTab] = useState<'description' | 'additional' | 'ingredients'>('description');
@@ -163,9 +175,64 @@ export default function ProductShow({ product, relatedProducts }: ProductShowPro
     // Check if current variant is in wishlist
     const inWishlist = selectedVariant ? isInWishlist(product.id, selectedVariant.id) : false;
 
+    // SEO data preparation
+    const siteUrl = seo?.siteUrl || '';
+    const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
+    const canonicalUrl = generateCanonicalUrl(siteUrl, currentPath);
+
+    // Build breadcrumbs for structured data
+    const breadcrumbs: BreadcrumbItem[] = [
+        { name: t('nav.home', 'Home'), url: siteUrl },
+        { name: t('products.title', 'Products'), url: `${siteUrl}/${locale === 'lt' ? 'lt/produktai' : 'products'}` },
+        { name: product.name, url: canonicalUrl },
+    ];
+
+    // Add category to breadcrumbs if exists
+    if (product.categories.length > 0) {
+        const category = product.categories[0];
+        breadcrumbs.splice(2, 0, {
+            name: category.name,
+            url: `${siteUrl}/${locale === 'lt' ? 'lt/produktai' : 'products'}?category=${category.slug}`,
+        });
+    }
+
+    // Build alternate URLs for hreflang
+    const alternateUrls = generateAlternateUrls(
+        siteUrl,
+        currentPath,
+        availableLocales || ['en', 'lt'],
+        locale,
+        product.alternateSlug
+    );
+
+    // Product SEO data for structured data
+    const productSEO: ProductSEO = {
+        name: product.name,
+        description: truncateDescription(product.metaDescription || product.shortDescription || product.description, 160),
+        image: product.image,
+        images: product.images?.map(img => img.url),
+        price: currentPrice,
+        compareAtPrice: currentCompareAtPrice,
+        currency: 'EUR',
+        availability: currentInStock ? 'InStock' : 'OutOfStock',
+        sku: currentSku,
+        brand: product.categories[0]?.name, // Use first category as brand if no brand
+        category: product.categories.map(c => c.name).join(' > '),
+        url: canonicalUrl,
+    };
+
     return (
         <>
-            <Head title={product.name} />
+            <SEO
+                title={product.metaTitle}
+                description={product.metaDescription || truncateDescription(product.shortDescription || product.description, 160)}
+                keywords={product.focusKeyphrase || undefined}
+                image={product.image}
+                canonical={canonicalUrl}
+                alternateUrls={alternateUrls}
+                product={productSEO}
+                breadcrumbs={breadcrumbs}
+            />
 
             <div className="min-h-screen bg-background pb-[calc(73px+env(safe-area-inset-bottom))] lg:pb-0">
                 <MainHeader />

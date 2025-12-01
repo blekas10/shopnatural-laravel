@@ -1,5 +1,6 @@
-import { Head, Link } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
+import SEO from '@/components/seo';
 import { type BreadcrumbItem } from '@/types';
 import { useTranslation } from '@/hooks/use-translation';
 import { Button } from '@/components/ui/button';
@@ -147,7 +148,11 @@ export default function OrderShow({ order: orderData }: OrderShowProps) {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title={`${t('orders.order', 'Order')} ${order.orderNumber}`} />
+            <SEO
+                title={`${t('orders.order', 'Order')} ${order.orderNumber}`}
+                noindex={true}
+                nofollow={true}
+            />
 
             <div className="flex h-full flex-1 flex-col gap-4 p-4 md:gap-6 md:p-6 lg:p-8">
                 {/* Header */}

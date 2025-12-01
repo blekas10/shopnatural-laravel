@@ -9,7 +9,8 @@ import {
 import { OTP_MAX_LENGTH } from '@/hooks/use-two-factor-auth';
 import AuthLayout from '@/layouts/auth-layout';
 import { twoFactorLoginStore as store } from '@/routes';
-import { Form, Head } from '@inertiajs/react';
+import { Form } from '@inertiajs/react';
+import SEO from '@/components/seo';
 import { REGEXP_ONLY_DIGITS } from 'input-otp';
 import { useMemo, useState } from 'react';
 
@@ -50,7 +51,11 @@ export default function TwoFactorChallenge() {
             title={authConfigContent.title}
             description={authConfigContent.description}
         >
-            <Head title="Two-Factor Authentication" />
+            <SEO
+                title="Two-Factor Authentication"
+                noindex={true}
+                nofollow={true}
+            />
 
             <div className="space-y-6">
                 <Form

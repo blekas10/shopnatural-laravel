@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
 import MainHeader from '@/components/main-header';
 import Footer from '@/components/footer';
 import { useTranslation } from '@/hooks/use-translation';
@@ -10,6 +10,7 @@ import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import type { ProductListItem } from '@/types/product';
+import SEO from '@/components/seo';
 
 interface WishlistItemData {
     id: number;
@@ -125,7 +126,11 @@ export default function WishlistIndex({ wishlistItems: initialWishlistItems }: W
 
     return (
         <>
-            <Head title={t('wishlist.title', 'Wishlist')} />
+            <SEO
+                title={t('wishlist.title', 'Wishlist')}
+                noindex={true}
+                nofollow={true}
+            />
 
             <div className="min-h-screen bg-background pb-[calc(73px+env(safe-area-inset-bottom))] lg:pb-0">
                 <MainHeader />

@@ -61,4 +61,10 @@ export interface ProductDetail extends BaseProduct {
     categories: Category[];
     images: ProductImage[];
     variants: ProductVariant[];
+    // Language switching
+    alternateSlug?: string;
+    // SEO fields
+    metaTitle: string;
+    metaDescription: string | null;
+    focusKeyphrase: string | null;
 }

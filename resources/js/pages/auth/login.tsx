@@ -14,8 +14,9 @@ import {
 } from '@/components/ui/dialog';
 import AuthLayout from '@/layouts/auth-layout';
 import { register, login as loginRoute, passwordEmail } from '@/routes';
-import { useForm, Head } from '@inertiajs/react';
+import { useForm } from '@inertiajs/react';
 import { useTranslation } from '@/hooks/use-translation';
+import SEO from '@/components/seo';
 import { useState } from 'react';
 
 interface LoginProps {
@@ -64,7 +65,11 @@ export default function Login({
             title={t('auth.login_title', 'Log in to your account')}
             description={t('auth.login_description', 'Enter your email and password below to log in')}
         >
-            <Head title={t('auth.login', 'Log in')} />
+            <SEO
+                title={t('auth.login', 'Log in')}
+                noindex={true}
+                nofollow={true}
+            />
 
             <form
                 onSubmit={handleLoginSubmit}

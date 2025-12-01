@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { Head } from '@inertiajs/react';
 import MainHeader from '@/components/main-header';
 import Footer from '@/components/footer';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ResetPasswordForm } from '@/components/auth/reset-password-form';
 import { useTranslation } from '@/hooks/use-translation';
+import SEO from '@/components/seo';
 
 interface ResetPasswordProps {
     token: string;
@@ -23,7 +23,11 @@ export default function ResetPassword({ token, email }: ResetPasswordProps) {
 
     return (
         <>
-            <Head title={t('auth.reset_password', 'Reset Password')} />
+            <SEO
+                title={t('auth.reset_password', 'Reset Password')}
+                noindex={true}
+                nofollow={true}
+            />
 
             <div className="min-h-screen bg-background">
                 <MainHeader />

@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import MainHeader from '@/components/main-header';
 import Footer from '@/components/footer';
 import { useTranslation } from '@/hooks/use-translation';
@@ -9,9 +9,20 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import SEO from '@/components/seo';
+import { generateCanonicalUrl, type BreadcrumbItem } from '@/lib/seo';
+
+interface PageProps {
+    seo: {
+        siteName: string;
+        siteUrl: string;
+    };
+    locale: string;
+}
 
 export default function Contact() {
     const { t, route } = useTranslation();
+    const { seo, locale } = usePage<PageProps>().props;
 
     // Form state
     const [formData, setFormData] = useState({
@@ -154,9 +165,57 @@ export default function Contact() {
         }
     ];
 
+    // SEO data
+    const siteUrl = seo?.siteUrl || '';
+    const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
+    const canonicalUrl = generateCanonicalUrl(siteUrl, currentPath);
+
+    // Breadcrumbs for structured data
+    const breadcrumbs: BreadcrumbItem[] = [
+        { name: t('nav.home', 'Home'), url: siteUrl },
+        { name: t('contact.title', 'Contact'), url: canonicalUrl },
+    ];
+
+    // Alternate URLs for hreflang
+    const alternateUrls = [
+        { locale: 'en', url: `${siteUrl}/contact` },
+        { locale: 'lt', url: `${siteUrl}/lt/kontaktai` },
+    ];
+
+    // LocalBusiness schema for contact page
+    const localBusinessSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'LocalBusiness',
+        name: seo?.siteName || 'Shop Natural',
+        image: `${siteUrl}/images/logo.svg`,
+        telephone: '+37060117017',
+        email: 'info@naturalmente.lt',
+        address: {
+            '@type': 'PostalAddress',
+            streetAddress: 'Vaidoto g. 1',
+            addressLocality: 'Kaunas',
+            postalCode: '45387',
+            addressCountry: 'LT',
+        },
+        openingHoursSpecification: {
+            '@type': 'OpeningHoursSpecification',
+            dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+            opens: '09:00',
+            closes: '17:00',
+        },
+        url: siteUrl,
+    };
+
     return (
         <>
-            <Head title={t('contact.title', 'Contact')} />
+            <SEO
+                title={t('contact.meta_title', 'Contact Us')}
+                description={t('contact.meta_description', 'Get in touch with Shop Natural. Visit us in Kaunas, call us, or send us a message. We are here to help with your natural cosmetics needs.')}
+                canonical={canonicalUrl}
+                alternateUrls={alternateUrls}
+                breadcrumbs={breadcrumbs}
+                additionalSchemas={[localBusinessSchema]}
+            />
 
             <div className="min-h-screen bg-background">
                 <MainHeader />

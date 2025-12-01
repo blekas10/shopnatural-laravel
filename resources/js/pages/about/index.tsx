@@ -1,11 +1,22 @@
-import { Head, Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import MainHeader from '@/components/main-header';
 import Footer from '@/components/footer';
 import { useTranslation } from '@/hooks/use-translation';
 import { ChevronRight, Leaf, Package, Heart, Sprout, Droplet, Trees, Sparkles } from 'lucide-react';
+import SEO from '@/components/seo';
+import { generateCanonicalUrl, type BreadcrumbItem } from '@/lib/seo';
+
+interface PageProps {
+    seo: {
+        siteName: string;
+        siteUrl: string;
+    };
+    locale: string;
+}
 
 export default function About() {
     const { t, route } = useTranslation();
+    const { seo, locale } = usePage<PageProps>().props;
 
     const commitments = [
         {
@@ -43,9 +54,32 @@ export default function About() {
         }
     ];
 
+    // SEO data
+    const siteUrl = seo?.siteUrl || '';
+    const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
+    const canonicalUrl = generateCanonicalUrl(siteUrl, currentPath);
+
+    // Breadcrumbs for structured data
+    const breadcrumbs: BreadcrumbItem[] = [
+        { name: t('nav.home', 'Home'), url: siteUrl },
+        { name: t('about.title', 'About Us'), url: canonicalUrl },
+    ];
+
+    // Alternate URLs for hreflang
+    const alternateUrls = [
+        { locale: 'en', url: `${siteUrl}/about` },
+        { locale: 'lt', url: `${siteUrl}/lt/apie-mus` },
+    ];
+
     return (
         <>
-            <Head title={t('about.title', 'About Us')} />
+            <SEO
+                title={t('about.meta_title', 'About Us')}
+                description={t('about.meta_description', 'Learn about Shop Natural - a family-run business dedicated to eco-friendly, natural products. Committed to sustainability and cruelty-free practices.')}
+                canonical={canonicalUrl}
+                alternateUrls={alternateUrls}
+                breadcrumbs={breadcrumbs}
+            />
 
             <div className="min-h-screen bg-background">
                 <MainHeader />
