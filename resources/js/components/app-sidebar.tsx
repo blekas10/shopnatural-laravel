@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/sidebar';
 import { type NavItem, type User as UserType } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { LayoutGrid, Package, User, ShoppingBag, Home, Settings, Users, BoxIcon } from 'lucide-react';
+import { LayoutGrid, Package, User, ShoppingBag, Home, Users, BoxIcon } from 'lucide-react';
 import AppLogo from './app-logo';
 import { useTranslation } from '@/hooks/use-translation';
 
@@ -49,7 +49,7 @@ export function AppSidebar() {
     const adminNavItems: NavItem[] = [
         {
             title: t('sidebar.dashboard', 'Dashboard'),
-            href: route('dashboard'),
+            href: route('admin.dashboard'),
             icon: LayoutGrid,
         },
         {
@@ -81,13 +81,8 @@ export function AppSidebar() {
         },
         {
             title: t('sidebar.manage_users', 'Manage Users'),
-            href: route('dashboard'),
+            href: route('admin.users.index'),
             icon: Users,
-        },
-        {
-            title: t('sidebar.settings', 'Settings'),
-            href: route('dashboard'),
-            icon: Settings,
         },
     ];
 
@@ -108,7 +103,7 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href={route('dashboard')} prefetch>
+                            <Link href={route(isAdmin ? 'admin.dashboard' : 'dashboard')} prefetch>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>

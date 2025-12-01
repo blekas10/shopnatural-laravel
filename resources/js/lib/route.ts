@@ -57,6 +57,10 @@ const routeMap: Record<string, Record<string, string>> = {
     'admin.orders.update-payment-status': { en: 'admin/orders', lt: 'admin/orders' },
     'admin.orders.invoice.download': { en: 'admin/orders', lt: 'admin/orders' },
     'admin.orders.invoice.view': { en: 'admin/orders', lt: 'admin/orders' },
+    'admin.users.index': { en: 'admin/users', lt: 'admin/users' },
+    'admin.users.show': { en: 'admin/users', lt: 'admin/users' },
+    'admin.users.toggle-role': { en: 'admin/users', lt: 'admin/users' },
+    'admin.dashboard': { en: 'admin/dashboard', lt: 'admin/dashboard' },
 };
 
 // Non-localized routes (auth routes that don't have locale prefix)
@@ -98,13 +102,15 @@ export function route(name: string, params: Record<string, string | number | boo
         path += `/${segment}`;
     }
 
-    // Handle route parameters (like {slug}, {orderNumber}, {id}, {category}, {product}, {order})
+    // Handle route parameters (like {slug}, {orderNumber}, {id}, {category}, {product}, {order}, {user})
     if (params.slug) {
         path += `/${params.slug}`;
     } else if (params.orderNumber) {
         path += `/${params.orderNumber}`;
     } else if (params.order) {
         path += `/${params.order}`;
+    } else if (params.user) {
+        path += `/${params.user}`;
     } else if (params.category) {
         path += `/${params.category}`;
     } else if (params.product) {
@@ -138,11 +144,17 @@ export function route(name: string, params: Record<string, string | number | boo
         path += '/payment-status';
     }
 
+    // Add /toggle-role suffix for user role toggle routes
+    if (name.endsWith('.toggle-role')) {
+        path += '/toggle-role';
+    }
+
     // Handle query parameters
     const queryParams = { ...params };
     delete queryParams.slug; // Remove slug as it's already in the path
     delete queryParams.orderNumber; // Remove orderNumber as it's already in the path
     delete queryParams.order; // Remove order as it's already in the path
+    delete queryParams.user; // Remove user as it's already in the path
     delete queryParams.category; // Remove category as it's already in the path
     delete queryParams.product; // Remove product as it's already in the path
     delete queryParams.id; // Remove id as it's already in the path

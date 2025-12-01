@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\BrandController as AdminBrandController;
 use App\Http\Controllers\Admin\ProductImageController as AdminProductImageController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
@@ -195,6 +196,14 @@ Route::group(['prefix' => 'lt'], function () {
             Route::patch('orders/{order}/payment-status', [AdminOrderController::class, 'updatePaymentStatus'])->name('lt.admin.orders.update-payment-status');
             Route::get('orders/{order}/saskaita/atsisiusti', [AdminOrderController::class, 'downloadInvoice'])->name('lt.admin.orders.invoice.download');
             Route::get('orders/{order}/saskaita/perziureti', [AdminOrderController::class, 'viewInvoice'])->name('lt.admin.orders.invoice.view');
+
+            // User management
+            Route::get('users', [AdminUserController::class, 'index'])->name('lt.admin.users.index');
+            Route::get('users/{user}', [AdminUserController::class, 'show'])->name('lt.admin.users.show');
+            Route::post('users/{user}/toggle-role', [AdminUserController::class, 'toggleRole'])->name('lt.admin.users.toggle-role');
+
+            // Admin dashboard
+            Route::get('dashboard', [DashboardController::class, 'adminIndex'])->name('lt.admin.dashboard');
         });
     });
 });
@@ -243,6 +252,14 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('orders/{order}/payment-status', [AdminOrderController::class, 'updatePaymentStatus'])->name('admin.orders.update-payment-status');
         Route::get('orders/{order}/invoice/download', [AdminOrderController::class, 'downloadInvoice'])->name('admin.orders.invoice.download');
         Route::get('orders/{order}/invoice/view', [AdminOrderController::class, 'viewInvoice'])->name('admin.orders.invoice.view');
+
+        // User management
+        Route::get('users', [AdminUserController::class, 'index'])->name('admin.users.index');
+        Route::get('users/{user}', [AdminUserController::class, 'show'])->name('admin.users.show');
+        Route::post('users/{user}/toggle-role', [AdminUserController::class, 'toggleRole'])->name('admin.users.toggle-role');
+
+        // Admin dashboard
+        Route::get('dashboard', [DashboardController::class, 'adminIndex'])->name('admin.dashboard');
     });
 });
 
