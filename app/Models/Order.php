@@ -221,7 +221,7 @@ class Order extends Model
     /**
      * Mark as shipped
      */
-    public function markAsShipped(string $trackingNumber = null): void
+    public function markAsShipped(?string $trackingNumber = null): void
     {
         $this->update([
             'status' => 'shipped',
