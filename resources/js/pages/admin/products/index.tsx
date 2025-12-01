@@ -220,8 +220,9 @@ export default function AdminProducts({ products, categories, brands, filters }:
             preserveScroll: true,
             replace: true,
         });
-    }, [filters]);
+    }, [filters, route]);
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const debouncedSearch = useCallback(
         debounce((value: string) => {
             const params: Record<string, string | number | null> = {

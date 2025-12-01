@@ -30,6 +30,7 @@ export function useTranslation(): TranslationHook {
         [translations]
     );
 
+    // eslint-disable-next-line react-hooks/preserve-manual-memoization
     const switchLocale = useCallback((newLocale: string) => {
         // Get current path
         const currentPath = window.location.pathname;
@@ -80,7 +81,6 @@ export function useTranslation(): TranslationHook {
 
         // Check if we're on a product detail page and have an alternate slug
         const isProductPage = segments[0] === 'products' || segments[0] === 'produktai';
-        const productSlug = isProductPage && segments.length > 1 ? segments[1] : null;
 
         // Translate route segments (but not for admin routes)
         const translatedSegments = isAdminRoute
@@ -111,7 +111,7 @@ export function useTranslation(): TranslationHook {
         }
 
         router.visit(newPath);
-    }, [availableLocales]);
+    }, [availableLocales, product?.alternateSlug]);
 
     const route = useCallback(
         (name: string, params?: Record<string, string | number | boolean>) => {
