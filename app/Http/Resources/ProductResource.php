@@ -25,7 +25,7 @@ class ProductResource extends JsonResource
             'id' => $this->id,
             'name' => $this->getTranslation('name', app()->getLocale()),
             'title' => $this->title ? $this->getTranslation('title', app()->getLocale()) : null,
-            'slug' => $this->slug,
+            'slug' => $this->getTranslation('slug', app()->getLocale()),
             'price' => $variant ? (float) $variant->price : $minPrice,
             'compareAtPrice' => $variant?->compare_at_price ? (float) $variant->compare_at_price : null,
             'minPrice' => $hasPriceRange ? (float) $minPrice : null,

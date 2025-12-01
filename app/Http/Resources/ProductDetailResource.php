@@ -63,7 +63,7 @@ class ProductDetailResource extends ProductResource
             ? $this->categories->map(fn($c) => [
                 'id' => $c->id,
                 'name' => $c->getTranslation('name', app()->getLocale()),
-                'slug' => $c->slug,
+                'slug' => $c->getTranslation('slug', app()->getLocale()),
             ])->toArray()
             : [];
 

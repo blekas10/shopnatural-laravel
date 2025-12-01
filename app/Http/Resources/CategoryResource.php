@@ -12,24 +12,26 @@ class CategoryResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $locale = app()->getLocale();
+
         return [
             'id' => $this->id,
-            'name' => $this->getTranslation('name', app()->getLocale()),
-            'slug' => $this->slug,
+            'name' => $this->getTranslation('name', $locale),
+            'slug' => $this->getTranslation('slug', $locale),
             'children' => $this->when(
                 $this->relationLoaded('activeChildren'),
-                function () {
-                    return $this->activeChildren->map(function ($child) {
+                function () use ($locale) {
+                    return $this->activeChildren->map(function ($child) use ($locale) {
                         return [
                             'id' => $child->id,
-                            'name' => $child->getTranslation('name', app()->getLocale()),
-                            'slug' => $child->slug,
+                            'name' => $child->getTranslation('name', $locale),
+                            'slug' => $child->getTranslation('slug', $locale),
                             'children' => $child->relationLoaded('activeChildren')
-                                ? $child->activeChildren->map(function ($grandchild) {
+                                ? $child->activeChildren->map(function ($grandchild) use ($locale) {
                                     return [
                                         'id' => $grandchild->id,
-                                        'name' => $grandchild->getTranslation('name', app()->getLocale()),
-                                        'slug' => $grandchild->slug,
+                                        'name' => $grandchild->getTranslation('name', $locale),
+                                        'slug' => $grandchild->getTranslation('slug', $locale),
                                     ];
                                 })->toArray()
                                 : [],
