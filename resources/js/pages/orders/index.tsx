@@ -12,6 +12,11 @@ import { Package, Filter, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { useTranslation } from '@/hooks/use-translation';
+import { usePage } from '@inertiajs/react';
+
+interface PageProps {
+    locale: string;
+}
 
 interface OrdersIndexProps {
     orders: Order[] | { data: Order[] };
@@ -32,6 +37,7 @@ const cardVariants = {
 
 export default function OrdersIndex({ orders: ordersData }: OrdersIndexProps) {
     const { t, route } = useTranslation();
+    const { locale } = usePage<PageProps>().props;
     const [activeFilter, setActiveFilter] = useState<OrderStatus | 'all'>('all');
     const [expandedOrders, setExpandedOrders] = useState<Set<number>>(new Set());
 
@@ -164,7 +170,7 @@ export default function OrdersIndex({ orders: ordersData }: OrdersIndexProps) {
                                                 <OrderStatusBadge status={order.status} />
                                             </div>
                                             <p className="text-xs text-muted-foreground md:text-sm">
-                                                {new Date(order.createdAt).toLocaleDateString('en-US', {
+                                                {new Date(order.createdAt).toLocaleDateString(locale === 'lt' ? 'lt-LT' : 'en-US', {
                                                     year: 'numeric',
                                                     month: 'long',
                                                     day: 'numeric',

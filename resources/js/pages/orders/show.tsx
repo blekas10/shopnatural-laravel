@@ -1,4 +1,4 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import SEO from '@/components/seo';
 import { type BreadcrumbItem } from '@/types';
@@ -25,6 +25,10 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+
+interface PageProps {
+    locale: string;
+}
 
 interface OrderItem {
     id: number;
@@ -99,6 +103,7 @@ interface OrderShowProps {
 
 export default function OrderShow({ order: orderData }: OrderShowProps) {
     const { t, route } = useTranslation();
+    const { locale } = usePage<PageProps>().props;
 
     // Normalize order data - handle both direct Order and ResourceCollection format
     const order = 'data' in orderData ? orderData.data : orderData;
@@ -119,7 +124,7 @@ export default function OrderShow({ order: orderData }: OrderShowProps) {
     ];
 
     const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('en-US', {
+        return new Date(dateString).toLocaleDateString(locale === 'lt' ? 'lt-LT' : 'en-US', {
             year: 'numeric',
             month: 'long',
             day: 'numeric',

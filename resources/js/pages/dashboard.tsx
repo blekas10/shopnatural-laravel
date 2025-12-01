@@ -8,11 +8,15 @@ import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem, type User } from '@/types';
 import type { Order } from '@/types/checkout';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Package, Clock, CheckCircle2, ShoppingBag, ArrowRight, Mail, AlertCircle, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/hooks/use-translation';
 import { useState } from 'react';
+
+interface PageProps {
+    locale: string;
+}
 
 interface DashboardProps {
     auth: {
@@ -43,6 +47,7 @@ const cardVariants = {
 
 export default function Dashboard({ auth, stats, recentOrders: recentOrdersData, emailVerified = true, status }: DashboardProps) {
     const { t, route } = useTranslation();
+    const { locale } = usePage<PageProps>().props;
     const [resending, setResending] = useState(false);
 
     // Normalize orders data - handle both array and ResourceCollection format
@@ -247,7 +252,7 @@ export default function Dashboard({ auth, stats, recentOrders: recentOrdersData,
                                                     <OrderStatusBadge status={order.status} />
                                                 </div>
                                                 <p className="text-sm text-muted-foreground">
-                                                    {new Date(order.createdAt).toLocaleDateString('en-US', {
+                                                    {new Date(order.createdAt).toLocaleDateString(locale === 'lt' ? 'lt-LT' : 'en-US', {
                                                         year: 'numeric',
                                                         month: 'long',
                                                         day: 'numeric',

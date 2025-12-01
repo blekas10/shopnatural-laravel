@@ -1,4 +1,4 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     ArrowLeft,
@@ -21,6 +21,10 @@ import type { OrderDetailsProps, OrderStatus } from '@/types/checkout';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
+interface PageProps {
+    locale: string;
+}
+
 const statusIcons: Record<OrderStatus, React.ElementType> = {
     confirmed: CheckCircle2,
     processing: Package,
@@ -31,11 +35,12 @@ const statusIcons: Record<OrderStatus, React.ElementType> = {
 
 export default function OrderDetails({ order }: OrderDetailsProps) {
     const { t, route } = useTranslation();
+    const { locale } = usePage<PageProps>().props;
     const [showCancelDialog, setShowCancelDialog] = useState(false);
     const [isCancelling, setIsCancelling] = useState(false);
 
     const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('en-US', {
+        return new Date(dateString).toLocaleDateString(locale === 'lt' ? 'lt-LT' : 'en-US', {
             year: 'numeric',
             month: 'long',
             day: 'numeric',
