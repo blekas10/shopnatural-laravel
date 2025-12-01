@@ -16,7 +16,7 @@ interface PageProps {
 
 export default function ReturnPolicy() {
     const { t, route } = useTranslation();
-    const { seo, locale } = usePage<PageProps>().props;
+    const { seo } = usePage<PageProps>().props;
 
     const sections = [
         {

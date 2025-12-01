@@ -22,7 +22,7 @@ interface PageProps {
 
 export default function Contact() {
     const { t, route } = useTranslation();
-    const { seo, locale } = usePage<PageProps>().props;
+    const { seo } = usePage<PageProps>().props;
 
     // Form state
     const [formData, setFormData] = useState({

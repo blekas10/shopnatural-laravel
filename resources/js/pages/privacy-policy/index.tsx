@@ -16,7 +16,7 @@ interface PageProps {
 
 export default function PrivacyPolicy() {
     const { t, route } = useTranslation();
-    const { seo, locale } = usePage<PageProps>().props;
+    const { seo } = usePage<PageProps>().props;
 
     // SEO data
     const siteUrl = seo?.siteUrl || '';
