@@ -112,7 +112,7 @@ export default function OrderDetails({ order }: OrderDetailsProps) {
                         </Link>
                         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                             <div>
-                                <h1 className="text-3xl font-bold uppercase tracking-wide md:text-4xl">
+                                <h1 className="text-2xl font-bold uppercase tracking-wide md:text-3xl lg:text-4xl">
                                     {t('order.order', 'Order')} #{order.orderNumber}
                                 </h1>
                                 <p className="mt-2 text-muted-foreground">

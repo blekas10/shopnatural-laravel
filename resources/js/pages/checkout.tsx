@@ -555,7 +555,7 @@ export default function Checkout({
                             <ArrowLeft className="mr-2 size-4 transition-transform group-hover:-translate-x-1" />
                             {t('checkout.back_to_cart', 'Back to Cart')}
                         </Link>
-                        <h1 className="text-3xl font-bold uppercase tracking-wide md:text-4xl">
+                        <h1 className="text-2xl font-bold uppercase tracking-wide md:text-3xl lg:text-4xl">
                             {t('checkout.title', 'Checkout')}
                         </h1>
                     </div>

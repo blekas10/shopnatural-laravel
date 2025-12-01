@@ -64,7 +64,7 @@ export default function PrivacyPolicy() {
                 <div className="container mx-auto px-4 py-8 md:px-6 md:py-12 lg:px-8">
                     {/* Page Heading */}
                     <div className="mb-8 md:mb-12">
-                        <h1 className="text-3xl font-bold uppercase tracking-wide text-foreground md:text-4xl lg:text-5xl">
+                        <h1 className="text-2xl font-bold uppercase tracking-wide text-foreground md:text-3xl lg:text-4xl">
                             {t('privacy_policy.heading', 'Privacy Policy')}
                         </h1>
                         <p className="mt-4 text-base leading-relaxed text-muted-foreground md:text-lg">

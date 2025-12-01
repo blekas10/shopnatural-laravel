@@ -126,7 +126,7 @@ export default function Cart() {
                             className="flex flex-col items-center justify-center py-16 text-center"
                         >
                             <ShoppingBag className="mb-6 size-24 text-muted-foreground/30" />
-                            <h1 className="mb-3 text-3xl font-bold uppercase tracking-wide text-foreground">
+                            <h1 className="mb-3 text-2xl font-bold uppercase tracking-wide text-foreground md:text-3xl">
                                 {t('cart.empty', 'Your cart is empty')}
                             </h1>
                             <p className="mb-8 text-lg text-muted-foreground">

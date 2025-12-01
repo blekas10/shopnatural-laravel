@@ -554,7 +554,7 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
                             <ChevronRight className="size-4" />
                             <span className="text-foreground">{t('products.title', 'Products')}</span>
                         </div>
-                        <h1 className="text-3xl font-bold uppercase tracking-wide text-foreground md:text-4xl">
+                        <h1 className="text-2xl font-bold uppercase tracking-wide text-foreground md:text-3xl lg:text-4xl">
                             {t('products.catalog', 'Product Catalog')}
                         </h1>
                     </div>

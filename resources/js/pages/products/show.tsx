@@ -248,8 +248,13 @@ export default function ProductShow({ product, relatedProducts }: ProductShowPro
                             <Link href={route('products.index')} className="hover:text-foreground transition-colors">
                                 {t('products.title', 'Products')}
                             </Link>
-                            <ChevronRight className="size-4" />
-                            <span className="text-foreground">{product.name}</span>
+                            <ChevronRight className="size-4 shrink-0" />
+                            <span className="text-foreground md:hidden">
+                                {product.name.split(' ').length > 3
+                                    ? product.name.split(' ').slice(0, 3).join(' ') + '...'
+                                    : product.name}
+                            </span>
+                            <span className="text-foreground hidden md:inline">{product.name}</span>
                         </div>
                     </div>
                 </div>
@@ -384,7 +389,7 @@ export default function ProductShow({ product, relatedProducts }: ProductShowPro
 
                             {/* Product Title */}
                             <div className="space-y-2">
-                                <h1 className="text-3xl font-bold uppercase tracking-wide text-foreground md:text-4xl">
+                                <h1 className="text-2xl font-bold uppercase tracking-wide text-foreground md:text-3xl lg:text-4xl">
                                     {product.name}
                                 </h1>
                                 {product.title && (

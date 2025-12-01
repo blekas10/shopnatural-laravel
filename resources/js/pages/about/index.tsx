@@ -123,7 +123,7 @@ export default function About() {
                     <div className="mb-16 md:mb-24">
                         <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
                             <div className="flex flex-col justify-center">
-                                <h2 className="mb-6 text-3xl font-bold uppercase tracking-wide text-foreground md:text-4xl">
+                                <h2 className="mb-6 text-2xl font-bold uppercase tracking-wide text-foreground md:text-3xl lg:text-4xl">
                                     {t('about.roots_title', 'Our Roots')}
                                 </h2>
                                 <p className="text-base leading-relaxed text-muted-foreground md:text-lg">
@@ -160,7 +160,7 @@ export default function About() {
                     {/* Our Commitments Section - Staggered Layout */}
                     <div className="mb-16 md:mb-24">
                         <div className="mb-8 text-center">
-                            <h2 className="mb-3 text-3xl font-bold uppercase tracking-wide text-foreground md:text-4xl">
+                            <h2 className="mb-3 text-2xl font-bold uppercase tracking-wide text-foreground md:text-3xl lg:text-4xl">
                                 {t('about.commitments_title', 'Our Commitments')}
                             </h2>
                             <p className="text-base text-muted-foreground md:text-lg">
@@ -200,7 +200,7 @@ export default function About() {
                     {/* Why Choose Us Section - Large Cards */}
                     <div className="mb-16 md:mb-24">
                         <div className="mb-8 text-center">
-                            <h2 className="mb-3 text-3xl font-bold uppercase tracking-wide text-foreground md:text-4xl">
+                            <h2 className="mb-3 text-2xl font-bold uppercase tracking-wide text-foreground md:text-3xl lg:text-4xl">
                                 {t('about.why_choose_title', 'Why Choose Shop Natural')}
                             </h2>
                         </div>
@@ -240,7 +240,7 @@ export default function About() {
                             <div className="absolute right-0 top-0 size-64 bg-gold/10 blur-3xl" />
                             <div className="absolute bottom-0 left-0 size-64 bg-teal/10 blur-3xl" />
                             <div className="relative mx-auto max-w-3xl text-center">
-                                <h2 className="mb-6 text-3xl font-bold uppercase tracking-wide text-foreground md:text-4xl lg:text-5xl">
+                                <h2 className="mb-6 text-2xl font-bold uppercase tracking-wide text-foreground md:text-3xl lg:text-4xl">
                                     {t('about.vision_title', 'Our Vision')}
                                 </h2>
                                 <p className="mb-6 text-lg leading-relaxed text-muted-foreground md:text-xl">
@@ -262,7 +262,7 @@ export default function About() {
                                 <div className="mb-4 inline-flex rounded-full bg-gold/30 p-4">
                                     <Trees className="size-8 text-foreground" />
                                 </div>
-                                <h2 className="mb-4 text-3xl font-bold uppercase tracking-wide text-foreground md:text-4xl">
+                                <h2 className="mb-4 text-2xl font-bold uppercase tracking-wide text-foreground md:text-3xl lg:text-4xl">
                                     {t('about.impact_title', 'Environmental Impact')}
                                 </h2>
                                 <p className="text-lg leading-relaxed text-foreground md:text-xl">

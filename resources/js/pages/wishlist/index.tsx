@@ -151,7 +151,7 @@ export default function WishlistIndex({ wishlistItems: initialWishlistItems }: W
                 <div className="container mx-auto px-4 py-8 md:px-6 md:py-12 lg:px-8">
                     {/* Page Header */}
                     <div className="mb-8">
-                        <h1 className="text-3xl font-bold uppercase tracking-wide text-foreground md:text-4xl flex items-center gap-3">
+                        <h1 className="text-2xl font-bold uppercase tracking-wide text-foreground md:text-3xl lg:text-4xl flex items-center gap-3">
                             <Heart className="size-8 md:size-10 text-gold fill-gold" />
                             {t('wishlist.title', 'My Wishlist')}
                         </h1>
