@@ -224,6 +224,9 @@ class Order extends Model
             'email' => $this->customer_email,
         ]);
 
+        // Wait for Mailtrap rate limit (remove this when using real mail provider)
+        sleep(2);
+
         // Send to admin always in Lithuanian
         $adminEmail = config('mail.admin_email', 'admin@shopnatural.com');
         \Mail::to($adminEmail)
