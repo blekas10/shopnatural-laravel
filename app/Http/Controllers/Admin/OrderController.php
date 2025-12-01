@@ -241,9 +241,12 @@ class OrderController extends Controller
     {
         $order->load('items.product', 'items.variant');
 
+        // Use current locale (from URL prefix)
+        $locale = app()->getLocale();
+
         $pdf = Pdf::loadView('emails.invoice-pdf', [
             'order' => $order,
-            'locale' => 'lt', // Admin invoices always in Lithuanian
+            'locale' => $locale,
         ]);
 
         $filename = 'invoice-' . $order->order_number . '.pdf';
@@ -258,9 +261,12 @@ class OrderController extends Controller
     {
         $order->load('items.product', 'items.variant');
 
+        // Use current locale (from URL prefix)
+        $locale = app()->getLocale();
+
         $pdf = Pdf::loadView('emails.invoice-pdf', [
             'order' => $order,
-            'locale' => 'lt',
+            'locale' => $locale,
         ]);
 
         return $pdf->stream('invoice-' . $order->order_number . '.pdf');

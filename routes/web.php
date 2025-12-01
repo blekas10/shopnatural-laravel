@@ -193,8 +193,8 @@ Route::group(['prefix' => 'lt'], function () {
             Route::get('orders/{order}', [AdminOrderController::class, 'show'])->name('lt.admin.orders.show');
             Route::patch('orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('lt.admin.orders.update-status');
             Route::patch('orders/{order}/payment-status', [AdminOrderController::class, 'updatePaymentStatus'])->name('lt.admin.orders.update-payment-status');
-            Route::get('orders/{order}/invoice/download', [AdminOrderController::class, 'downloadInvoice'])->name('lt.admin.orders.invoice.download');
-            Route::get('orders/{order}/invoice/view', [AdminOrderController::class, 'viewInvoice'])->name('lt.admin.orders.invoice.view');
+            Route::get('orders/{order}/saskaita/atsisiusti', [AdminOrderController::class, 'downloadInvoice'])->name('lt.admin.orders.invoice.download');
+            Route::get('orders/{order}/saskaita/perziureti', [AdminOrderController::class, 'viewInvoice'])->name('lt.admin.orders.invoice.view');
         });
     });
 });

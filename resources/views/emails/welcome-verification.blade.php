@@ -43,7 +43,7 @@
             @if($locale === 'lt')
                 <strong>Greitas užsakymas</strong> — Išsaugokite adresus ir mokėjimo būdus<br>
                 <strong>Užsakymų istorija</strong> — Peržiūrėkite visus savo užsakymus vienoje vietoje<br>
-                <strong>Ekskluzyvūs pasiūlymai</strong> — Gaukite specialius pasiūlymus ir nuolaidas
+                <strong>Specialūs pasiūlymai</strong> — Gaukite specialius pasiūlymus ir nuolaidas
             @else
                 <strong>Fast checkout</strong> — Save addresses and payment methods<br>
                 <strong>Order history</strong> — View all your orders in one place<br>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $locale === 'lt' ? 'Sąskaita faktūra' : 'Invoice' }} - {{ $order->order_number }}</title>
+    <title>{{ $locale === 'lt' ? 'PVM sąskaita faktūra' : 'VAT Invoice' }} - {{ $invoice_number ?? $order->order_number }}</title>
     <style>
         * {
             margin: 0;
@@ -13,160 +13,201 @@
 
         body {
             font-family: 'DejaVu Sans', sans-serif;
-            font-size: 10pt;
-            line-height: 1.6;
+            font-size: 9pt;
+            line-height: 1.5;
             color: #333;
+            background: #fff;
         }
 
         .container {
-            padding: 40px;
+            padding: 30px 40px;
             max-width: 800px;
             margin: 0 auto;
         }
 
+        /* Header with logo and invoice info */
         .header {
-            margin-bottom: 40px;
-            padding-bottom: 20px;
-            border-bottom: 3px solid #C2A363;
-        }
-
-        .logo {
-            font-size: 24pt;
-            font-weight: bold;
-            color: #C2A363;
-            margin-bottom: 5px;
-        }
-
-        .company-info {
-            color: #666;
-            font-size: 9pt;
-        }
-
-        .invoice-details {
             display: table;
             width: 100%;
             margin-bottom: 30px;
         }
 
-        .invoice-details > div {
+        .header-left {
             display: table-cell;
-            width: 50%;
+            width: 45%;
             vertical-align: top;
+        }
+
+        .header-right {
+            display: table-cell;
+            width: 55%;
+            vertical-align: top;
+            text-align: right;
+        }
+
+        .logo-img {
+            max-width: 180px;
+            height: auto;
         }
 
         .invoice-title {
-            font-size: 18pt;
+            font-size: 14pt;
             font-weight: bold;
-            margin-bottom: 10px;
+            color: #333;
+            margin-bottom: 12px;
         }
 
-        .detail-row {
-            margin-bottom: 5px;
+        .invoice-meta {
+            font-size: 9pt;
         }
 
-        .label {
+        .invoice-meta-row {
+            display: table;
+            width: 100%;
+            margin-bottom: 3px;
+        }
+
+        .invoice-meta-label {
+            display: table-cell;
             font-weight: bold;
-            color: #666;
+            color: #333;
+            text-align: left;
+            padding-right: 15px;
         }
 
+        .invoice-meta-value {
+            display: table-cell;
+            text-align: right;
+            color: #333;
+        }
+
+        /* Three column addresses */
         .addresses {
             display: table;
             width: 100%;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
+            border-top: 2px solid #C2A363;
+            padding-top: 20px;
         }
 
-        .address-block {
+        .address-column {
             display: table-cell;
-            width: 50%;
-            padding: 15px;
-            background: #f8f8f8;
+            width: 33.33%;
             vertical-align: top;
+            padding-right: 15px;
         }
 
-        .address-block:first-child {
-            margin-right: 10px;
+        .address-column:last-child {
+            padding-right: 0;
         }
 
         .address-title {
             font-weight: bold;
-            font-size: 11pt;
+            font-size: 9pt;
             margin-bottom: 8px;
-            color: #C2A363;
+            color: #333;
         }
 
-        table {
+        .address-content {
+            font-size: 9pt;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* Products table */
+        .products-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            font-size: 8.5pt;
         }
 
-        th {
-            background: #C2A363;
-            color: white;
-            padding: 12px;
+        .products-table th {
+            background: #f5f5f5;
+            border: 1px solid #e0e0e0;
+            padding: 10px 8px;
             text-align: left;
             font-weight: bold;
+            color: #333;
+            text-transform: uppercase;
+            font-size: 8pt;
         }
 
-        td {
-            padding: 10px 12px;
-            border-bottom: 1px solid #eee;
+        .products-table td {
+            border: 1px solid #e0e0e0;
+            padding: 10px 8px;
+            vertical-align: top;
         }
 
-        tr:last-child td {
-            border-bottom: none;
+        .products-table .text-center {
+            text-align: center;
         }
 
-        .text-right {
+        .products-table .text-right {
             text-align: right;
         }
 
-        .totals {
-            margin-top: 20px;
-            float: right;
-            width: 300px;
+        .products-table tbody tr:nth-child(even) {
+            background: #fafafa;
         }
 
-        .totals table {
-            margin-bottom: 0;
+        /* Summary section */
+        .summary-wrapper {
+            display: table;
+            width: 100%;
         }
 
-        .totals td {
-            border-bottom: none;
+        .summary-spacer {
+            display: table-cell;
+            width: 50%;
+        }
+
+        .summary-table-wrapper {
+            display: table-cell;
+            width: 50%;
+        }
+
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 9pt;
+        }
+
+        .summary-table td {
             padding: 8px 12px;
+            border: 1px solid #e0e0e0;
         }
 
-        .totals .total-row {
-            font-size: 12pt;
+        .summary-table .label {
             font-weight: bold;
-            border-top: 2px solid #C2A363;
+            text-align: right;
+            background: #f5f5f5;
+            width: 60%;
         }
 
-        .totals .total-row td {
-            padding-top: 12px;
+        .summary-table .value {
+            text-align: right;
+            width: 40%;
         }
 
+        .summary-table .discount {
+            color: #C2A363;
+        }
+
+        .summary-table .total-row td {
+            font-weight: bold;
+            font-size: 10pt;
+            background: #f5f5f5;
+        }
+
+        /* Footer */
         .footer {
-            margin-top: 60px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
+            margin-top: 40px;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
             text-align: center;
             color: #666;
-            font-size: 9pt;
-            clear: both;
-        }
-
-        .shipping-info {
-            background: #f8f8f8;
-            padding: 15px;
-            margin-bottom: 20px;
-            border-left: 3px solid #C2A363;
-        }
-
-        .shipping-info-title {
-            font-weight: bold;
-            margin-bottom: 5px;
-            color: #C2A363;
+            font-size: 8pt;
         }
     </style>
 </head>
@@ -174,147 +215,138 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <div class="logo">Shop Natural</div>
-            <div class="company-info">
-                {{ $locale === 'lt' ? 'Natūralių produktų parduotuvė' : 'Natural Products Store' }}<br>
-                info@shopnatural.com | www.shopnatural.com
+            <div class="header-left">
+                <img src="{{ public_path('images/shop-natural-logo.png') }}" alt="Shop Natural" class="logo-img">
+            </div>
+            <div class="header-right">
+                <div class="invoice-title">{{ $locale === 'lt' ? 'PVM sąskaita faktūra' : 'VAT Invoice' }}</div>
+                <div class="invoice-meta">
+                    <div class="invoice-meta-row">
+                        <span class="invoice-meta-label">{{ $locale === 'lt' ? 'Sąskaitos numeris' : 'Invoice Number' }}</span>
+                        <span class="invoice-meta-value">{{ $invoice_number ?? 'IN' . str_pad($order->id, 6, '0', STR_PAD_LEFT) }}</span>
+                    </div>
+                    <div class="invoice-meta-row">
+                        <span class="invoice-meta-label">{{ $locale === 'lt' ? 'Užsakymo numeris' : 'Order Number' }}</span>
+                        <span class="invoice-meta-value">{{ $order->order_number }}</span>
+                    </div>
+                    <div class="invoice-meta-row">
+                        <span class="invoice-meta-label">{{ $locale === 'lt' ? 'Užsakymo data' : 'Order Date' }}</span>
+                        <span class="invoice-meta-value">{{ $locale === 'lt' ? $order->created_at->translatedFormat('d F Y') : $order->created_at->format('d F Y') }}</span>
+                    </div>
+                    <div class="invoice-meta-row">
+                        <span class="invoice-meta-label">{{ $locale === 'lt' ? 'Mokėjimo būdas' : 'Payment Method' }}</span>
+                        <span class="invoice-meta-value">{{ $order->payment_method ?? ($locale === 'lt' ? 'Visi populiarūs mokėjimo būdai' : 'All popular payment methods') }}</span>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Invoice Details -->
-        <div class="invoice-details">
-            <div>
-                <div class="invoice-title">{{ $locale === 'lt' ? 'SĄSKAITA FAKTŪRA' : 'INVOICE' }}</div>
-                <div class="detail-row">
-                    <span class="label">{{ $locale === 'lt' ? 'Užsakymo numeris:' : 'Order Number:' }}</span>
-                    {{ $order->order_number }}
-                </div>
-                <div class="detail-row">
-                    <span class="label">{{ $locale === 'lt' ? 'Data:' : 'Date:' }}</span>
-                    {{ $order->created_at->format('Y-m-d') }}
-                </div>
-                <div class="detail-row">
-                    <span class="label">{{ $locale === 'lt' ? 'Statusas:' : 'Status:' }}</span>
-                    {{ ucfirst($order->status) }}
-                </div>
-            </div>
-            <div style="text-align: right;">
-                <div class="detail-row">
-                    <span class="label">{{ $locale === 'lt' ? 'Mokėjimo būsena:' : 'Payment Status:' }}</span>
-                    {{ ucfirst($order->payment_status) }}
-                </div>
-                @if($order->tracking_number)
-                <div class="detail-row">
-                    <span class="label">{{ $locale === 'lt' ? 'Sekimo numeris:' : 'Tracking Number:' }}</span>
-                    {{ $order->tracking_number }}
-                </div>
-                @endif
-            </div>
-        </div>
-
-        <!-- Customer & Billing Address -->
+        <!-- Three Column Addresses -->
         <div class="addresses">
-            <div class="address-block">
-                <div class="address-title">{{ $locale === 'lt' ? 'Pirkėjas' : 'Customer' }}</div>
-                {{ $order->shipping_first_name }} {{ $order->shipping_last_name }}<br>
-                {{ $order->customer_email }}<br>
-                @if($order->shipping_phone)
-                    {{ $order->shipping_phone }}<br>
-                @endif
+            <div class="address-column">
+                <div class="address-title">{{ $locale === 'lt' ? 'Parduotuvės informacija:' : 'Store Information:' }}</div>
+                <div class="address-content">
+                    shop-natural<br>
+                    Vaidoto g. 1<br>
+                    LT-45387 Kaunas<br>
+                    Lietuva<br>
+                    +370 601 17017
+                </div>
             </div>
-            <div class="address-block" style="margin-left: 10px;">
-                <div class="address-title">{{ $locale === 'lt' ? 'Sąskaitos adresas' : 'Billing Address' }}</div>
-                {{ $order->billing_street_address }}<br>
-                @if($order->billing_apartment)
-                    {{ $order->billing_apartment }}<br>
-                @endif
-                {{ $order->billing_city }}, {{ $order->billing_postal_code }}<br>
-                {{ $order->billing_country }}
+            <div class="address-column">
+                <div class="address-title">{{ $locale === 'lt' ? 'Pristatymo adresas' : 'Shipping Address' }}</div>
+                <div class="address-content">
+                    {{ $order->shipping_first_name }} {{ $order->shipping_last_name }}<br>
+                    {{ $order->shipping_street_address }}@if($order->shipping_apartment) {{ $order->shipping_apartment }}@endif<br>
+                    {{ $order->shipping_city }}<br>
+                    {{ $order->shipping_country }}<br>
+                    {{ $order->shipping_postal_code }}<br>
+                    @if($order->shipping_phone)Tel: {{ $order->shipping_phone }}@endif
+                </div>
+            </div>
+            <div class="address-column">
+                <div class="address-title">{{ $locale === 'lt' ? 'Mokėjimo adresas' : 'Billing Address' }}</div>
+                <div class="address-content">
+                    {{ $order->billing_first_name ?? $order->shipping_first_name }} {{ $order->billing_last_name ?? $order->shipping_last_name }}<br>
+                    {{ $order->billing_street_address ?? $order->shipping_street_address }}@if($order->billing_apartment ?? $order->shipping_apartment) {{ $order->billing_apartment ?? $order->shipping_apartment }}@endif<br>
+                    {{ $order->billing_city ?? $order->shipping_city }}<br>
+                    {{ $order->billing_country ?? $order->shipping_country }}<br>
+                    {{ $order->billing_postal_code ?? $order->shipping_postal_code }}<br>
+                    @if($order->shipping_phone)Tel: {{ $order->shipping_phone }}@endif
+                </div>
             </div>
         </div>
 
-        <!-- Shipping Information -->
-        @if($order->shipping_method)
-        <div class="shipping-info">
-            <div class="shipping-info-title">{{ $locale === 'lt' ? 'Pristatymo informacija' : 'Shipping Information' }}</div>
-            <div class="detail-row">
-                <span class="label">{{ $locale === 'lt' ? 'Pristatymo būdas:' : 'Shipping Method:' }}</span>
-                {{ ucwords(str_replace('-', ' ', $order->shipping_method)) }}
-            </div>
-            <div class="detail-row">
-                <span class="label">{{ $locale === 'lt' ? 'Pristatymo adresas:' : 'Shipping Address:' }}</span>
-                {{ $order->shipping_street_address }}
-                @if($order->shipping_apartment), {{ $order->shipping_apartment }}@endif,
-                {{ $order->shipping_city }}, {{ $order->shipping_postal_code }}, {{ $order->shipping_country }}
-            </div>
-            @if($order->venipak_pickup_point)
-            <div class="detail-row">
-                <span class="label">{{ $locale === 'lt' ? 'Venipak atsiėmimo punktas:' : 'Venipak Pickup Point:' }}</span>
-                {{ $order->venipak_pickup_point['name'] ?? '' }},
-                {{ $order->venipak_pickup_point['address'] ?? '' }},
-                {{ $order->venipak_pickup_point['city'] ?? '' }},
-                {{ $order->venipak_pickup_point['zip'] ?? '' }}
-            </div>
-            @endif
-        </div>
-        @endif
-
-        <!-- Order Items -->
-        <table>
+        <!-- Products Table -->
+        <table class="products-table">
             <thead>
                 <tr>
-                    <th>{{ $locale === 'lt' ? 'Produktas' : 'Product' }}</th>
-                    <th>{{ $locale === 'lt' ? 'SKU' : 'SKU' }}</th>
-                    <th class="text-right">{{ $locale === 'lt' ? 'Kiekis' : 'Qty' }}</th>
-                    <th class="text-right">{{ $locale === 'lt' ? 'Kaina' : 'Price' }}</th>
-                    <th class="text-right">{{ $locale === 'lt' ? 'Suma' : 'Total' }}</th>
+                    <th style="width: 40%;">{{ $locale === 'lt' ? 'PRODUKTAS' : 'PRODUCT' }}</th>
+                    <th style="width: 10%;" class="text-center">{{ $locale === 'lt' ? 'KODAS' : 'CODE' }}</th>
+                    <th style="width: 8%;" class="text-center">{{ $locale === 'lt' ? 'KIEKIS' : 'QTY' }}</th>
+                    <th style="width: 14%;" class="text-right">{{ $locale === 'lt' ? 'KAINA BE PVM' : 'PRICE EX VAT' }}</th>
+                    <th style="width: 8%;" class="text-center">{{ $locale === 'lt' ? 'PVM (%)' : 'VAT (%)' }}</th>
+                    <th style="width: 10%;" class="text-right">{{ $locale === 'lt' ? 'PVM (€)' : 'VAT (€)' }}</th>
+                    <th style="width: 10%;" class="text-right">{{ $locale === 'lt' ? 'VISO' : 'TOTAL' }}</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($order->items as $item)
+                @php
+                    $itemTotal = $item->total;
+                    $vatRate = 21;
+                    $priceExVat = $itemTotal / (1 + $vatRate / 100);
+                    $vatAmount = $itemTotal - $priceExVat;
+                @endphp
                 <tr>
-                    <td>{{ $item->product_name }} - {{ $item->variant_size }}</td>
-                    <td>{{ $item->product_sku }}</td>
-                    <td class="text-right">{{ $item->quantity }}</td>
-                    <td class="text-right">€{{ number_format($item->unit_price, 2) }}</td>
-                    <td class="text-right">€{{ number_format($item->total, 2) }}</td>
+                    <td>{{ $item->product_name }}@if($item->variant_size) - {{ $item->variant_size }}@endif</td>
+                    <td class="text-center">{{ $item->product_sku }}</td>
+                    <td class="text-center">{{ $item->quantity }}</td>
+                    <td class="text-right">{{ number_format($priceExVat, 2, ',', ' ') }} €</td>
+                    <td class="text-center">{{ $vatRate }}%</td>
+                    <td class="text-right">{{ number_format($vatAmount, 2, ',', ' ') }} €</td>
+                    <td class="text-right">{{ number_format($itemTotal, 2, ',', ' ') }} €</td>
                 </tr>
                 @endforeach
             </tbody>
         </table>
 
-        <!-- Totals -->
-        <div class="totals">
-            <table>
-                <tr>
-                    <td>{{ $locale === 'lt' ? 'Tarpinė suma:' : 'Subtotal:' }}</td>
-                    <td class="text-right">€{{ number_format($order->subtotal, 2) }}</td>
-                </tr>
-                <tr>
-                    <td>{{ $locale === 'lt' ? 'Pristatymas:' : 'Shipping:' }}</td>
-                    <td class="text-right">€{{ number_format($order->shipping_cost, 2) }}</td>
-                </tr>
-                @if($order->discount > 0)
-                <tr>
-                    <td>{{ $locale === 'lt' ? 'Nuolaida:' : 'Discount:' }}</td>
-                    <td class="text-right">-€{{ number_format($order->discount, 2) }}</td>
-                </tr>
-                @endif
-                <tr>
-                    <td>{{ $locale === 'lt' ? 'PVM (21%):' : 'VAT (21%):' }}</td>
-                    <td class="text-right">€{{ number_format($order->tax, 2) }}</td>
-                </tr>
-                <tr class="total-row">
-                    <td>{{ $locale === 'lt' ? 'IŠ VISO:' : 'TOTAL:' }}</td>
-                    <td class="text-right">€{{ number_format($order->total, 2) }}</td>
-                </tr>
-            </table>
+        <!-- Summary -->
+        <div class="summary-wrapper">
+            <div class="summary-spacer"></div>
+            <div class="summary-table-wrapper">
+                <table class="summary-table">
+                    <tr>
+                        <td class="label">{{ $locale === 'lt' ? 'Pristatymo būdas' : 'Shipping Method' }}</td>
+                        <td class="value">{{ $order->shipping_method ? ucwords(str_replace(['-', '_'], ' ', $order->shipping_method)) : '-' }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">{{ $locale === 'lt' ? 'Pristatymo kaina' : 'Shipping Cost' }}</td>
+                        <td class="value">{{ number_format($order->shipping_cost, 2, ',', ' ') }} €</td>
+                    </tr>
+                    <tr>
+                        <td class="label">{{ $locale === 'lt' ? 'Prekės (be PVM)' : 'Products (ex VAT)' }}</td>
+                        <td class="value">{{ number_format(($order->subtotal + $order->discount) / 1.21, 2, ',', ' ') }} €</td>
+                    </tr>
+                    <tr>
+                        <td class="label">{{ $locale === 'lt' ? 'Nuolaida' : 'Discount' }}</td>
+                        <td class="value discount">{{ $order->discount > 0 ? '-' . number_format($order->discount, 2, ',', ' ') : '0,00' }} €</td>
+                    </tr>
+                    <tr>
+                        <td class="label">{{ $locale === 'lt' ? 'PVM (21%)' : 'VAT (21%)' }}</td>
+                        <td class="value">{{ number_format($order->tax, 2, ',', ' ') }} €</td>
+                    </tr>
+                    <tr class="total-row">
+                        <td class="label">{{ $locale === 'lt' ? 'Viso mokėti' : 'Total to Pay' }}</td>
+                        <td class="value">{{ number_format($order->total, 2, ',', ' ') }} €</td>
+                    </tr>
+                </table>
+            </div>
         </div>
 
         <!-- Footer -->
         <div class="footer">
-            {{ $locale === 'lt' ? 'Dėkojame už jūsų užsakymą!' : 'Thank you for your order!' }}<br>
-            {{ $locale === 'lt' ? 'Klausimų atveju susisiekite su mumis' : 'For questions, please contact us at' }} info@shopnatural.com
+            {{ $locale === 'lt' ? 'Dėkojame už jūsų užsakymą!' : 'Thank you for your order!' }} | shop-natural.com | info@shop-natural.com
         </div>
     </div>
 </body>
