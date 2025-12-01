@@ -30,7 +30,6 @@ export function useTranslation(): TranslationHook {
         [translations]
     );
 
-    // eslint-disable-next-line react-hooks/preserve-manual-memoization
     const switchLocale = useCallback((newLocale: string) => {
         // Get current path
         const currentPath = window.location.pathname;
@@ -111,7 +110,7 @@ export function useTranslation(): TranslationHook {
         }
 
         router.visit(newPath);
-    }, [availableLocales, product?.alternateSlug]);
+    }, [availableLocales, product]);
 
     const route = useCallback(
         (name: string, params?: Record<string, string | number | boolean>) => {
