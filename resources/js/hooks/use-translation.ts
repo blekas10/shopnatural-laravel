@@ -10,12 +10,18 @@ interface TranslationHook {
     route: (name: string, params?: Record<string, string | number | boolean>) => string;
 }
 
+interface PageProps {
+    locale: string;
+    availableLocales: string[];
+    translations: Record<string, string>;
+    product?: {
+        slug: string;
+        alternateSlug?: string;
+    };
+}
+
 export function useTranslation(): TranslationHook {
-    const { locale, availableLocales, translations } = usePage<{
-        locale: string;
-        availableLocales: string[];
-        translations: Record<string, string>;
-    }>().props;
+    const { locale, availableLocales, translations, product } = usePage<PageProps>().props;
 
     const t = useCallback(
         (key: string, fallback?: string): string => {
@@ -72,15 +78,23 @@ export function useTranslation(): TranslationHook {
             'settings': { en: 'settings', lt: 'settings' },
         };
 
+        // Check if we're on a product detail page and have an alternate slug
+        const isProductPage = segments[0] === 'products' || segments[0] === 'produktai';
+        const productSlug = isProductPage && segments.length > 1 ? segments[1] : null;
+
         // Translate route segments (but not for admin routes)
         const translatedSegments = isAdminRoute
             ? segments // Keep admin routes as-is
-            : segments.map((segment) => {
+            : segments.map((segment, index) => {
                 // Check if this segment is a translatable route
                 if (routeMap[segment]) {
                     return routeMap[segment][newLocale];
                 }
-                return segment; // Keep product slugs and other segments as-is
+                // If this is a product slug and we have alternateSlug, use it
+                if (isProductPage && index === 1 && product?.alternateSlug) {
+                    return product.alternateSlug;
+                }
+                return segment;
             });
 
         // Build new path with locale prefix (skip for default 'en')

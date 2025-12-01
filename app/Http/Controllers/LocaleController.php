@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Product;
 use Illuminate\Http\Request;
 
 class LocaleController extends Controller
 {
     /**
-     * Switch the application locale
+     * Switch the application locale (fallback - main switching happens in frontend)
      */
     public function switch(Request $request)
     {

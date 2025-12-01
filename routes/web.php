@@ -60,6 +60,9 @@ Route::patch('cart/items/{item}', [CartController::class, 'updateItem'])->name('
 Route::delete('cart/items/{item}', [CartController::class, 'removeItem'])->name('cart.remove');
 Route::delete('cart/clear', [CartController::class, 'clear'])->name('cart.clear');
 
+// Locale switching route
+Route::post('locale', [\App\Http\Controllers\LocaleController::class, 'switch'])->name('locale.switch');
+
 // English routes (default, no prefix)
 Route::group([], function () {
     Route::get('/', [HomeController::class, 'index'])->name('en.home');

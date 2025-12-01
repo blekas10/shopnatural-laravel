@@ -21,11 +21,12 @@ export function useTranslation(): TranslationHook {
     const switchLocale = (newLocale: string) => {
         router.post(
             '/locale',
-            { locale: newLocale },
             {
-                preserveState: true,
+                locale: newLocale,
+                current_path: window.location.pathname,
+            },
+            {
                 preserveScroll: true,
-                only: ['locale', 'translations'],
             }
         );
     };

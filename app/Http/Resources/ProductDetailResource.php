@@ -67,16 +67,22 @@ class ProductDetailResource extends ProductResource
             ])->toArray()
             : [];
 
+        // Get alternate locale slug for language switching
+        $currentLocale = app()->getLocale();
+        $alternateLocale = $currentLocale === 'en' ? 'lt' : 'en';
+        $alternateSlug = $this->getTranslation('slug', $alternateLocale);
+
         return array_merge($baseData, [
             'sku' => $this->defaultVariant?->sku ?? '',
-            'shortDescription' => $this->short_description ? $this->getTranslation('short_description', app()->getLocale()) : null,
-            'description' => $this->getTranslation('description', app()->getLocale()),
-            'additionalInformation' => $this->additional_information ? $this->getTranslation('additional_information', app()->getLocale()) : null,
-            'ingredients' => $this->getTranslation('ingredients', app()->getLocale()),
+            'shortDescription' => $this->short_description ? $this->getTranslation('short_description', $currentLocale) : null,
+            'description' => $this->getTranslation('description', $currentLocale),
+            'additionalInformation' => $this->additional_information ? $this->getTranslation('additional_information', $currentLocale) : null,
+            'ingredients' => $this->getTranslation('ingredients', $currentLocale),
             'inStock' => $this->inStock(),
             'categories' => $categories,
             'images' => $images,
             'variants' => $variants,
+            'alternateSlug' => $alternateSlug,
         ]);
     }
 }
