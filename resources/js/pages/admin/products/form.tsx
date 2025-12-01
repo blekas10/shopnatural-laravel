@@ -56,6 +56,7 @@ interface Product {
     ingredients: TranslatableField;
     meta_title: TranslatableField;
     meta_description: TranslatableField;
+    focus_keyphrase: TranslatableField;
     brand_id: number | null;
     is_active: boolean;
     is_featured: boolean;
@@ -102,6 +103,7 @@ export default function ProductForm({ product, categories, brands }: ProductForm
         ingredients: product?.ingredients || emptyTranslatable(),
         meta_title: product?.meta_title || emptyTranslatable(),
         meta_description: product?.meta_description || emptyTranslatable(),
+        focus_keyphrase: product?.focus_keyphrase || emptyTranslatable(),
         brand_id: product?.brand_id?.toString() || 'none',
         is_active: product?.is_active ?? true,
         is_featured: product?.is_featured ?? false,
@@ -557,6 +559,21 @@ export default function ProductForm({ product, categories, brands }: ProductForm
                                         rows={2}
                                     />
                                 </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="focus_keyphrase">
+                                    {t('admin.products.form.focus_keyphrase', 'Focus Keyphrase')}
+                                    <span className="ml-2 text-xs uppercase text-muted-foreground">
+                                        [{activeLocale}]
+                                    </span>
+                                </Label>
+                                <Input
+                                    id="focus_keyphrase"
+                                    value={getTranslatableValue('focus_keyphrase')}
+                                    onChange={(e) => updateTranslatableField('focus_keyphrase', e.target.value)}
+                                    placeholder={t('admin.products.form.focus_keyphrase_placeholder', 'SEO focus keyphrase')}
+                                />
                             </div>
                         </div>
                     </div>

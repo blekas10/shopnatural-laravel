@@ -42,6 +42,9 @@ class StoreProductRequest extends FormRequest
             'meta_description' => 'nullable|array',
             'meta_description.en' => 'nullable|string|max:500',
             'meta_description.lt' => 'nullable|string|max:500',
+            'focus_keyphrase' => 'nullable|array',
+            'focus_keyphrase.en' => 'nullable|string|max:255',
+            'focus_keyphrase.lt' => 'nullable|string|max:255',
 
             // Relationships
             'brand_id' => 'nullable|exists:brands,id',
