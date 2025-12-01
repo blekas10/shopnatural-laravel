@@ -17,6 +17,7 @@
     "auth.logging_in": "Prisijungiama...",
     "auth.registering": "Registruojamasi...",
     "auth.no_account": "Neturite paskyros?",
+    
     "auth.already_have_account": "Jau turite paskyrą?",
     "auth.create_account": "Susikurti paskyrą",
     "auth.registration_error": "Įvyko klaida bandant registruotis",
