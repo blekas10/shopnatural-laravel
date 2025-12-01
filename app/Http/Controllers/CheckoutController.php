@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\ProductVariant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -72,6 +73,13 @@ class CheckoutController extends Controller
      */
     public function store(Request $request)
     {
+        Log::info('Checkout: Starting checkout process', [
+            'user_id' => auth()->id(),
+            'session_id' => session()->getId(),
+            'payment_method' => $request->input('paymentMethod'),
+            'items_count' => count($request->input('items', [])),
+        ]);
+
         $validated = $request->validate([
             'contact.fullName' => 'required|string',
             'contact.email' => 'required|email:rfc',
@@ -108,6 +116,12 @@ class CheckoutController extends Controller
             'discount' => 'required|numeric|min:0',
             'total' => 'required|numeric|min:0',
             'agreeToTerms' => 'required|accepted',
+        ]);
+
+        Log::info('Checkout: Validation passed', [
+            'customer_email' => $validated['contact']['email'],
+            'shipping_method' => $validated['shippingMethod'],
+            'total' => $validated['total'],
         ]);
 
         DB::beginTransaction();
@@ -160,6 +174,14 @@ class CheckoutController extends Controller
                 'customer_email' => $validated['contact']['email'],
             ]);
 
+            Log::info('Checkout: Order created', [
+                'order_id' => $order->id,
+                'order_number' => $order->order_number,
+                'customer_email' => $order->customer_email,
+                'contact_email_from_request' => $validated['contact']['email'] ?? 'NOT SET',
+                'total' => $order->total,
+            ]);
+
             // Create order items with historical product data
             foreach ($validated['items'] as $item) {
                 // Fetch product and variant for historical data
@@ -191,9 +213,26 @@ class CheckoutController extends Controller
                     'tax' => 0, // Calculate if needed
                     'total' => $subtotal,
                 ]);
+
+                Log::debug('Checkout: Order item created', [
+                    'order_id' => $order->id,
+                    'product_id' => $item['productId'],
+                    'variant_id' => $item['variantId'],
+                    'quantity' => $quantity,
+                ]);
             }
 
+            Log::info('Checkout: All order items created, committing transaction', [
+                'order_id' => $order->id,
+                'items_count' => count($validated['items']),
+            ]);
+
             DB::commit();
+
+            Log::info('Checkout: Transaction committed successfully', [
+                'order_id' => $order->id,
+                'order_number' => $order->order_number,
+            ]);
 
             // Mark cart as completed and link to order
             $this->completeCart($order);
@@ -256,6 +295,12 @@ class CheckoutController extends Controller
                 // Store session ID for reference
                 $order->update(['payment_intent_id' => $session->id]);
 
+                Log::info('Checkout: Stripe session created, redirecting to payment', [
+                    'order_id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'stripe_session_id' => $session->id,
+                ]);
+
                 // Redirect to Stripe Checkout (external redirect for Inertia)
                 return \Inertia\Inertia::location($session->url);
             } elseif ($paymentMethod === 'paysera') {
@@ -285,6 +330,11 @@ class CheckoutController extends Controller
 
                     // Build full URL with query parameters
                     $fullUrl = $paymentUrl . '?' . http_build_query($requestData);
+
+                    Log::info('Checkout: Paysera request created, redirecting to payment', [
+                        'order_id' => $order->id,
+                        'order_number' => $order->order_number,
+                    ]);
 
                     // Redirect to Paysera payment page
                     return \Inertia\Inertia::location($fullUrl);

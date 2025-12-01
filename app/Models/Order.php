@@ -208,14 +208,31 @@ class Order extends Model
     {
         $locale = app()->getLocale();
 
+        \Log::info('Order: Sending confirmation emails', [
+            'order_id' => $this->id,
+            'order_number' => $this->order_number,
+            'customer_email' => $this->customer_email,
+            'locale' => $locale,
+        ]);
+
         // Send to customer in their language
         \Mail::to($this->customer_email)
             ->send(new \App\Mail\OrderConfirmed($this, $locale));
+
+        \Log::info('Order: Customer email queued', [
+            'order_id' => $this->id,
+            'email' => $this->customer_email,
+        ]);
 
         // Send to admin always in Lithuanian
         $adminEmail = config('mail.admin_email', 'admin@shopnatural.com');
         \Mail::to($adminEmail)
             ->send(new \App\Mail\OrderConfirmed($this, 'lt'));
+
+        \Log::info('Order: Admin email queued', [
+            'order_id' => $this->id,
+            'admin_email' => $adminEmail,
+        ]);
     }
 
     /**

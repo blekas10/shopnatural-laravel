@@ -11,6 +11,7 @@ use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
 class OrderConfirmed extends Mailable implements ShouldQueue
 {
@@ -23,6 +24,13 @@ class OrderConfirmed extends Mailable implements ShouldQueue
         public Order $order,
         public string $emailLocale = 'en'
     ) {
+        Log::info('OrderConfirmed: Mailable constructed', [
+            'order_id' => $order->id,
+            'order_number' => $order->order_number,
+            'customer_email' => $order->customer_email,
+            'locale' => $emailLocale,
+        ]);
+
         $this->order->load('items.product', 'items.variant');
     }
 

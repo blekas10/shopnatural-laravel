@@ -51,7 +51,18 @@ class PayseraController extends Controller
                 ]);
 
                 // Send confirmation emails
+                Log::info('Paysera: About to send confirmation emails', [
+                    'order_id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'customer_email' => $order->customer_email,
+                    'order_exists' => Order::where('id', $order->id)->exists(),
+                ]);
+
                 $order->sendOrderConfirmationEmails();
+
+                Log::info('Paysera: Confirmation emails dispatched', [
+                    'order_id' => $order->id,
+                ]);
             } elseif ($response['status'] == '0') {
                 // Payment pending
                 Log::info('Paysera payment pending', [
