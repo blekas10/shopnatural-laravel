@@ -17,7 +17,7 @@
     "auth.logging_in": "Prisijungiama...",
     "auth.registering": "Registruojamasi...",
     "auth.no_account": "Neturite paskyros?",
-    
+
     "auth.already_have_account": "Jau turite paskyrą?",
     "auth.create_account": "Susikurti paskyrą",
     "auth.registration_error": "Įvyko klaida bandant registruotis",
@@ -520,7 +520,7 @@
     "common.saving": "Saugoma...",
     "products.showing": "Rodoma",
     "products.of": "iš",
-    "products.load_more": "Įkelti daugiau produktų",
+    "products.load_more": "Daugiau produktų",
     "products.search": "Paieška",
     "products.search_placeholder": "Ieškoti produktų...",
     "admin.products.clear_filters": "Išvalyti filtrus",
