@@ -216,9 +216,25 @@ class ProductController extends Controller
         $validated = $request->validated();
 
         DB::transaction(function () use ($validated) {
-            // Auto-generate slug if not provided (use English name)
+            // Auto-generate slugs if not provided
             $englishName = $validated['name']['en'] ?? '';
-            $slug = $validated['slug'] ?? Str::slug($englishName);
+            $lithuanianName = $validated['name']['lt'] ?? '';
+
+            $slug = $validated['slug'] ?? [
+                'en' => Str::slug($englishName),
+                'lt' => Str::slug($lithuanianName),
+            ];
+
+            // Ensure slug is an array with both locales
+            if (!is_array($slug)) {
+                $slug = ['en' => $slug, 'lt' => $slug];
+            }
+            if (empty($slug['en'])) {
+                $slug['en'] = Str::slug($englishName);
+            }
+            if (empty($slug['lt'])) {
+                $slug['lt'] = Str::slug($lithuanianName) ?: $slug['en'];
+            }
 
             // Create product with translations
             $product = Product::create([
@@ -279,7 +295,7 @@ class ProductController extends Controller
             'product' => [
                 'id' => $product->id,
                 'name' => $product->getTranslations('name'),
-                'slug' => $product->slug,
+                'slug' => $product->getTranslations('slug'),
                 'title' => $product->getTranslations('title'),
                 'short_description' => $product->getTranslations('short_description'),
                 'description' => $product->getTranslations('description'),
@@ -321,9 +337,25 @@ class ProductController extends Controller
         $validated = $request->validated();
 
         DB::transaction(function () use ($validated, $product) {
-            // Auto-generate slug if not provided (use English name)
+            // Auto-generate slugs if not provided
             $englishName = $validated['name']['en'] ?? '';
-            $slug = $validated['slug'] ?? Str::slug($englishName);
+            $lithuanianName = $validated['name']['lt'] ?? '';
+
+            $slug = $validated['slug'] ?? [
+                'en' => Str::slug($englishName),
+                'lt' => Str::slug($lithuanianName),
+            ];
+
+            // Ensure slug is an array with both locales
+            if (!is_array($slug)) {
+                $slug = ['en' => $slug, 'lt' => $slug];
+            }
+            if (empty($slug['en'])) {
+                $slug['en'] = Str::slug($englishName);
+            }
+            if (empty($slug['lt'])) {
+                $slug['lt'] = Str::slug($lithuanianName) ?: $slug['en'];
+            }
 
             // Update product with translations
             $product->update([

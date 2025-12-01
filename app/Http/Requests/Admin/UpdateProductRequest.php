@@ -13,14 +13,14 @@ class UpdateProductRequest extends FormRequest
 
     public function rules(): array
     {
-        $productId = $this->route('product')->id;
-
         return [
             // Basic product info with translations
             'name' => 'required|array',
             'name.en' => 'required|string|max:255',
             'name.lt' => 'nullable|string|max:255',
-            'slug' => 'nullable|string|unique:products,slug,' . $productId . '|max:255',
+            'slug' => 'nullable|array',
+            'slug.en' => 'nullable|string|max:255',
+            'slug.lt' => 'nullable|string|max:255',
             'title' => 'nullable|array',
             'title.en' => 'nullable|string|max:255',
             'title.lt' => 'nullable|string|max:255',

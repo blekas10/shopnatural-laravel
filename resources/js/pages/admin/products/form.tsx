@@ -48,7 +48,7 @@ interface ProductImage {
 interface Product {
     id: number;
     name: TranslatableField;
-    slug: string;
+    slug: TranslatableField;
     title: TranslatableField;
     short_description: TranslatableField;
     description: TranslatableField;
@@ -94,7 +94,7 @@ export default function ProductForm({ product, categories, brands }: ProductForm
 
     const { data, setData, post, put, processing, errors } = useForm({
         name: product?.name || emptyTranslatable(),
-        slug: product?.slug || '',
+        slug: product?.slug || emptyTranslatable(),
         title: product?.title || emptyTranslatable(),
         short_description: product?.short_description || emptyTranslatable(),
         description: product?.description || emptyTranslatable(),
@@ -420,14 +420,14 @@ export default function ProductForm({ product, categories, brands }: ProductForm
                                 <div className="space-y-2">
                                     <Label htmlFor="slug">
                                         {t('admin.products.form.slug', 'URL Slug')}
-                                        <span className="ml-2 text-xs text-muted-foreground">
-                                            {t('admin.products.form.slug_placeholder', 'Auto-generated from name')}
+                                        <span className="ml-2 text-xs uppercase text-muted-foreground">
+                                            [{activeLocale}]
                                         </span>
                                     </Label>
                                     <Input
                                         id="slug"
-                                        value={data.slug}
-                                        onChange={(e) => setData('slug', e.target.value)}
+                                        value={getTranslatableValue('slug')}
+                                        onChange={(e) => updateTranslatableField('slug', e.target.value)}
                                         placeholder="product-url-slug"
                                         className={errors.slug ? 'border-red-500' : ''}
                                     />
