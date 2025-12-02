@@ -866,5 +866,42 @@
     "brands.shop_collection_name": "Pirkti {name}",
     "brands.explore_products": "Atraskite visus {brand} produktus",
     "brands.explore_description": "Atraskite visą mūsų natūralių ir ekologiškų produktų asortimentą iš {brand}.",
-    "brands.view_all_products": "Žiūrėti visus produktus"
+    "brands.view_all_products": "Žiūrėti visus produktus",
+
+    "nav.categories_brands": "Prekių Ženklai",
+    "nav.categories_hair_care": "Plaukų/Galvos Odos Priežiūra",
+    "nav.categories_hair_condition": "Plaukų Būklė",
+    "nav.categories_styling": "Formavimo Priemonės",
+    "nav.categories_others": "Kita",
+
+    "categories.shampoos": "Šampūnai",
+    "categories.conditioners": "Kondicionieriai",
+    "categories.hair_masks": "Plaukų Kaukės",
+    "categories.color_products": "Atspalvį Suteikiančios Priemonės",
+    "categories.leave_in_treatments": "Nenuskalaujamos Priemonės",
+    "categories.oils_creams": "Aliejukai, Kremai",
+    "categories.color_protection": "Apsauga Spalvai",
+    "categories.sun_protection_hair": "Apsauga Nuo Saulės",
+
+    "categories.blonde_hair": "Šviesintiems Plaukams",
+    "categories.colored_hair": "Dažytiems Plaukams",
+    "categories.damaged_hair": "Pažeistiems Plaukams",
+    "categories.dry_hair": "Sausiems Plaukams",
+    "categories.frizzy_hair": "Besišiaušiantiems Plaukams",
+    "categories.hair_loss": "Slenkantiems Plaukams",
+    "categories.healthy_normal_hair": "Normaliems, Sveikiems Plaukams",
+    "categories.oily_hair": "Besiriebaluojantiems Plaukams",
+    "categories.split_ends": "Besišakojantiems Galiukams",
+
+    "categories.glossing_products": "Blizgesiai",
+    "categories.hair_styling_creams": "Plaukų Kremai, Geliai",
+    "categories.hairsprays": "Plaukų Lakai",
+    "categories.heat_protection": "Apsauga Nuo Karščio",
+    "categories.mousses": "Putos Plaukams",
+    "categories.volumizing": "Apimtį Suteikiančios",
+    "categories.waxes": "Vaškai",
+
+    "categories.face": "Veidas",
+    "categories.body_care": "Kūno Priežiūros Produktai",
+    "categories.men": "Vyrams"
 }

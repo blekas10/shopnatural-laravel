@@ -846,5 +846,42 @@
     "brands.shop_collection_name": "Shop {name}",
     "brands.explore_products": "Explore All {brand} Products",
     "brands.explore_description": "Discover our complete range of natural and organic products from {brand}.",
-    "brands.view_all_products": "View All Products"
+    "brands.view_all_products": "View All Products",
+
+    "nav.categories_brands": "Brands",
+    "nav.categories_hair_care": "Hair Care",
+    "nav.categories_hair_condition": "Hair Condition",
+    "nav.categories_styling": "Styling Products",
+    "nav.categories_others": "Others",
+
+    "categories.shampoos": "Shampoos",
+    "categories.conditioners": "Conditioners",
+    "categories.hair_masks": "Hair Masks",
+    "categories.color_products": "Color Products",
+    "categories.leave_in_treatments": "Leave-in Treatments",
+    "categories.oils_creams": "Oils, creams",
+    "categories.color_protection": "Color Protection",
+    "categories.sun_protection_hair": "Sun Protection for Hair",
+
+    "categories.blonde_hair": "Blonde Hair",
+    "categories.colored_hair": "Colored Hair",
+    "categories.damaged_hair": "Damaged Hair",
+    "categories.dry_hair": "Dry Hair",
+    "categories.frizzy_hair": "Frizzy Hair",
+    "categories.hair_loss": "Hair Loss",
+    "categories.healthy_normal_hair": "Healthy, Normal Hair",
+    "categories.oily_hair": "Oily Hair",
+    "categories.split_ends": "Split Ends",
+
+    "categories.glossing_products": "Glossing Products",
+    "categories.hair_styling_creams": "Hair Styling Creams, Gels",
+    "categories.hairsprays": "Hairsprays",
+    "categories.heat_protection": "Heat Protection",
+    "categories.mousses": "Mousses",
+    "categories.volumizing": "Volumizing",
+    "categories.waxes": "Waxes",
+
+    "categories.face": "Face",
+    "categories.body_care": "Body Care",
+    "categories.men": "Men"
 }

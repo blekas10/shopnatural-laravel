@@ -27,7 +27,7 @@ class ProductVariant extends Model
             'compare_at_price' => 'decimal:2',
             'stock' => 'integer',
             'low_stock_threshold' => 'integer',
-            'size' => 'integer',
+            'size' => 'string',
             'is_default' => 'boolean',
             'is_active' => 'boolean',
         ];

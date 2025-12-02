@@ -22,7 +22,7 @@ import axios from 'axios';
 interface Variant {
     id?: number;
     sku: string;
-    size: number;
+    size: string;
     price: number;
     compare_at_price: number | null;
     stock: number;
@@ -111,7 +111,7 @@ export default function ProductForm({ product, categories, brands }: ProductForm
         variants: product?.variants || [
             {
                 sku: '',
-                size: 500,
+                size: '',
                 price: 0,
                 compare_at_price: null,
                 stock: 0,
@@ -159,7 +159,7 @@ export default function ProductForm({ product, categories, brands }: ProductForm
             ...data.variants,
             {
                 sku: '',
-                size: 500,
+                size: '',
                 price: 0,
                 compare_at_price: null,
                 stock: 0,
@@ -809,16 +809,15 @@ export default function ProductForm({ product, categories, brands }: ProductForm
 
                                         <div className="space-y-2">
                                             <Label>
-                                                {t('admin.products.form.size', 'Size (ml)')}{' '}
+                                                {t('admin.products.form.size', 'Size')}{' '}
                                                 <span className="text-red-500">*</span>
                                             </Label>
                                             <Input
-                                                type="number"
                                                 value={variant.size}
                                                 onChange={(e) =>
-                                                    updateVariant(index, 'size', parseInt(e.target.value) || 0)
+                                                    updateVariant(index, 'size', e.target.value)
                                                 }
-                                                min={1}
+                                                placeholder={t('admin.products.form.size_placeholder', 'e.g., 250ml, 30VNT')}
                                             />
                                         </div>
 
@@ -899,7 +898,7 @@ export default function ProductForm({ product, categories, brands }: ProductForm
                                                 <div className="relative inline-block">
                                                     <img
                                                         src={variant.image_url}
-                                                        alt={`Variant ${variant.size}ml`}
+                                                        alt={`Variant ${variant.size}`}
                                                         className="h-24 w-24 rounded-lg border-2 border-border object-cover"
                                                     />
                                                     <button

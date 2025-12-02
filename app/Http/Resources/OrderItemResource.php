@@ -47,7 +47,7 @@ class OrderItemResource extends JsonResource
             $this->mergeWhen($this->relationLoaded('variant'), [
                 'variant' => $this->variant ? [
                     'id' => $this->variant->id,
-                    'size' => $this->variant->size . 'ml',
+                    'size' => $this->variant->size,
                     'currentPrice' => (float) $this->variant->price,
                     'inStock' => $this->variant->inStock(),
                     'image' => $this->variant->image?->url,

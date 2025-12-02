@@ -49,7 +49,7 @@ class ProductDetailResource extends ProductResource
             ? $this->variants->map(fn($v) => [
                 'id' => $v->id,
                 'sku' => $v->sku,
-                'size' => $v->size . 'ml', // Format as "500ml", "1000ml"
+                'size' => $v->size, // Stored with unit (e.g., "500ml", "30VNT")
                 'price' => (float) $v->price,
                 'compareAtPrice' => $v->compare_at_price ? (float) $v->compare_at_price : null,
                 'stock' => $v->stock,

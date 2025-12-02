@@ -110,69 +110,97 @@ export default function MainHeader({ className }: MainHeaderProps) {
             .slice(0, 2);
     };
 
+    // Brand links with IDs for filtering
     const brandLinks = [
         {
             name: 'Naturalmente',
+            id: 1,
             slug: 'naturalmente',
             logo: '/images/brands/naturalmente-logo.png',
         },
         {
-            name: 'My.Organics',
+            name: 'MY.ORGANICS',
+            id: 12,
             slug: 'my-organics',
             logo: '/images/brands/my-organics-logo.png',
         },
         {
+            name: 'Breathe',
+            id: 29,
+            slug: 'breathe',
+            logo: '/images/brands/breathe-logo.jpg',
+        },
+        {
             name: 'Essere',
+            id: 21,
             slug: 'essere',
             logo: '/images/brands/essere-logo.png',
         },
         {
             name: 'Gentleman',
+            id: 25,
             slug: 'gentleman',
             logo: '/images/brands/gentleman-logo.png',
         },
-        {
-            name: 'Breathe',
-            slug: 'breathe',
-            logo: '/images/brands/breathe-logo.jpg',
-        },
     ];
 
+    // Category sections matching database structure
     const categorySections = [
         {
-            title: 'Face Care',
+            title: t('nav.categories_brands', 'Brands'),
             items: [
-                { label: 'Cleansers', href: '/categories/cleansers' },
-                { label: 'Moisturizers', href: '/categories/moisturizers' },
-                { label: 'Serums', href: '/categories/serums' },
-                { label: 'Face Masks', href: '/categories/face-masks' },
+                { label: 'Naturalmente', href: `${route('products.index')}?brands=1` },
+                { label: 'MY.ORGANICS', href: `${route('products.index')}?brands=12` },
+                { label: 'Breathe', href: `${route('products.index')}?brands=29` },
+                { label: 'Essere', href: `${route('products.index')}?brands=21` },
+                { label: 'Gentleman', href: `${route('products.index')}?brands=25` },
             ],
         },
         {
-            title: 'Body Care',
+            title: t('nav.categories_hair_care', 'Hair Care'),
             items: [
-                { label: 'Body Lotions', href: '/categories/body-lotions' },
-                { label: 'Body Wash', href: '/categories/body-wash' },
-                { label: 'Body Scrubs', href: '/categories/body-scrubs' },
-                { label: 'Hand Care', href: '/categories/hand-care' },
+                { label: t('categories.shampoos', 'Shampoos'), href: `${route('products.index')}?categories=87` },
+                { label: t('categories.conditioners', 'Conditioners'), href: `${route('products.index')}?categories=83` },
+                { label: t('categories.hair_masks', 'Hair Masks'), href: `${route('products.index')}?categories=84` },
+                { label: t('categories.color_products', 'Color Products'), href: `${route('products.index')}?categories=81` },
+                { label: t('categories.leave_in_treatments', 'Leave-In Treatments'), href: `${route('products.index')}?categories=85` },
+                { label: t('categories.oils_creams', 'Oils, Creams'), href: `${route('products.index')}?categories=86` },
+                { label: t('categories.color_protection', 'Color Protection'), href: `${route('products.index')}?categories=82` },
+                { label: t('categories.sun_protection_hair', 'Sun Protection for Hair'), href: `${route('products.index')}?categories=88` },
             ],
         },
         {
-            title: 'Hair Care',
+            title: t('nav.categories_hair_condition', 'Hair Condition'),
             items: [
-                { label: 'Shampoo', href: '/categories/shampoo' },
-                { label: 'Conditioner', href: '/categories/conditioner' },
-                { label: 'Hair Masks', href: '/categories/hair-masks' },
-                { label: 'Styling', href: '/categories/styling' },
+                { label: t('categories.blonde_hair', 'Blonde Hair'), href: `${route('products.index')}?categories=90` },
+                { label: t('categories.colored_hair', 'Colored Hair'), href: `${route('products.index')}?categories=91` },
+                { label: t('categories.damaged_hair', 'Damaged Hair'), href: `${route('products.index')}?categories=92` },
+                { label: t('categories.dry_hair', 'Dry Hair'), href: `${route('products.index')}?categories=93` },
+                { label: t('categories.frizzy_hair', 'Frizzy Hair'), href: `${route('products.index')}?categories=94` },
+                { label: t('categories.hair_loss', 'Hair Loss'), href: `${route('products.index')}?categories=95` },
+                { label: t('categories.healthy_normal_hair', 'Healthy, Normal Hair'), href: `${route('products.index')}?categories=96` },
+                { label: t('categories.oily_hair', 'Oily Hair'), href: `${route('products.index')}?categories=97` },
+                { label: t('categories.split_ends', 'Split Ends'), href: `${route('products.index')}?categories=98` },
             ],
         },
         {
-            title: 'Makeup',
+            title: t('nav.categories_styling', 'Styling Products'),
             items: [
-                { label: 'Foundation', href: '/categories/foundation' },
-                { label: 'Lipstick', href: '/categories/lipstick' },
-                { label: 'Mascara', href: '/categories/mascara' },
-                { label: 'Eyeshadow', href: '/categories/eyeshadow' },
+                { label: t('categories.glossing_products', 'Glossing Products'), href: `${route('products.index')}?categories=109` },
+                { label: t('categories.hair_styling_creams', 'Hair Styling Creams, Gels'), href: `${route('products.index')}?categories=110` },
+                { label: t('categories.hairsprays', 'Hairsprays'), href: `${route('products.index')}?categories=111` },
+                { label: t('categories.heat_protection', 'Heat Protection'), href: `${route('products.index')}?categories=112` },
+                { label: t('categories.mousses', 'Mousses'), href: `${route('products.index')}?categories=113` },
+                { label: t('categories.volumizing', 'Volumizing'), href: `${route('products.index')}?categories=114` },
+                { label: t('categories.waxes', 'Waxes'), href: `${route('products.index')}?categories=115` },
+            ],
+        },
+        {
+            title: t('nav.categories_others', 'Others'),
+            items: [
+                { label: t('categories.face', 'Face'), href: `${route('products.index')}?categories=59` },
+                { label: t('categories.body_care', 'Body Care'), href: `${route('products.index')}?categories=58` },
+                { label: t('categories.men', 'Men'), href: `${route('products.index')}?categories=117` },
             ],
         },
     ];
@@ -550,7 +578,7 @@ export default function MainHeader({ className }: MainHeaderProps) {
                                 {brandLinks.map((brand) => (
                                     <Link
                                         key={brand.slug}
-                                        href={route('brands.show', { slug: brand.slug })}
+                                        href={`${route('products.index')}?brands=${brand.id}`}
                                         className="group flex flex-col items-center gap-3 rounded-lg border border-border p-4 transition-all hover:border-gold/50 hover:shadow-md"
                                         onClick={() => setDesktopBrandsOpen(false)}
                                     >
@@ -580,7 +608,7 @@ export default function MainHeader({ className }: MainHeaderProps) {
                         )}
                     >
                         <div className="container mx-auto px-4 py-10 md:px-6 lg:px-8">
-                            <div className="grid grid-cols-4 gap-10">
+                            <div className="grid grid-cols-5 gap-8">
                                 {categorySections.map((section) => (
                                     <div
                                         key={section.title}
@@ -619,9 +647,9 @@ export default function MainHeader({ className }: MainHeaderProps) {
                     >
                         <SheetContent
                             side="right"
-                            className="w-[280px] sm:w-[320px]"
+                            className="flex w-[280px] flex-col sm:w-[320px]"
                         >
-                            <SheetHeader>
+                            <SheetHeader className="flex-shrink-0">
                                 <SheetTitle>
                                     <Link
                                         href="/"
@@ -637,7 +665,7 @@ export default function MainHeader({ className }: MainHeaderProps) {
                                 </SheetTitle>
                             </SheetHeader>
 
-                            <nav className="mt-6 flex flex-col gap-2">
+                            <nav className="mt-6 flex flex-1 flex-col gap-2 overflow-y-auto pb-6">
                                 {/* Shop */}
                                 <Link
                                     href={route('products.index')}
@@ -777,7 +805,7 @@ export default function MainHeader({ className }: MainHeaderProps) {
                                         {brandLinks.map((brand) => (
                                             <Link
                                                 key={brand.slug}
-                                                href={route('brands.show', { slug: brand.slug })}
+                                                href={`${route('products.index')}?brands=${brand.id}`}
                                                 className="rounded-md px-3 py-2 text-sm font-medium transition-colors duration-300 hover:text-gold"
                                                 onClick={() => setMobileMenuOpen(false)}
                                             >

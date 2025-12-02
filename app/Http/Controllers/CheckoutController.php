@@ -204,7 +204,7 @@ class CheckoutController extends Controller
                     // Store product details at time of order
                     'product_name' => $product->getTranslation('name', app()->getLocale()),
                     'product_sku' => $variant->sku,
-                    'variant_size' => $variant->size . 'ml',
+                    'variant_size' => $variant->size,
 
                     // Pricing
                     'unit_price' => $unitPrice,
