@@ -578,7 +578,7 @@ export default function MainHeader({ className }: MainHeaderProps) {
                                 {brandLinks.map((brand) => (
                                     <Link
                                         key={brand.slug}
-                                        href={`${route('products.index')}?brands=${brand.id}`}
+                                        href={route('brands.show', { slug: brand.slug })}
                                         className="group flex flex-col items-center gap-3 rounded-lg border border-border p-4 transition-all hover:border-gold/50 hover:shadow-md"
                                         onClick={() => setDesktopBrandsOpen(false)}
                                     >
@@ -805,7 +805,7 @@ export default function MainHeader({ className }: MainHeaderProps) {
                                         {brandLinks.map((brand) => (
                                             <Link
                                                 key={brand.slug}
-                                                href={`${route('products.index')}?brands=${brand.id}`}
+                                                href={route('brands.show', { slug: brand.slug })}
                                                 className="rounded-md px-3 py-2 text-sm font-medium transition-colors duration-300 hover:text-gold"
                                                 onClick={() => setMobileMenuOpen(false)}
                                             >

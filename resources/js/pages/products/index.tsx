@@ -238,10 +238,11 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
         if (filters.brandIds.length > 0) {
             filtered = filtered.filter(p => {
                 if (!p.brandId) return false;
+                const productBrandId = p.brandId;
                 // For each selected brand, check if product brand is in that brand or its descendants
                 return filters.brandIds.every(selectedBrandId => {
                     const brandIdsWithDescendants = getAllBrandDescendantIds(selectedBrandId);
-                    return brandIdsWithDescendants.includes(p.brandId);
+                    return brandIdsWithDescendants.includes(productBrandId);
                 });
             });
         }
