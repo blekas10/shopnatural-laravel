@@ -149,11 +149,11 @@ export default function MainHeader({ className }: MainHeaderProps) {
         {
             title: t('nav.categories_brands', 'Brands'),
             items: [
-                { label: 'Naturalmente', href: `${route('products.index')}?brands=1` },
-                { label: 'MY.ORGANICS', href: `${route('products.index')}?brands=12` },
-                { label: 'Breathe', href: `${route('products.index')}?brands=29` },
-                { label: 'Essere', href: `${route('products.index')}?brands=21` },
-                { label: 'Gentleman', href: `${route('products.index')}?brands=25` },
+                { label: 'Naturalmente', href: route('brands.show', { slug: 'naturalmente' }) },
+                { label: 'MY.ORGANICS', href: route('brands.show', { slug: 'my-organics' }) },
+                { label: 'Breathe', href: route('brands.show', { slug: 'breathe' }) },
+                { label: 'Essere', href: route('brands.show', { slug: 'essere' }) },
+                { label: 'Gentleman', href: route('brands.show', { slug: 'gentleman' }) },
             ],
         },
         {
