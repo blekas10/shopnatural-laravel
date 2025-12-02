@@ -221,7 +221,7 @@ export default function ProductShow({ product, relatedProducts }: ProductShowPro
     // Otherwise use direct brand, fallback to first category
     const brandName = product.parentBrand?.name || product.brand?.name || product.categories[0]?.name;
 
-    const productSEO: ProductSEO = {
+    const productSEO: ProductSEO = useMemo(() => ({
         name: product.name,
         description: truncateDescription(product.metaDescription || product.shortDescription || product.description, 160),
         image: product.image,
@@ -234,7 +234,7 @@ export default function ProductShow({ product, relatedProducts }: ProductShowPro
         brand: brandName,
         category: product.categories.map(c => c.name).join(' > '),
         url: canonicalUrl,
-    };
+    }), [product, currentPrice, currentCompareAtPrice, currentInStock, currentSku, brandName, canonicalUrl]);
 
     // Generate GEO/AEO schemas for AI search optimization
     const additionalSchemas: object[] = useMemo(() => {

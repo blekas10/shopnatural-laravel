@@ -64,8 +64,10 @@ export default function AdminDashboard({
     stats,
     recentOrders,
     statuses,
-    paymentStatuses,
+    paymentStatuses: _paymentStatuses,
 }: AdminDashboardProps) {
+    // Note: paymentStatuses available for future use
+    void _paymentStatuses;
     const { t, route } = useTranslation();
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -94,6 +96,7 @@ export default function AdminDashboard({
         return colors[status] || 'bg-gray-500 text-white hover:bg-gray-600';
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const getPaymentStatusBadgeColor = (paymentStatus: string) => {
         const colors: Record<string, string> = {
             pending: 'bg-yellow-500 text-white hover:bg-yellow-600',
