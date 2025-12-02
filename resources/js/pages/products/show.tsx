@@ -10,7 +10,18 @@ import { ChevronRight, ShoppingCart, Check, X, Heart } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { truncateDescription, generateCanonicalUrl, generateAlternateUrls, type ProductSEO, type BreadcrumbItem } from '@/lib/seo';
+import {
+    truncateDescription,
+    generateCanonicalUrl,
+    generateAlternateUrls,
+    parseProductDescriptionForFAQ,
+    parseProductDescriptionForHowTo,
+    createFAQSchema,
+    createHowToSchema,
+    createEnhancedProductSchema,
+    type ProductSEO,
+    type BreadcrumbItem
+} from '@/lib/seo';
 import type { ProductDetail, ProductVariant, BaseProduct, ProductListItem } from '@/types/product';
 
 
@@ -206,6 +217,10 @@ export default function ProductShow({ product, relatedProducts }: ProductShowPro
     );
 
     // Product SEO data for structured data
+    // Use parent brand if exists (e.g., "Naturalmente" for sub-brand "Botanic Skincare")
+    // Otherwise use direct brand, fallback to first category
+    const brandName = product.parentBrand?.name || product.brand?.name || product.categories[0]?.name;
+
     const productSEO: ProductSEO = {
         name: product.name,
         description: truncateDescription(product.metaDescription || product.shortDescription || product.description, 160),
@@ -216,10 +231,39 @@ export default function ProductShow({ product, relatedProducts }: ProductShowPro
         currency: 'EUR',
         availability: currentInStock ? 'InStock' : 'OutOfStock',
         sku: currentSku,
-        brand: product.categories[0]?.name, // Use first category as brand if no brand
+        brand: brandName,
         category: product.categories.map(c => c.name).join(' > '),
         url: canonicalUrl,
     };
+
+    // Generate GEO/AEO schemas for AI search optimization
+    const additionalSchemas: object[] = useMemo(() => {
+        const schemas: object[] = [];
+        const currentLocale = locale as 'en' | 'lt';
+
+        // Parse FAQ from product description (Features, Suitable For, Application sections)
+        const faqs = parseProductDescriptionForFAQ(product.description, product.name, currentLocale);
+        if (faqs.length > 0) {
+            schemas.push(createFAQSchema(faqs));
+        }
+
+        // Parse HowTo from Application section
+        const howTo = parseProductDescriptionForHowTo(product.description, product.name, currentLocale);
+        if (howTo) {
+            schemas.push(createHowToSchema(howTo.name, howTo.description, howTo.steps, undefined, product.image));
+        }
+
+        // Create enhanced product schema with ingredients
+        if (product.ingredients) {
+            schemas.push(createEnhancedProductSchema({
+                ...productSEO,
+                ingredients: product.ingredients,
+                volume: selectedVariant?.size,
+            }));
+        }
+
+        return schemas;
+    }, [product, productSEO, locale, selectedVariant]);
 
     return (
         <>
@@ -232,6 +276,7 @@ export default function ProductShow({ product, relatedProducts }: ProductShowPro
                 alternateUrls={alternateUrls}
                 product={productSEO}
                 breadcrumbs={breadcrumbs}
+                additionalSchemas={additionalSchemas}
             />
 
             <div className="min-h-screen bg-background pb-[calc(73px+env(safe-area-inset-bottom))] lg:pb-0">

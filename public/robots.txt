@@ -1,2 +1,38 @@
+# Shop Natural - robots.txt
+# https://shop-natural.com
+
+# Allow all crawlers
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /storage/
+Disallow: /_debugbar/
+
+# AI Crawlers - Welcome!
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: Anthropic-AI
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+# Sitemap location
+Sitemap: https://shop-natural.com/sitemap.xml
+
+# LLM-friendly content
+# See /llms.txt for AI-optimized site information

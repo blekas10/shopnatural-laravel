@@ -68,7 +68,7 @@ class ProductController extends Controller
     public function show(string $slug): Response
     {
         // Query slug from both English and Lithuanian translations
-        $product = Product::with(['categories', 'images', 'defaultVariant', 'variants.image', 'brand'])
+        $product = Product::with(['categories', 'images', 'defaultVariant', 'variants.image', 'brand.parent'])
             ->where(function ($query) use ($slug) {
                 $query->where('slug->en', $slug)
                       ->orWhere('slug->lt', $slug);

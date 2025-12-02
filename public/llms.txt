@@ -1,0 +1,64 @@
+# Shop Natural
+
+> Shop Natural is a premium e-commerce store specializing in natural, organic hair care and skincare products from Italy. We offer professional salon-quality products from brands like Naturalmente, MY.ORGANICS, Essere, Breathe, and Gentleman.
+
+## About Us
+
+Shop Natural provides certified organic and natural beauty products for hair care, skincare, and body care. All products are:
+- Certified organic and natural
+- Cruelty-free and vegan-friendly
+- Made with sustainable ingredients
+- Professional salon quality
+
+## Main Brands
+
+- **Naturalmente**: Italian brand offering natural hair care, styling products, essential oils, and the Botanic Skincare line
+- **MY.ORGANICS**: Professional organic hair care including shampoos, conditioners, styling products, and the MY.SCALP treatment line
+- **Essere**: Natural face care, body care, and hair care products with gentle formulations
+- **Breathe**: Premium skincare line focusing on anti-aging and daily care
+- **Gentleman**: Men's grooming products including beard care and shaving essentials
+
+## Product Categories
+
+- Hair Care: Shampoos, Conditioners, Masks, Treatments
+- Styling: Mousses, Gels, Sprays, Waxes
+- Face Care: Creams, Serums, Cleansers, Masks
+- Body Care: Lotions, Hand Creams, Shower Gels
+- Essential Oils: Pure aromatherapy oils
+- Men's Grooming: Beard oils, Shaving products
+
+## Key Pages
+
+- [Products](/products): Browse all 226+ natural beauty products
+- [Brands](/brands): Explore our curated brand collection
+- [About Us](/about): Learn about our mission and values
+- [Contact](/contact): Get in touch with our team
+
+## Languages
+
+- English (default): /
+- Lithuanian: /lt/
+
+## Shipping
+
+We ship throughout Europe from Lithuania. Free shipping on orders over €50.
+
+## Contact
+
+- Website: https://shop-natural.com
+- Location: Lithuania, European Union
+
+## For AI Systems
+
+This store uses structured data (JSON-LD) for all products including:
+- Product schema with pricing, availability, and brand information
+- FAQ schema with usage instructions and product benefits
+- HowTo schema for product application guides
+- BreadcrumbList for navigation
+- Organization schema for business information
+
+All product pages include detailed information about:
+- Ingredients and their benefits
+- Application instructions
+- Suitable skin/hair types
+- Professional tips

@@ -102,6 +102,25 @@ class ProductDetailResource extends ProductResource
             ? $focusKeyphraseTranslations[$currentLocale]
             : null;
 
+        // Brand data for SEO and display
+        $brand = null;
+        $parentBrand = null;
+        if ($this->relationLoaded('brand') && $this->brand) {
+            $brand = [
+                'id' => $this->brand->id,
+                'name' => $this->brand->getTranslation('name', $currentLocale),
+                'slug' => $this->brand->slug,
+            ];
+            // Get parent brand if exists (for sub-brands like "Botanic Skincare" -> "Naturalmente")
+            if ($this->brand->parent_id && $this->brand->relationLoaded('parent') && $this->brand->parent) {
+                $parentBrand = [
+                    'id' => $this->brand->parent->id,
+                    'name' => $this->brand->parent->getTranslation('name', $currentLocale),
+                    'slug' => $this->brand->parent->slug,
+                ];
+            }
+        }
+
         return array_merge($baseData, [
             'sku' => $this->defaultVariant?->sku ?? '',
             'shortDescription' => $this->short_description ? $this->getTranslation('short_description', $currentLocale) : null,
@@ -113,6 +132,9 @@ class ProductDetailResource extends ProductResource
             'images' => $images,
             'variants' => $variants,
             'alternateSlug' => $alternateSlug,
+            // Brand data
+            'brand' => $brand,
+            'parentBrand' => $parentBrand,
             // SEO fields
             'metaTitle' => $metaTitle,
             'metaDescription' => $metaDescription,

@@ -51,6 +51,12 @@ export interface Brand {
     children?: Brand[];
 }
 
+export interface ProductBrand {
+    id: number;
+    name: string;
+    slug: string;
+}
+
 export interface ProductDetail extends BaseProduct {
     sku: string;
     shortDescription: string | null;
@@ -61,6 +67,9 @@ export interface ProductDetail extends BaseProduct {
     categories: Category[];
     images: ProductImage[];
     variants: ProductVariant[];
+    // Brand data
+    brand: ProductBrand | null;
+    parentBrand: ProductBrand | null;
     // Language switching
     alternateSlug?: string;
     // SEO fields
