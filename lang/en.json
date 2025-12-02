@@ -4,6 +4,7 @@
     "nav.about": "About",
     "nav.contact": "Contact",
     "nav.categories": "Categories",
+    "nav.brands": "Brands",
     "auth.login": "Login",
     "auth.register": "Register",
     "auth.logout": "Logout",
@@ -837,5 +838,13 @@
     "users.admin_removed": "Admin role removed",
     "users.role_update_failed": "Failed to update role",
     "users.cannot_remove_own_admin": "You cannot remove admin role from yourself",
-    "users.role_updated": "Role updated successfully"
+    "users.role_updated": "Role updated successfully",
+    "brands.meta_description": "Natural and organic beauty products",
+    "brands.shop_all": "Shop All {brand}",
+    "brands.collections": "Collections",
+    "brands.shop_collection": "Shop Collection",
+    "brands.shop_collection_name": "Shop {name}",
+    "brands.explore_products": "Explore All {brand} Products",
+    "brands.explore_description": "Discover our complete range of natural and organic products from {brand}.",
+    "brands.view_all_products": "View All Products"
 }

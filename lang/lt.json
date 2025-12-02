@@ -4,6 +4,7 @@
     "nav.about": "Apie mus",
     "nav.contact": "Kontaktai",
     "nav.categories": "Kategorijos",
+    "nav.brands": "Prekių ženklai",
     "auth.login": "Prisijungti",
     "auth.register": "Registruotis",
     "auth.logout": "Atsijungti",
@@ -857,5 +858,13 @@
     "users.admin_removed": "Administratoriaus rolė pašalinta",
     "users.role_update_failed": "Nepavyko atnaujinti rolės",
     "users.cannot_remove_own_admin": "Negalite pašalinti administratoriaus rolės nuo savęs",
-    "users.role_updated": "Rolė sėkmingai atnaujinta"
+    "users.role_updated": "Rolė sėkmingai atnaujinta",
+    "brands.meta_description": "Natūralūs ir ekologiški grožio produktai",
+    "brands.shop_all": "Visi {brand} produktai",
+    "brands.collections": "Kolekcijos",
+    "brands.shop_collection": "Pirkti kolekciją",
+    "brands.shop_collection_name": "Pirkti {name}",
+    "brands.explore_products": "Atraskite visus {brand} produktus",
+    "brands.explore_description": "Atraskite visą mūsų natūralių ir ekologiškų produktų asortimentą iš {brand}.",
+    "brands.view_all_products": "Žiūrėti visus produktus"
 }

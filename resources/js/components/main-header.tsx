@@ -40,10 +40,13 @@ export default function MainHeader({ className }: MainHeaderProps) {
     const { itemCount } = useCart();
     const { itemCount: wishlistCount } = useWishlist();
     const { auth } = usePage<{ auth: { user: { name: string; email: string } | null } }>().props;
+    const { url } = usePage();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [cartDrawerOpen, setCartDrawerOpen] = useState(false);
     const [mobileCategoriesOpen, setMobileCategoriesOpen] = useState(false);
+    const [mobileBrandsOpen, setMobileBrandsOpen] = useState(false);
     const [desktopCategoriesOpen, setDesktopCategoriesOpen] = useState(false);
+    const [desktopBrandsOpen, setDesktopBrandsOpen] = useState(false);
     const [mobileSectionsOpen, setMobileSectionsOpen] = useState<
         Record<string, boolean>
     >({});
@@ -55,6 +58,7 @@ export default function MainHeader({ className }: MainHeaderProps) {
         view: 'login',
     });
     const dropdownRef = useRef<HTMLDivElement>(null);
+    const brandsDropdownRef = useRef<HTMLDivElement>(null);
     const headerRef = useRef<HTMLElement>(null);
     const [headerHeight, setHeaderHeight] = useState(0);
 
@@ -106,10 +110,32 @@ export default function MainHeader({ className }: MainHeaderProps) {
             .slice(0, 2);
     };
 
-    const navigationLinks = [
-        { label: t('nav.home'), href: route('home') },
-        { label: t('nav.shop'), href: route('products.index') },
-        { label: t('nav.about'), href: route('about') },
+    const brandLinks = [
+        {
+            name: 'Naturalmente',
+            slug: 'naturalmente',
+            logo: '/images/brands/naturalmente-logo.png',
+        },
+        {
+            name: 'My.Organics',
+            slug: 'my-organics',
+            logo: '/images/brands/my-organics-logo.png',
+        },
+        {
+            name: 'Essere',
+            slug: 'essere',
+            logo: '/images/brands/essere-logo.png',
+        },
+        {
+            name: 'Gentleman',
+            slug: 'gentleman',
+            logo: '/images/brands/gentleman-logo.png',
+        },
+        {
+            name: 'Breathe',
+            slug: 'breathe',
+            logo: '/images/brands/breathe-logo.jpg',
+        },
     ];
 
     const categorySections = [
@@ -151,7 +177,7 @@ export default function MainHeader({ className }: MainHeaderProps) {
         },
     ];
 
-    // Click-outside detection for desktop categories dropdown
+    // Click-outside detection for desktop dropdowns
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
             if (
@@ -160,16 +186,22 @@ export default function MainHeader({ className }: MainHeaderProps) {
             ) {
                 setDesktopCategoriesOpen(false);
             }
+            if (
+                brandsDropdownRef.current &&
+                !brandsDropdownRef.current.contains(event.target as Node)
+            ) {
+                setDesktopBrandsOpen(false);
+            }
         }
 
-        if (desktopCategoriesOpen) {
+        if (desktopCategoriesOpen || desktopBrandsOpen) {
             document.addEventListener('mousedown', handleClickOutside);
         }
 
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [desktopCategoriesOpen]);
+    }, [desktopCategoriesOpen, desktopBrandsOpen]);
 
     // Listen for cart open event
     useEffect(() => {
@@ -265,24 +297,26 @@ export default function MainHeader({ className }: MainHeaderProps) {
 
                         {/* Desktop Navigation */}
                         <nav className="hidden items-center gap-6 md:flex">
-                            {navigationLinks.map((link) => (
-                                <Link
-                                    key={link.href}
-                                    href={link.href}
-                                    className="relative cursor-pointer rounded-md px-3 py-2 text-base font-bold tracking-wide text-foreground uppercase transition-colors duration-300 ease-in-out after:absolute after:bottom-1.5 after:left-3 after:h-[1.5px] after:w-0 after:bg-gold after:transition-all after:duration-300 after:ease-in-out hover:text-gold hover:after:w-[calc(100%-1.5rem)]"
-                                >
-                                    {link.label}
-                                </Link>
-                            ))}
+                            {/* Shop */}
+                            <Link
+                                href={route('products.index')}
+                                className={cn(
+                                    'relative cursor-pointer rounded-md px-3 py-2 text-base font-bold tracking-wide uppercase transition-colors duration-300 ease-in-out after:absolute after:bottom-1.5 after:left-3 after:h-[1.5px] after:bg-gold after:transition-all after:duration-300 after:ease-in-out hover:text-gold hover:after:w-[calc(100%-1.5rem)]',
+                                    url.startsWith('/products')
+                                        ? 'text-gold after:w-[calc(100%-1.5rem)]'
+                                        : 'text-foreground after:w-0',
+                                )}
+                            >
+                                {t('nav.shop')}
+                            </Link>
 
                             {/* Categories with click-controlled full-width dropdown */}
                             <div ref={dropdownRef}>
                                 <button
-                                    onClick={() =>
-                                        setDesktopCategoriesOpen(
-                                            !desktopCategoriesOpen,
-                                        )
-                                    }
+                                    onClick={() => {
+                                        setDesktopCategoriesOpen(!desktopCategoriesOpen);
+                                        setDesktopBrandsOpen(false);
+                                    }}
                                     className={cn(
                                         'relative flex cursor-pointer items-center gap-1 rounded-md px-4 py-2 text-base font-bold tracking-wide uppercase transition-colors duration-300 ease-in-out after:absolute after:bottom-1.5 after:left-4 after:h-[1.5px] after:bg-gold after:transition-all after:duration-300 after:ease-in-out',
                                         desktopCategoriesOpen
@@ -296,12 +330,63 @@ export default function MainHeader({ className }: MainHeaderProps) {
                                     <ChevronDown
                                         className={cn(
                                             'size-4 transition-transform duration-300',
-                                            desktopCategoriesOpen &&
-                                                'rotate-180',
+                                            desktopCategoriesOpen && 'rotate-180',
                                         )}
                                     />
                                 </button>
                             </div>
+
+                            {/* Brands with click-controlled full-width dropdown */}
+                            <div ref={brandsDropdownRef}>
+                                <button
+                                    onClick={() => {
+                                        setDesktopBrandsOpen(!desktopBrandsOpen);
+                                        setDesktopCategoriesOpen(false);
+                                    }}
+                                    className={cn(
+                                        'relative flex cursor-pointer items-center gap-1 rounded-md px-4 py-2 text-base font-bold tracking-wide uppercase transition-colors duration-300 ease-in-out after:absolute after:bottom-1.5 after:left-4 after:h-[1.5px] after:bg-gold after:transition-all after:duration-300 after:ease-in-out',
+                                        desktopBrandsOpen
+                                            ? 'text-gold after:w-[calc(100%-2rem)]'
+                                            : 'text-foreground after:w-0 hover:text-gold hover:after:w-[calc(100%-2rem)]',
+                                    )}
+                                    aria-expanded={desktopBrandsOpen}
+                                    aria-haspopup="true"
+                                >
+                                    {t('nav.brands', 'Brands')}
+                                    <ChevronDown
+                                        className={cn(
+                                            'size-4 transition-transform duration-300',
+                                            desktopBrandsOpen && 'rotate-180',
+                                        )}
+                                    />
+                                </button>
+                            </div>
+
+                            {/* About */}
+                            <Link
+                                href={route('about')}
+                                className={cn(
+                                    'relative cursor-pointer rounded-md px-3 py-2 text-base font-bold tracking-wide uppercase transition-colors duration-300 ease-in-out after:absolute after:bottom-1.5 after:left-3 after:h-[1.5px] after:bg-gold after:transition-all after:duration-300 after:ease-in-out hover:text-gold hover:after:w-[calc(100%-1.5rem)]',
+                                    url.startsWith('/about')
+                                        ? 'text-gold after:w-[calc(100%-1.5rem)]'
+                                        : 'text-foreground after:w-0',
+                                )}
+                            >
+                                {t('nav.about')}
+                            </Link>
+
+                            {/* Contact */}
+                            <Link
+                                href={route('contact')}
+                                className={cn(
+                                    'relative cursor-pointer rounded-md px-3 py-2 text-base font-bold tracking-wide uppercase transition-colors duration-300 ease-in-out after:absolute after:bottom-1.5 after:left-3 after:h-[1.5px] after:bg-gold after:transition-all after:duration-300 after:ease-in-out hover:text-gold hover:after:w-[calc(100%-1.5rem)]',
+                                    url.startsWith('/contact')
+                                        ? 'text-gold after:w-[calc(100%-1.5rem)]'
+                                        : 'text-foreground after:w-0',
+                                )}
+                            >
+                                {t('nav.contact')}
+                            </Link>
 
                             {/* Desktop Locale Switcher */}
                             <LocaleSwitcher />
@@ -451,6 +536,40 @@ export default function MainHeader({ className }: MainHeaderProps) {
                         </div>
                     </div>
 
+                    {/* Full-width brands mega menu */}
+                    <div
+                        className={cn(
+                            'absolute top-full left-0 w-full border-t border-border bg-white shadow-xl transition-all duration-300 ease-in-out',
+                            desktopBrandsOpen
+                                ? 'visible translate-y-0 opacity-100'
+                                : 'invisible -translate-y-4 opacity-0',
+                        )}
+                    >
+                        <div className="container mx-auto px-4 py-6 md:px-6 lg:px-8">
+                            <div className="grid grid-cols-5 gap-4">
+                                {brandLinks.map((brand) => (
+                                    <Link
+                                        key={brand.slug}
+                                        href={route('brands.show', { slug: brand.slug })}
+                                        className="group flex flex-col items-center gap-3 rounded-lg border border-border p-4 transition-all hover:border-gold/50 hover:shadow-md"
+                                        onClick={() => setDesktopBrandsOpen(false)}
+                                    >
+                                        <div className="flex h-16 w-full items-center justify-center">
+                                            <img
+                                                src={brand.logo}
+                                                alt={brand.name}
+                                                className="max-h-full max-w-full object-contain transition-all duration-300"
+                                            />
+                                        </div>
+                                        <span className="text-sm font-bold tracking-wide text-gold uppercase">
+                                            {brand.name}
+                                        </span>
+                                    </Link>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
                     {/* Full-width categories mega menu */}
                     <div
                         className={cn(
@@ -519,16 +638,19 @@ export default function MainHeader({ className }: MainHeaderProps) {
                             </SheetHeader>
 
                             <nav className="mt-6 flex flex-col gap-2">
-                                {navigationLinks.map((link) => (
-                                    <Link
-                                        key={link.href}
-                                        href={link.href}
-                                        className="relative rounded-md px-3 py-2.5 text-base font-bold tracking-wide text-foreground uppercase transition-colors after:absolute after:bottom-1 after:left-3 after:h-[1.5px] after:w-0 after:bg-gold after:transition-all after:duration-300 after:ease-in-out hover:text-gold hover:after:w-[calc(100%-1.5rem)]"
-                                        onClick={() => setMobileMenuOpen(false)}
-                                    >
-                                        {link.label}
-                                    </Link>
-                                ))}
+                                {/* Shop */}
+                                <Link
+                                    href={route('products.index')}
+                                    className={cn(
+                                        'relative rounded-md px-3 py-2.5 text-base font-bold tracking-wide uppercase transition-colors after:absolute after:bottom-1 after:left-3 after:h-[1.5px] after:bg-gold after:transition-all after:duration-300 after:ease-in-out hover:text-gold hover:after:w-[calc(100%-1.5rem)]',
+                                        url.startsWith('/products')
+                                            ? 'text-gold after:w-[calc(100%-1.5rem)]'
+                                            : 'text-foreground after:w-0',
+                                    )}
+                                    onClick={() => setMobileMenuOpen(false)}
+                                >
+                                    {t('nav.shop')}
+                                </Link>
 
                                 {/* Mobile Categories - Nested Collapsible */}
                                 <Collapsible
@@ -628,6 +750,70 @@ export default function MainHeader({ className }: MainHeaderProps) {
                                         })}
                                     </CollapsibleContent>
                                 </Collapsible>
+
+                                {/* Mobile Brands - Collapsible */}
+                                <Collapsible
+                                    open={mobileBrandsOpen}
+                                    onOpenChange={setMobileBrandsOpen}
+                                >
+                                    <CollapsibleTrigger
+                                        className={cn(
+                                            'relative flex w-full items-center justify-between rounded-md px-3 py-2.5 text-left text-base font-bold tracking-wide uppercase transition-colors duration-300 ease-in-out after:absolute after:bottom-1 after:left-3 after:h-[1.5px] after:bg-gold after:transition-all after:duration-300 after:ease-in-out',
+                                            mobileBrandsOpen
+                                                ? 'text-gold after:w-[calc(100%-1.5rem)]'
+                                                : 'text-foreground after:w-0 hover:text-gold hover:after:w-0',
+                                        )}
+                                    >
+                                        <span>{t('nav.brands', 'Brands')}</span>
+                                        <ChevronDown
+                                            className={cn(
+                                                'size-4 transition-transform duration-300',
+                                                mobileBrandsOpen && 'rotate-180',
+                                            )}
+                                        />
+                                    </CollapsibleTrigger>
+
+                                    <CollapsibleContent className="mt-1 ml-6 flex flex-col gap-1">
+                                        {brandLinks.map((brand) => (
+                                            <Link
+                                                key={brand.slug}
+                                                href={route('brands.show', { slug: brand.slug })}
+                                                className="rounded-md px-3 py-2 text-sm font-medium transition-colors duration-300 hover:text-gold"
+                                                onClick={() => setMobileMenuOpen(false)}
+                                            >
+                                                {brand.name}
+                                            </Link>
+                                        ))}
+                                    </CollapsibleContent>
+                                </Collapsible>
+
+                                {/* About */}
+                                <Link
+                                    href={route('about')}
+                                    className={cn(
+                                        'relative rounded-md px-3 py-2.5 text-base font-bold tracking-wide uppercase transition-colors after:absolute after:bottom-1 after:left-3 after:h-[1.5px] after:bg-gold after:transition-all after:duration-300 after:ease-in-out hover:text-gold hover:after:w-[calc(100%-1.5rem)]',
+                                        url.startsWith('/about')
+                                            ? 'text-gold after:w-[calc(100%-1.5rem)]'
+                                            : 'text-foreground after:w-0',
+                                    )}
+                                    onClick={() => setMobileMenuOpen(false)}
+                                >
+                                    {t('nav.about')}
+                                </Link>
+
+                                {/* Contact */}
+                                <Link
+                                    href={route('contact')}
+                                    className={cn(
+                                        'relative rounded-md px-3 py-2.5 text-base font-bold tracking-wide uppercase transition-colors after:absolute after:bottom-1 after:left-3 after:h-[1.5px] after:bg-gold after:transition-all after:duration-300 after:ease-in-out hover:text-gold hover:after:w-[calc(100%-1.5rem)]',
+                                        url.startsWith('/contact')
+                                            ? 'text-gold after:w-[calc(100%-1.5rem)]'
+                                            : 'text-foreground after:w-0',
+                                    )}
+                                    onClick={() => setMobileMenuOpen(false)}
+                                >
+                                    {t('nav.contact')}
+                                </Link>
 
                                 {/* Mobile Auth Links */}
                                 <div className="mt-6 space-y-2 border-t pt-4">

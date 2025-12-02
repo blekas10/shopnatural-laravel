@@ -47,6 +47,8 @@ export function useTranslation(): TranslationHook {
         const routeMap: Record<string, Record<string, string>> = {
             'products': { en: 'products', lt: 'produktai' },
             'produktai': { en: 'products', lt: 'produktai' },
+            'brands': { en: 'brands', lt: 'prekes-zenklai' },
+            'prekes-zenklai': { en: 'brands', lt: 'prekes-zenklai' },
             'cart': { en: 'cart', lt: 'krepselis' },
             'krepselis': { en: 'cart', lt: 'krepselis' },
             'wishlist': { en: 'wishlist', lt: 'pageidavimu-sarasas' },
