@@ -70,3 +70,22 @@ export const adminBrandsStore = () => route('admin.brands.store');
 export const adminBrandsEdit = (id: number) => route('admin.brands.edit', { brand: id });
 export const adminBrandsUpdate = (id: number) => route('admin.brands.update', { brand: id });
 export const adminBrandsDestroy = (id: number) => route('admin.brands.destroy', { brand: id });
+
+// Admin Product Discounts routes
+export const adminProductDiscountsIndex = () => route('admin.product-discounts.index');
+export const adminProductDiscountsCreate = () => route('admin.product-discounts.create');
+export const adminProductDiscountsStore = () => route('admin.product-discounts.store');
+export const adminProductDiscountsEdit = (id: number) => route('admin.product-discounts.edit', { product_discount: id });
+export const adminProductDiscountsUpdate = (id: number) => route('admin.product-discounts.update', { product_discount: id });
+export const adminProductDiscountsDestroy = (id: number) => route('admin.product-discounts.destroy', { product_discount: id });
+
+// Admin Promo Codes routes
+export const adminPromoCodesIndex = () => route('admin.promo-codes.index');
+export const adminPromoCodesCreate = () => route('admin.promo-codes.create');
+export const adminPromoCodesStore = () => route('admin.promo-codes.store');
+export const adminPromoCodesEdit = (id: number) => route('admin.promo-codes.edit', { promo_code: id });
+export const adminPromoCodesUpdate = (id: number) => route('admin.promo-codes.update', { promo_code: id });
+export const adminPromoCodesDestroy = (id: number) => route('admin.promo-codes.destroy', { promo_code: id });
+
+// API routes
+export const apiPromoCodeValidate = () => route('api.promo-code.validate');

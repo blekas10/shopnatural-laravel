@@ -127,6 +127,17 @@ export default function Checkout({
     });
     const [agreeToTerms, setAgreeToTerms] = useState(false);
 
+    // Promo Code State
+    const [promoCodeInput, setPromoCodeInput] = useState('');
+    const [appliedPromoCode, setAppliedPromoCode] = useState<{
+        code: string;
+        type: 'percentage' | 'fixed';
+        value: number;
+        discountAmount: number;
+    } | null>(null);
+    const [promoCodeLoading, setPromoCodeLoading] = useState(false);
+    const [promoCodeError, setPromoCodeError] = useState<string | null>(null);
+
     // Validation Errors
     const [contactErrors, setContactErrors] = useState<{
         fullName?: string;
@@ -274,49 +285,111 @@ export default function Checkout({
         return null;
     }
 
-    // Calculate totals
-    // Calculate original subtotal (before discounts) - prices include tax
-    const originalSubtotalWithTax = items.reduce((sum, item) => {
+    // VAT rate (21%)
+    const VAT_RATE = 0.21;
+
+    // Calculate original subtotal (sum of original prices before product discount)
+    // All prices include VAT
+    const originalSubtotal = items.reduce((sum, item) => {
         const price = item.variant?.price || item.product.price;
         const compareAtPrice = item.variant?.compareAtPrice || item.product.compareAtPrice;
         const originalPrice = compareAtPrice || price;
         return sum + (originalPrice * item.quantity);
     }, 0);
 
-    // Calculate actual subtotal (with discounts) - prices include tax
-    const subtotalWithTax = totalPrice;
+    // Subtotal = sum of current prices (after product discount, with VAT)
+    const subtotal = totalPrice;
 
-    // VAT rate
-    const VAT_RATE = 0.21;
+    // Product discount = difference between original and current prices
+    const productDiscount = originalSubtotal - subtotal;
 
-    // Calculate discount (from prices with tax)
-    const discountWithTax = originalSubtotalWithTax - subtotalWithTax;
+    // Calculate VAT breakdown from subtotal (prices include VAT)
+    const subtotalExclVat = subtotal / (1 + VAT_RATE);
+    const vatAmount = subtotal - subtotalExclVat;
 
-    // Convert discount to amount without tax
-    const discount = discountWithTax / (1 + VAT_RATE);
-
+    // Shipping cost
     const shipping = calculateShippingCost(
         selectedShippingMethod,
         shippingMethods
     );
 
-    // Calculate VAT (21% PVM) included in product prices
-    // Products already include tax, so we extract it: tax = price - (price / 1.21)
-    const tax = subtotalWithTax - (subtotalWithTax / (1 + VAT_RATE));
+    // Promo code discount - calculated from applied promo code
+    const promoCodeDiscount = appliedPromoCode?.discountAmount ?? 0;
 
-    // Subtotal without tax (for display)
-    const subtotal = subtotalWithTax / (1 + VAT_RATE);
+    // Total = subtotal + shipping - promo code discount
+    const total = subtotal + shipping - promoCodeDiscount;
 
-    // Total = products with tax + shipping (no tax on shipping)
-    const total = subtotalWithTax + shipping;
+    // Function to validate and apply promo code
+    const handleApplyPromoCode = async () => {
+        if (!promoCodeInput.trim()) {
+            setPromoCodeError(t('promo_code.enter_code', 'Please enter a promo code'));
+            return;
+        }
+
+        setPromoCodeLoading(true);
+        setPromoCodeError(null);
+
+        try {
+            const response = await fetch('/api/promo-code/validate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                },
+                body: JSON.stringify({
+                    code: promoCodeInput.trim(),
+                    cart_total: subtotal,
+                    email: contact.email || undefined,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (data.valid) {
+                setAppliedPromoCode({
+                    code: data.code,
+                    type: data.type,
+                    value: data.value,
+                    discountAmount: data.discount_amount,
+                });
+                setPromoCodeInput('');
+                toast.success(t('promo_code.applied', 'Promo code applied!'));
+            } else {
+                setPromoCodeError(data.error || t('promo_code.invalid', 'Invalid promo code'));
+            }
+        } catch {
+            setPromoCodeError(t('promo_code.error', 'Failed to validate promo code'));
+        } finally {
+            setPromoCodeLoading(false);
+        }
+    };
+
+    // Function to remove applied promo code
+    const handleRemovePromoCode = () => {
+        setAppliedPromoCode(null);
+        setPromoCodeError(null);
+    };
 
     const orderSummaryData = {
-        subtotal: subtotal,
-        shipping,
-        tax,
-        discount,
-        total,
         items,
+        originalSubtotal,
+        productDiscount,
+        subtotal,
+        subtotalExclVat,
+        vatAmount,
+        shipping,
+        promoCodeDiscount,
+        total,
+        promoCode: appliedPromoCode ? {
+            code: appliedPromoCode.code,
+            type: appliedPromoCode.type,
+            value: appliedPromoCode.value,
+            discountAmount: appliedPromoCode.discountAmount,
+            formattedValue: appliedPromoCode.type === 'percentage'
+                ? `${appliedPromoCode.value}%`
+                : `€${appliedPromoCode.value.toFixed(2)}`,
+        } : undefined,
     };
 
     // Validation functions
@@ -460,12 +533,17 @@ export default function Checkout({
                 productId: item.productId,
                 variantId: item.variantId,
                 quantity: item.quantity,
-                price: item.variant?.price || 0,
+                price: item.variant?.price || item.product.price,
+                originalPrice: item.variant?.compareAtPrice || item.product.compareAtPrice || undefined,
             })),
+            originalSubtotal,
+            productDiscount,
             subtotal,
+            subtotalExclVat,
+            vatAmount,
             shipping,
-            tax,
-            discount,
+            promoCode: appliedPromoCode?.code || undefined,
+            promoCodeDiscount,
             total,
         };
 
@@ -910,6 +988,74 @@ export default function Checkout({
                                             <h2 className="mb-6 text-xl font-bold uppercase tracking-wide">
                                                 4. {t('checkout.payment_method', 'Payment Method')}
                                             </h2>
+
+                                            {/* Promo Code Section */}
+                                            <div className="mb-6 rounded-lg border-2 border-border bg-muted/30 p-4">
+                                                <Label className="mb-2 block text-sm font-medium">
+                                                    {t('checkout.promo_code', 'Promo Code')}
+                                                </Label>
+                                                {appliedPromoCode ? (
+                                                    <div className="flex items-center justify-between rounded-lg bg-green-50 dark:bg-green-900/20 p-3 border border-green-200 dark:border-green-800">
+                                                        <div className="flex items-center gap-2">
+                                                            <Check className="size-5 text-green-600" />
+                                                            <span className="font-mono font-medium text-green-700 dark:text-green-400">
+                                                                {appliedPromoCode.code}
+                                                            </span>
+                                                            <span className="text-sm text-green-600 dark:text-green-500">
+                                                                ({appliedPromoCode.type === 'percentage'
+                                                                    ? `-${appliedPromoCode.value}%`
+                                                                    : `-€${appliedPromoCode.value.toFixed(2)}`})
+                                                            </span>
+                                                        </div>
+                                                        <Button
+                                                            type="button"
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={handleRemovePromoCode}
+                                                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                        >
+                                                            {t('checkout.remove', 'Remove')}
+                                                        </Button>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex gap-2">
+                                                        <Input
+                                                            type="text"
+                                                            value={promoCodeInput}
+                                                            onChange={(e) => {
+                                                                setPromoCodeInput(e.target.value.toUpperCase());
+                                                                setPromoCodeError(null);
+                                                            }}
+                                                            placeholder={t('checkout.enter_promo_code', 'Enter promo code')}
+                                                            className={cn(
+                                                                "flex-1 font-mono uppercase",
+                                                                promoCodeError && "border-red-500"
+                                                            )}
+                                                            onKeyDown={(e) => {
+                                                                if (e.key === 'Enter') {
+                                                                    e.preventDefault();
+                                                                    handleApplyPromoCode();
+                                                                }
+                                                            }}
+                                                        />
+                                                        <Button
+                                                            type="button"
+                                                            onClick={handleApplyPromoCode}
+                                                            disabled={promoCodeLoading || !promoCodeInput.trim()}
+                                                            variant="outline"
+                                                            className="border-2 border-gold text-gold hover:bg-gold hover:text-white"
+                                                        >
+                                                            {promoCodeLoading
+                                                                ? t('checkout.applying', 'Applying...')
+                                                                : t('checkout.apply', 'Apply')}
+                                                        </Button>
+                                                    </div>
+                                                )}
+                                                {promoCodeError && (
+                                                    <p className="mt-2 text-sm text-red-500">{promoCodeError}</p>
+                                                )}
+                                            </div>
+
                                             <PaymentForm
                                                 selectedMethod={selectedPaymentMethod}
                                                 onMethodChange={setSelectedPaymentMethod}

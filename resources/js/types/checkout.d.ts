@@ -39,17 +39,25 @@ export interface CardDetails {
 
 export interface PromoCode {
     code: string;
-    discount: number;
     type: 'percentage' | 'fixed';
+    value: number;
+    discountAmount: number;
+    formattedValue: string;
 }
 
 export interface OrderSummaryData {
-    subtotal: number;
-    shipping: number;
-    tax: number;
-    discount: number;
-    total: number;
     items: CartItem[];
+    // Price breakdown (all prices include VAT)
+    originalSubtotal: number; // Sum of original prices before product discount
+    productDiscount: number; // Product discount amount
+    subtotal: number; // Price after product discount (originalSubtotal - productDiscount)
+    subtotalExclVat: number; // Subtotal without VAT
+    vatAmount: number; // VAT amount (21%)
+    shipping: number; // Shipping cost (checkout only)
+    promoCodeDiscount: number; // Promo code discount (checkout only)
+    total: number; // Grand total
+    // Applied promo code info
+    promoCode?: PromoCode;
 }
 
 export interface CheckoutFormData {
@@ -68,15 +76,21 @@ export interface CheckoutFormData {
         variantId: number | null;
         quantity: number;
         price: number;
+        originalPrice?: number; // Original price before product discount
     }>;
+    // Price breakdown
+    originalSubtotal: number;
+    productDiscount: number;
     subtotal: number;
+    subtotalExclVat: number;
+    vatAmount: number;
     shipping: number;
-    tax: number;
-    discount: number;
+    promoCodeDiscount: number;
     total: number;
 }
 
 export type OrderStatus =
+    | 'pending'
     | 'confirmed'
     | 'processing'
     | 'shipped'
@@ -93,12 +107,22 @@ export interface Order {
     id: number;
     orderNumber: string;
     status: OrderStatus;
+    paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded';
     items: CartItem[];
+    // Price breakdown
+    originalSubtotal: number;
+    productDiscount: number;
     subtotal: number;
+    subtotalExclVat: number;
+    vatAmount: number;
     shipping: number;
-    tax: number;
-    discount: number;
+    promoCode?: {
+        code: string;
+        value: string;
+    };
+    promoCodeDiscount: number;
     total: number;
+    // Addresses
     contact: ContactInformation;
     shippingAddress: ShippingAddress;
     billingAddress?: ShippingAddress;
@@ -114,6 +138,8 @@ export interface Order {
 export interface CheckoutPageProps {
     paymentMethods: PaymentMethod[];
     cartItems?: CartItem[];
+    originalSubtotal?: number;
+    productDiscount?: number;
     subtotal?: number;
     errors?: Record<string, string>;
 }

@@ -20,11 +20,18 @@ class OrderResource extends JsonResource
             'status' => $this->status,
             'paymentStatus' => $this->payment_status,
 
-            // Pricing
+            // Price breakdown
+            'originalSubtotal' => (float) ($this->original_subtotal ?? $this->subtotal),
+            'productDiscount' => (float) ($this->product_discount ?? 0),
             'subtotal' => (float) $this->subtotal,
-            'tax' => (float) $this->tax,
+            'subtotalExclVat' => (float) ($this->subtotal_excl_vat ?? ($this->subtotal / 1.21)),
+            'vatAmount' => (float) ($this->vat_amount ?? ($this->subtotal - ($this->subtotal / 1.21))),
             'shippingCost' => (float) $this->shipping_cost,
-            'discount' => (float) $this->discount,
+            'promoCode' => $this->promo_code_id ? [
+                'code' => $this->promoCode?->code,
+                'value' => $this->promo_code_value,
+            ] : null,
+            'promoCodeDiscount' => (float) ($this->discount ?? 0),
             'total' => (float) $this->total,
             'currency' => $this->currency,
 

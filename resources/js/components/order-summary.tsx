@@ -140,8 +140,31 @@ export function OrderSummary({
 
             {/* Price Breakdown */}
             <div className="space-y-3">
+                {/* Product Price (original subtotal before product discount) */}
                 <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">
+                        {t('checkout.product_price', 'Product Price')}
+                    </span>
+                    <span className="font-medium text-foreground">
+                        €{data.originalSubtotal.toFixed(2)}
+                    </span>
+                </div>
+
+                {/* Product Discount (if any) */}
+                {data.productDiscount > 0 && (
+                    <div className="flex items-center justify-between text-sm">
+                        <span className="text-teal-600 dark:text-teal-400">
+                            {t('checkout.product_discount', 'Product Discount')}
+                        </span>
+                        <span className="font-medium text-teal-600 dark:text-teal-400">
+                            -€{data.productDiscount.toFixed(2)}
+                        </span>
+                    </div>
+                )}
+
+                {/* Subtotal (after product discount) */}
+                <div className="flex items-center justify-between text-sm border-t border-border pt-3">
+                    <span className="text-foreground font-medium">
                         {t('checkout.subtotal', 'Subtotal')}
                     </span>
                     <span className="font-medium text-foreground">
@@ -149,6 +172,42 @@ export function OrderSummary({
                     </span>
                 </div>
 
+                {/* Price excl. VAT */}
+                <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">
+                        {t('checkout.price_excl_vat', 'Price excl. VAT')}
+                    </span>
+                    <span className="font-medium text-foreground">
+                        €{data.subtotalExclVat.toFixed(2)}
+                    </span>
+                </div>
+
+                {/* VAT */}
+                <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">
+                        {t('checkout.vat', 'VAT (21%)')}
+                    </span>
+                    <span className="font-medium text-foreground">
+                        €{data.vatAmount.toFixed(2)}
+                    </span>
+                </div>
+
+                {/* Promo Code Discount (applied before shipping) */}
+                {data.promoCodeDiscount > 0 && (
+                    <div className="flex items-center justify-between text-sm">
+                        <span className="text-teal-600 dark:text-teal-400">
+                            {t('checkout.promo_discount', 'Promo Code')}
+                            {data.promoCode && (
+                                <span className="ml-1 text-xs">({data.promoCode.code})</span>
+                            )}
+                        </span>
+                        <span className="font-medium text-teal-600 dark:text-teal-400">
+                            -€{data.promoCodeDiscount.toFixed(2)}
+                        </span>
+                    </div>
+                )}
+
+                {/* Shipping (added after promo code) */}
                 {data.shipping > 0 && (
                     <div className="flex items-center justify-between text-sm">
                         <span className="text-muted-foreground">
@@ -160,32 +219,11 @@ export function OrderSummary({
                     </div>
                 )}
 
-                {data.tax > 0 && (
-                    <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">
-                            {t('checkout.tax', 'Tax (VAT 21%)')}
-                        </span>
-                        <span className="font-medium text-foreground">
-                            €{data.tax.toFixed(2)}
-                        </span>
-                    </div>
-                )}
-
-                {data.discount > 0 && (
-                    <div className="flex items-center justify-between text-sm">
-                        <span className="text-teal-600 dark:text-teal-400">
-                            {t('checkout.discount', 'Discount')}
-                        </span>
-                        <span className="font-medium text-teal-600 dark:text-teal-400">
-                            -€{data.discount.toFixed(2)}
-                        </span>
-                    </div>
-                )}
-
+                {/* Grand Total */}
                 <div className="border-t border-border pt-3">
                     <div className="flex items-center justify-between">
                         <span className="text-lg font-bold text-foreground">
-                            {t('checkout.total', 'Total')}
+                            {t('checkout.grand_total', 'Grand Total')}
                         </span>
                         <span className="text-2xl font-bold text-gold">
                             €{data.total.toFixed(2)}

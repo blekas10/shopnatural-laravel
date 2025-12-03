@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Services\PromoCodeService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -110,13 +111,37 @@ class CheckoutController extends Controller
             'items.*.variantId' => 'nullable|integer|exists:product_variants,id',
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.price' => 'required|numeric|min:0',
+            'items.*.originalPrice' => 'nullable|numeric|min:0',
+            'originalSubtotal' => 'required|numeric|min:0',
+            'productDiscount' => 'required|numeric|min:0',
             'subtotal' => 'required|numeric|min:0',
+            'subtotalExclVat' => 'required|numeric|min:0',
+            'vatAmount' => 'required|numeric|min:0',
             'shipping' => 'required|numeric|min:0',
-            'tax' => 'required|numeric|min:0',
-            'discount' => 'required|numeric|min:0',
+            'promoCode' => 'nullable|string|max:50',
+            'promoCodeDiscount' => 'required|numeric|min:0',
             'total' => 'required|numeric|min:0',
             'agreeToTerms' => 'required|accepted',
         ]);
+
+        // Validate promo code if provided
+        $promoCode = null;
+        $promoCodeService = app(PromoCodeService::class);
+
+        if (!empty($validated['promoCode'])) {
+            $promoCode = $promoCodeService->validate(
+                $validated['promoCode'],
+                $validated['subtotal'],
+                auth()->id(),
+                $validated['contact']['email']
+            );
+
+            if (!$promoCode) {
+                return back()->withErrors([
+                    'promoCode' => $promoCodeService->getError() ?? __('promo_code.invalid'),
+                ]);
+            }
+        }
 
         Log::info('Checkout: Validation passed', [
             'customer_email' => $validated['contact']['email'],
@@ -140,12 +165,18 @@ class CheckoutController extends Controller
                 'status' => 'pending',
                 'payment_status' => 'pending',
                 'payment_method' => $validated['paymentMethod'],
+                // Price breakdown
+                'original_subtotal' => $validated['originalSubtotal'],
+                'product_discount' => $validated['productDiscount'],
                 'subtotal' => $validated['subtotal'],
-                'tax' => $validated['tax'],
+                'subtotal_excl_vat' => $validated['subtotalExclVat'],
+                'vat_amount' => $validated['vatAmount'],
                 'shipping_cost' => $validated['shipping'],
                 'shipping_method' => $validated['shippingMethod'],
                 'venipak_pickup_point' => $validated['venipakPickupPoint'] ?? null,
-                'discount' => $validated['discount'],
+                'discount' => $validated['promoCodeDiscount'],
+                'promo_code_id' => $promoCode?->id,
+                'promo_code_value' => $promoCode ? $promoCode->getFormattedValue() : null,
                 'total' => $validated['total'],
                 'currency' => 'EUR',
 
@@ -222,6 +253,16 @@ class CheckoutController extends Controller
                 ]);
             }
 
+            // Apply promo code usage tracking
+            if ($promoCode) {
+                $promoCodeService->applyToOrder($order, $promoCode, $validated['promoCodeDiscount']);
+                Log::info('Checkout: Promo code applied', [
+                    'order_id' => $order->id,
+                    'promo_code' => $promoCode->code,
+                    'discount_amount' => $validated['promoCodeDiscount'],
+                ]);
+            }
+
             Log::info('Checkout: All order items created, committing transaction', [
                 'order_id' => $order->id,
                 'items_count' => count($validated['items']),
@@ -279,18 +320,44 @@ class CheckoutController extends Controller
                     ];
                 }
 
-                $session = \Stripe\Checkout\Session::create([
+                // Prepare session params
+                $sessionParams = [
                     'line_items' => $lineItems,
                     'mode' => 'payment',
                     'success_url' => route($locale . '.order.confirmation', ['orderNumber' => $order->order_number]),
                     'cancel_url' => route($locale . '.checkout'),
                     'customer_email' => $order->customer_email,
-                    'locale' => $locale, // Set Stripe interface language based on site locale
+                    'locale' => $locale,
                     'metadata' => [
                         'order_number' => $order->order_number,
                         'order_id' => $order->id,
                     ],
-                ]);
+                ];
+
+                // Apply promo code discount if present
+                if ($promoCode && $validated['promoCodeDiscount'] > 0) {
+                    // Create a one-time Stripe coupon for this order
+                    $coupon = \Stripe\Coupon::create([
+                        'amount_off' => (int)($validated['promoCodeDiscount'] * 100),
+                        'currency' => config('stripe.currency'),
+                        'duration' => 'once',
+                        'name' => $promoCode->code,
+                        'max_redemptions' => 1,
+                    ]);
+
+                    $sessionParams['discounts'] = [
+                        ['coupon' => $coupon->id],
+                    ];
+
+                    Log::info('Checkout: Stripe coupon created for promo code', [
+                        'order_id' => $order->id,
+                        'promo_code' => $promoCode->code,
+                        'coupon_id' => $coupon->id,
+                        'discount_amount' => $validated['promoCodeDiscount'],
+                    ]);
+                }
+
+                $session = \Stripe\Checkout\Session::create($sessionParams);
 
                 // Store session ID for reference
                 $order->update(['payment_intent_id' => $session->id]);

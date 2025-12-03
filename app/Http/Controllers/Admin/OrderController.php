@@ -94,7 +94,7 @@ class OrderController extends Controller
      */
     public function show(Order $order)
     {
-        $order->load(['items.product', 'items.variant', 'user']);
+        $order->load(['items.product', 'items.variant', 'user', 'promoCode']);
 
         return Inertia::render('admin/orders/show', [
             'order' => [
@@ -136,10 +136,17 @@ class OrderController extends Controller
                 'venipak_pickup_point' => $order->venipak_pickup_point,
                 'tracking_number' => $order->tracking_number,
 
-                // Pricing
+                // Price breakdown
+                'original_subtotal' => $order->original_subtotal ?? $order->subtotal,
+                'product_discount' => $order->product_discount ?? '0.00',
                 'subtotal' => $order->subtotal,
-                'tax' => $order->tax,
+                'subtotal_excl_vat' => $order->subtotal_excl_vat ?? number_format((float) $order->subtotal / 1.21, 2, '.', ''),
+                'vat_amount' => $order->vat_amount ?? number_format((float) $order->subtotal - ((float) $order->subtotal / 1.21), 2, '.', ''),
                 'shipping_cost' => $order->shipping_cost,
+                'promo_code' => $order->promoCode ? [
+                    'code' => $order->promoCode->code,
+                ] : null,
+                'promo_code_value' => $order->promo_code_value,
                 'discount' => $order->discount,
                 'total' => $order->total,
                 'currency' => $order->currency,
@@ -239,7 +246,7 @@ class OrderController extends Controller
      */
     public function downloadInvoice(Order $order)
     {
-        $order->load('items.product', 'items.variant');
+        $order->load(['items.product', 'items.variant', 'promoCode']);
 
         // Use current locale (from URL prefix)
         $locale = app()->getLocale();
@@ -259,7 +266,7 @@ class OrderController extends Controller
      */
     public function viewInvoice(Order $order)
     {
-        $order->load('items.product', 'items.variant');
+        $order->load(['items.product', 'items.variant', 'promoCode']);
 
         // Use current locale (from URL prefix)
         $locale = app()->getLocale();

@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/sidebar';
 import { type NavItem, type User as UserType } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { LayoutGrid, Package, User, ShoppingBag, Home, Users, BoxIcon } from 'lucide-react';
+import { LayoutGrid, Package, User, ShoppingBag, Home, Users, BoxIcon, Percent, Ticket } from 'lucide-react';
 import AppLogo from './app-logo';
 import { useTranslation } from '@/hooks/use-translation';
 
@@ -71,6 +71,20 @@ export function AppSidebar() {
                 {
                     title: t('sidebar.manage_products.brands', 'Brands'),
                     href: route('admin.brands.index'),
+                },
+            ],
+        },
+        {
+            title: t('sidebar.discounts', 'Discounts'),
+            icon: Percent,
+            items: [
+                {
+                    title: t('sidebar.product_discounts', 'Product Discounts'),
+                    href: route('admin.product-discounts.index'),
+                },
+                {
+                    title: t('sidebar.promo_codes', 'Promo Codes'),
+                    href: route('admin.promo-codes.index'),
                 },
             ],
         },

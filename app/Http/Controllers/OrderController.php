@@ -49,7 +49,8 @@ class OrderController extends Controller
             ->with([
                 'items.product.primaryImage',
                 'items.variant.image',
-                'payment'
+                'payment',
+                'promoCode',
             ])
             ->firstOrFail();
 
@@ -76,6 +77,7 @@ class OrderController extends Controller
             ->with([
                 'items.product.primaryImage',
                 'items.variant.image',
+                'promoCode',
             ])
             ->firstOrFail();
 
@@ -92,6 +94,11 @@ class OrderController extends Controller
                 abort(403, 'Unauthorized access to order');
             }
         }
+
+        // Calculate VAT values with fallbacks for old orders
+        $subtotal = (float) $order->subtotal;
+        $subtotalExclVat = $order->subtotal_excl_vat ?? ($subtotal / 1.21);
+        $vatAmount = $order->vat_amount ?? ($subtotal - $subtotalExclVat);
 
         return Inertia::render('order-confirmation', [
             'order' => [
@@ -114,10 +121,18 @@ class OrderController extends Controller
                         ] : null,
                     ];
                 })->toArray(),
-                'subtotal' => (float) $order->subtotal,
+                // Price breakdown
+                'originalSubtotal' => (float) ($order->original_subtotal ?? $order->subtotal),
+                'productDiscount' => (float) ($order->product_discount ?? 0),
+                'subtotal' => $subtotal,
+                'subtotalExclVat' => (float) $subtotalExclVat,
+                'vatAmount' => (float) $vatAmount,
                 'shipping' => (float) $order->shipping_cost,
-                'tax' => (float) $order->tax,
-                'discount' => (float) $order->discount,
+                'promoCode' => $order->promoCode ? [
+                    'code' => $order->promoCode->code,
+                    'value' => $order->promo_code_value,
+                ] : null,
+                'promoCodeDiscount' => (float) ($order->discount ?? 0),
                 'total' => (float) $order->total,
                 'contact' => [
                     'email' => $order->customer_email,
@@ -158,7 +173,7 @@ class OrderController extends Controller
     {
         // Find order by order_number
         $order = Order::where('order_number', $orderNumber)
-            ->with(['items.product.primaryImage', 'items.variant.image'])
+            ->with(['items.product.primaryImage', 'items.variant.image', 'promoCode'])
             ->firstOrFail();
 
         // Authorization: check if user owns the order
@@ -184,7 +199,7 @@ class OrderController extends Controller
     {
         // Find order by order_number
         $order = Order::where('order_number', $orderNumber)
-            ->with(['items.product.primaryImage', 'items.variant.image'])
+            ->with(['items.product.primaryImage', 'items.variant.image', 'promoCode'])
             ->firstOrFail();
 
         // Authorization: check if user owns the order

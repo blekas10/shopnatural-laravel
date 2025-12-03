@@ -6,6 +6,8 @@ use App\Http\Controllers\Admin\BrandController as AdminBrandController;
 use App\Http\Controllers\Admin\ProductImageController as AdminProductImageController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\ProductDiscountController as AdminProductDiscountController;
+use App\Http\Controllers\Admin\PromoCodeController as AdminPromoCodeController;
 use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
@@ -52,6 +54,9 @@ Route::prefix('api')->group(function () {
 
     // Contact form route
     Route::post('contact', [\App\Http\Controllers\Api\ContactController::class, 'send'])->name('api.contact.send');
+
+    // Promo code validation
+    Route::post('promo-code/validate', [\App\Http\Controllers\Api\PromoCodeController::class, 'validate'])->name('api.promo-code.validate');
 });
 
 // Cart routes (accessible without locale prefix)
@@ -192,6 +197,22 @@ Route::group(['prefix' => 'lt'], function () {
             Route::put('brands/{brand}', [AdminBrandController::class, 'update'])->name('lt.admin.brands.update');
             Route::delete('brands/{brand}', [AdminBrandController::class, 'destroy'])->name('lt.admin.brands.destroy');
 
+            // Product Discount management
+            Route::get('product-discounts', [AdminProductDiscountController::class, 'index'])->name('lt.admin.product-discounts.index');
+            Route::get('product-discounts/create', [AdminProductDiscountController::class, 'create'])->name('lt.admin.product-discounts.create');
+            Route::post('product-discounts', [AdminProductDiscountController::class, 'store'])->name('lt.admin.product-discounts.store');
+            Route::get('product-discounts/{product_discount}/edit', [AdminProductDiscountController::class, 'edit'])->name('lt.admin.product-discounts.edit');
+            Route::put('product-discounts/{product_discount}', [AdminProductDiscountController::class, 'update'])->name('lt.admin.product-discounts.update');
+            Route::delete('product-discounts/{product_discount}', [AdminProductDiscountController::class, 'destroy'])->name('lt.admin.product-discounts.destroy');
+
+            // Promo Code management
+            Route::get('promo-codes', [AdminPromoCodeController::class, 'index'])->name('lt.admin.promo-codes.index');
+            Route::get('promo-codes/create', [AdminPromoCodeController::class, 'create'])->name('lt.admin.promo-codes.create');
+            Route::post('promo-codes', [AdminPromoCodeController::class, 'store'])->name('lt.admin.promo-codes.store');
+            Route::get('promo-codes/{promo_code}/edit', [AdminPromoCodeController::class, 'edit'])->name('lt.admin.promo-codes.edit');
+            Route::put('promo-codes/{promo_code}', [AdminPromoCodeController::class, 'update'])->name('lt.admin.promo-codes.update');
+            Route::delete('promo-codes/{promo_code}', [AdminPromoCodeController::class, 'destroy'])->name('lt.admin.promo-codes.destroy');
+
             // Order management
             Route::get('orders', [AdminOrderController::class, 'index'])->name('lt.admin.orders.index');
             Route::get('orders/{order}', [AdminOrderController::class, 'show'])->name('lt.admin.orders.show');
@@ -247,6 +268,22 @@ Route::middleware(['auth'])->group(function () {
         Route::get('brands/{brand}/edit', [AdminBrandController::class, 'edit'])->name('admin.brands.edit');
         Route::put('brands/{brand}', [AdminBrandController::class, 'update'])->name('admin.brands.update');
         Route::delete('brands/{brand}', [AdminBrandController::class, 'destroy'])->name('admin.brands.destroy');
+
+        // Product Discount management
+        Route::get('product-discounts', [AdminProductDiscountController::class, 'index'])->name('admin.product-discounts.index');
+        Route::get('product-discounts/create', [AdminProductDiscountController::class, 'create'])->name('admin.product-discounts.create');
+        Route::post('product-discounts', [AdminProductDiscountController::class, 'store'])->name('admin.product-discounts.store');
+        Route::get('product-discounts/{product_discount}/edit', [AdminProductDiscountController::class, 'edit'])->name('admin.product-discounts.edit');
+        Route::put('product-discounts/{product_discount}', [AdminProductDiscountController::class, 'update'])->name('admin.product-discounts.update');
+        Route::delete('product-discounts/{product_discount}', [AdminProductDiscountController::class, 'destroy'])->name('admin.product-discounts.destroy');
+
+        // Promo Code management
+        Route::get('promo-codes', [AdminPromoCodeController::class, 'index'])->name('admin.promo-codes.index');
+        Route::get('promo-codes/create', [AdminPromoCodeController::class, 'create'])->name('admin.promo-codes.create');
+        Route::post('promo-codes', [AdminPromoCodeController::class, 'store'])->name('admin.promo-codes.store');
+        Route::get('promo-codes/{promo_code}/edit', [AdminPromoCodeController::class, 'edit'])->name('admin.promo-codes.edit');
+        Route::put('promo-codes/{promo_code}', [AdminPromoCodeController::class, 'update'])->name('admin.promo-codes.update');
+        Route::delete('promo-codes/{promo_code}', [AdminPromoCodeController::class, 'destroy'])->name('admin.promo-codes.destroy');
 
         // Order management
         Route::get('orders', [AdminOrderController::class, 'index'])->name('admin.orders.index');

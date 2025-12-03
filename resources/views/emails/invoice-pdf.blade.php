@@ -312,6 +312,16 @@
         </table>
 
         <!-- Summary -->
+        @php
+            // Calculate values with fallbacks for old orders
+            $originalSubtotal = $order->original_subtotal ?? $order->subtotal;
+            $productDiscount = $order->product_discount ?? 0;
+            $subtotal = $order->subtotal;
+            $subtotalExclVat = $order->subtotal_excl_vat ?? ($subtotal / 1.21);
+            $vatAmount = $order->vat_amount ?? ($subtotal - $subtotalExclVat);
+            $promoCodeDiscount = $order->discount ?? 0;
+            $promoCode = $order->promoCode?->code ?? null;
+        @endphp
         <div class="summary-wrapper">
             <div class="summary-spacer"></div>
             <div class="summary-table-wrapper">
@@ -321,20 +331,36 @@
                         <td class="value">{{ $order->shipping_method ? ucwords(str_replace(['-', '_'], ' ', $order->shipping_method)) : '-' }}</td>
                     </tr>
                     <tr>
-                        <td class="label">{{ $locale === 'lt' ? 'Pristatymo kaina' : 'Shipping Cost' }}</td>
-                        <td class="value">{{ number_format($order->shipping_cost, 2, ',', ' ') }} €</td>
+                        <td class="label">{{ $locale === 'lt' ? 'Prekių kaina' : 'Product Price' }}</td>
+                        <td class="value">{{ number_format($originalSubtotal, 2, ',', ' ') }} €</td>
+                    </tr>
+                    @if($productDiscount > 0)
+                    <tr>
+                        <td class="label">{{ $locale === 'lt' ? 'Produktų nuolaida' : 'Product Discount' }}</td>
+                        <td class="value discount">-{{ number_format($productDiscount, 2, ',', ' ') }} €</td>
+                    </tr>
+                    @endif
+                    <tr>
+                        <td class="label">{{ $locale === 'lt' ? 'Tarpinė suma' : 'Subtotal' }}</td>
+                        <td class="value">{{ number_format($subtotal, 2, ',', ' ') }} €</td>
                     </tr>
                     <tr>
-                        <td class="label">{{ $locale === 'lt' ? 'Prekės (be PVM)' : 'Products (ex VAT)' }}</td>
-                        <td class="value">{{ number_format(($order->subtotal + $order->discount) / 1.21, 2, ',', ' ') }} €</td>
-                    </tr>
-                    <tr>
-                        <td class="label">{{ $locale === 'lt' ? 'Nuolaida' : 'Discount' }}</td>
-                        <td class="value discount">{{ $order->discount > 0 ? '-' . number_format($order->discount, 2, ',', ' ') : '0,00' }} €</td>
+                        <td class="label">{{ $locale === 'lt' ? 'Kaina be PVM' : 'Price excl. VAT' }}</td>
+                        <td class="value">{{ number_format($subtotalExclVat, 2, ',', ' ') }} €</td>
                     </tr>
                     <tr>
                         <td class="label">{{ $locale === 'lt' ? 'PVM (21%)' : 'VAT (21%)' }}</td>
-                        <td class="value">{{ number_format($order->tax, 2, ',', ' ') }} €</td>
+                        <td class="value">{{ number_format($vatAmount, 2, ',', ' ') }} €</td>
+                    </tr>
+                    @if($promoCodeDiscount > 0)
+                    <tr>
+                        <td class="label">{{ $locale === 'lt' ? 'Nuolaidos kodas' : 'Promo Code' }}@if($promoCode) ({{ $promoCode }})@endif</td>
+                        <td class="value discount">-{{ number_format($promoCodeDiscount, 2, ',', ' ') }} €</td>
+                    </tr>
+                    @endif
+                    <tr>
+                        <td class="label">{{ $locale === 'lt' ? 'Pristatymo kaina' : 'Shipping Cost' }}</td>
+                        <td class="value">{{ number_format($order->shipping_cost, 2, ',', ' ') }} €</td>
                     </tr>
                     <tr class="total-row">
                         <td class="label">{{ $locale === 'lt' ? 'Viso mokėti' : 'Total to Pay' }}</td>

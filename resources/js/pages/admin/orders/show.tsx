@@ -73,11 +73,19 @@ interface Order {
     shipping_postal_code: string;
     shipping_country: string;
     shipping_method: string | null;
-    venipak_pickup_point: { id: string; name: string; address: string; city: string } | null;
+    venipak_pickup_point: { id: string; name: string; address: string; city: string; zip?: string } | null;
     tracking_number: string | null;
+    // Price breakdown
+    original_subtotal: string;
+    product_discount: string;
     subtotal: string;
-    tax: string;
+    subtotal_excl_vat: string;
+    vat_amount: string;
     shipping_cost: string;
+    promo_code?: {
+        code: string;
+    };
+    promo_code_value: string | null;
     discount: string;
     total: string;
     currency: string;
@@ -493,27 +501,61 @@ export default function OrderShow({ order, statuses, paymentStatuses }: OrderSho
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-3">
+                                    {/* Product Price (original before product discount) */}
                                     <div className="flex justify-between text-sm">
-                                        <span className="text-gray-600">{t('orders.subtotal', 'Subtotal')}</span>
+                                        <span className="text-gray-600">{t('checkout.product_price', 'Product Price')}</span>
+                                        <span className="text-gray-900">{formatPrice(order.original_subtotal)}</span>
+                                    </div>
+
+                                    {/* Product Discount */}
+                                    {parseFloat(order.product_discount) > 0 && (
+                                        <div className="flex justify-between text-sm">
+                                            <span className="text-green-600">{t('checkout.product_discount', 'Product Discount')}</span>
+                                            <span className="text-green-600 font-medium">-{formatPrice(order.product_discount)}</span>
+                                        </div>
+                                    )}
+
+                                    {/* Subtotal (after product discount) */}
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-gray-600">{t('checkout.subtotal', 'Subtotal')}</span>
                                         <span className="text-gray-900">{formatPrice(order.subtotal)}</span>
                                     </div>
+
+                                    {/* Price excl. VAT */}
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-gray-600">{t('checkout.price_excl_vat', 'Price excl. VAT')}</span>
+                                        <span className="text-gray-900">{formatPrice(order.subtotal_excl_vat)}</span>
+                                    </div>
+
+                                    {/* VAT */}
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-gray-600">{t('checkout.vat', 'VAT')} (21%)</span>
+                                        <span className="text-gray-900">{formatPrice(order.vat_amount)}</span>
+                                    </div>
+
+                                    {/* Promo Code Discount (applied before shipping) */}
+                                    {parseFloat(order.discount) > 0 && (
+                                        <div className="flex justify-between text-sm">
+                                            <span className="text-green-600">
+                                                {t('checkout.promo_code_discount', 'Promo Code')}
+                                                {order.promo_code && (
+                                                    <span className="ml-1 font-mono text-xs">({order.promo_code.code})</span>
+                                                )}
+                                            </span>
+                                            <span className="text-green-600 font-medium">-{formatPrice(order.discount)}</span>
+                                        </div>
+                                    )}
+
+                                    {/* Shipping (added after promo code) */}
                                     <div className="flex justify-between text-sm">
                                         <span className="text-gray-600">{t('orders.shipping', 'Shipping')}</span>
                                         <span className="text-gray-900">{formatPrice(order.shipping_cost)}</span>
                                     </div>
-                                    {parseFloat(order.discount) > 0 && (
-                                        <div className="flex justify-between text-sm">
-                                            <span className="text-gray-600">{t('orders.discount', 'Discount')}</span>
-                                            <span className="text-red-600">-{formatPrice(order.discount)}</span>
-                                        </div>
-                                    )}
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-gray-600">{t('orders.tax', 'Tax')}</span>
-                                        <span className="text-gray-900">{formatPrice(order.tax)}</span>
-                                    </div>
+
+                                    {/* Grand Total */}
                                     <div className="border-t border-gold/20 pt-3 flex justify-between">
                                         <span className="text-lg font-bold text-gray-900">
-                                            {t('orders.total', 'Total')}
+                                            {t('checkout.grand_total', 'Grand Total')}
                                         </span>
                                         <span className="text-xl font-bold text-gold">
                                             {formatPrice(order.total)}

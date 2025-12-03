@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Services\ProductDiscountService;
 use Illuminate\Http\Request;
 
 class ProductDetailResource extends ProductResource
@@ -45,18 +46,27 @@ class ProductDetailResource extends ProductResource
                 ->toArray()
             : [];
 
+        // Apply product discounts to variants
+        $discountService = app(ProductDiscountService::class);
         $variants = $this->relationLoaded('variants')
-            ? $this->variants->map(fn($v) => [
-                'id' => $v->id,
-                'sku' => $v->sku,
-                'size' => $v->size, // Stored with unit (e.g., "500ml", "30VNT")
-                'price' => (float) $v->price,
-                'compareAtPrice' => $v->compare_at_price ? (float) $v->compare_at_price : null,
-                'stock' => $v->stock,
-                'inStock' => $v->inStock(),
-                'isDefault' => $v->is_default,
-                'image' => $v->image?->url,
-            ])->values()->toArray()
+            ? $this->variants->map(function ($v) use ($discountService) {
+                $variantPrice = (float) $v->price;
+                $discountInfo = $discountService->applyDiscountToVariant($this->resource, $variantPrice);
+
+                return [
+                    'id' => $v->id,
+                    'sku' => $v->sku,
+                    'size' => $v->size, // Stored with unit (e.g., "500ml", "30VNT")
+                    'price' => $discountInfo['hasDiscount'] ? $discountInfo['price'] : $variantPrice,
+                    'compareAtPrice' => $discountInfo['hasDiscount']
+                        ? $discountInfo['compareAtPrice']
+                        : ($v->compare_at_price ? (float) $v->compare_at_price : null),
+                    'stock' => $v->stock,
+                    'inStock' => $v->inStock(),
+                    'isDefault' => $v->is_default,
+                    'image' => $v->image?->url,
+                ];
+            })->values()->toArray()
             : [];
 
         $categories = $this->relationLoaded('categories')

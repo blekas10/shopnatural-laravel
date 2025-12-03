@@ -281,14 +281,76 @@ export default function OrderConfirmation({ order }: OrderConfirmationProps) {
 
                                 {/* Price Breakdown */}
                                 <div className="mt-6 space-y-3 border-t border-border pt-6">
+                                    {/* Product Price (original before product discount) */}
                                     <div className="flex items-center justify-between text-sm">
                                         <span className="text-muted-foreground">
-                                            {t('order.subtotal', 'Subtotal')}
+                                            {t('checkout.product_price', 'Product Price')}
+                                        </span>
+                                        <span className="font-medium">
+                                            €{order.originalSubtotal.toFixed(2)}
+                                        </span>
+                                    </div>
+
+                                    {/* Product Discount */}
+                                    {order.productDiscount > 0 && (
+                                        <div className="flex items-center justify-between text-sm">
+                                            <span className="text-teal-600 dark:text-teal-400">
+                                                {t('checkout.product_discount', 'Product Discount')}
+                                            </span>
+                                            <span className="font-medium text-teal-600 dark:text-teal-400">
+                                                -€{order.productDiscount.toFixed(2)}
+                                            </span>
+                                        </div>
+                                    )}
+
+                                    {/* Subtotal (after product discount) */}
+                                    <div className="flex items-center justify-between text-sm">
+                                        <span className="text-muted-foreground">
+                                            {t('checkout.subtotal', 'Subtotal')}
                                         </span>
                                         <span className="font-medium">
                                             €{order.subtotal.toFixed(2)}
                                         </span>
                                     </div>
+
+                                    {/* Price excl. VAT */}
+                                    <div className="flex items-center justify-between text-sm">
+                                        <span className="text-muted-foreground">
+                                            {t('checkout.price_excl_vat', 'Price excl. VAT')}
+                                        </span>
+                                        <span className="font-medium">
+                                            €{order.subtotalExclVat.toFixed(2)}
+                                        </span>
+                                    </div>
+
+                                    {/* VAT */}
+                                    <div className="flex items-center justify-between text-sm">
+                                        <span className="text-muted-foreground">
+                                            {t('checkout.vat', 'VAT')} (21%)
+                                        </span>
+                                        <span className="font-medium">
+                                            €{order.vatAmount.toFixed(2)}
+                                        </span>
+                                    </div>
+
+                                    {/* Promo Code Discount (applied before shipping) */}
+                                    {order.promoCodeDiscount > 0 && (
+                                        <div className="flex items-center justify-between text-sm">
+                                            <span className="text-teal-600 dark:text-teal-400">
+                                                {t('checkout.promo_code_discount', 'Promo Code')}
+                                                {order.promoCode && (
+                                                    <span className="ml-1 font-mono text-xs">
+                                                        ({order.promoCode.code})
+                                                    </span>
+                                                )}
+                                            </span>
+                                            <span className="font-medium text-teal-600 dark:text-teal-400">
+                                                -€{order.promoCodeDiscount.toFixed(2)}
+                                            </span>
+                                        </div>
+                                    )}
+
+                                    {/* Shipping (added after promo code) */}
                                     <div className="flex items-center justify-between text-sm">
                                         <span className="text-muted-foreground">
                                             {t('order.shipping', 'Shipping')}
@@ -299,22 +361,11 @@ export default function OrderConfirmation({ order }: OrderConfirmationProps) {
                                                 : `€${order.shipping.toFixed(2)}`}
                                         </span>
                                     </div>
-                                    {order.discount > 0 && (
-                                        <div className="flex items-center justify-between text-sm">
-                                            <span className="text-teal-600 dark:text-teal-400">
-                                                {t(
-                                                    'order.discount',
-                                                    'Discount',
-                                                )}
-                                            </span>
-                                            <span className="font-medium text-teal-600 dark:text-teal-400">
-                                                -€{order.discount.toFixed(2)}
-                                            </span>
-                                        </div>
-                                    )}
+
+                                    {/* Grand Total */}
                                     <div className="flex items-center justify-between border-t border-border pt-3">
                                         <span className="text-lg font-bold">
-                                            {t('order.total', 'Total')}
+                                            {t('checkout.grand_total', 'Grand Total')}
                                         </span>
                                         <span className="text-2xl font-bold text-gold">
                                             €{order.total.toFixed(2)}

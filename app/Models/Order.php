@@ -20,11 +20,17 @@ class Order extends Model
         'payment_method',
         'payment_intent_id',
         'subtotal',
+        'original_subtotal',
+        'product_discount',
+        'subtotal_excl_vat',
+        'vat_amount',
         'tax',
         'shipping_cost',
         'shipping_method',
         'venipak_pickup_point',
         'discount',
+        'promo_code_id',
+        'promo_code_value',
         'total',
         'currency',
         'shipping_first_name',
@@ -58,6 +64,10 @@ class Order extends Model
     {
         return [
             'subtotal' => 'decimal:2',
+            'original_subtotal' => 'decimal:2',
+            'product_discount' => 'decimal:2',
+            'subtotal_excl_vat' => 'decimal:2',
+            'vat_amount' => 'decimal:2',
             'tax' => 'decimal:2',
             'shipping_cost' => 'decimal:2',
             'discount' => 'decimal:2',
@@ -98,6 +108,22 @@ class Order extends Model
     public function payment(): HasOne
     {
         return $this->hasOne(Payment::class);
+    }
+
+    /**
+     * Get the promo code used for this order
+     */
+    public function promoCode(): BelongsTo
+    {
+        return $this->belongsTo(PromoCode::class);
+    }
+
+    /**
+     * Get the promo code usage record for this order
+     */
+    public function promoCodeUsage(): HasOne
+    {
+        return $this->hasOne(PromoCodeUsage::class);
     }
 
     /**

@@ -55,42 +55,45 @@ export default function Cart() {
         }, 300);
     };
 
-    // Calculate original subtotal (before discounts) - prices include tax
-    const originalSubtotalWithTax = optimisticItems.reduce((sum, item) => {
+    // VAT rate (21%)
+    const VAT_RATE = 0.21;
+
+    // Calculate original subtotal (sum of original prices before product discount)
+    // All prices include VAT
+    const originalSubtotal = optimisticItems.reduce((sum, item) => {
         const price = item.variant?.price || item.product.price;
         const compareAtPrice = item.variant?.compareAtPrice || item.product.compareAtPrice;
         const originalPrice = compareAtPrice || price;
         return sum + (originalPrice * item.quantity);
     }, 0);
 
-    // Calculate actual subtotal (with discounts) - prices include tax
-    const subtotalWithTax = totalPrice;
+    // Subtotal = sum of current prices (after product discount, with VAT)
+    const subtotal = totalPrice;
 
-    // VAT rate
-    const VAT_RATE = 0.21;
+    // Product discount = difference between original and current prices
+    const productDiscount = originalSubtotal - subtotal;
 
-    // Calculate discount (from prices with tax)
-    const discountWithTax = originalSubtotalWithTax - subtotalWithTax;
+    // Calculate VAT breakdown from subtotal (prices include VAT)
+    const subtotalExclVat = subtotal / (1 + VAT_RATE);
+    const vatAmount = subtotal - subtotalExclVat;
 
-    // Convert discount to amount without tax
-    const discount = discountWithTax / (1 + VAT_RATE);
+    // Cart page: no shipping, no promo code
+    const shipping = 0;
+    const promoCodeDiscount = 0;
 
-    // Calculate VAT (21% PVM) included in product prices
-    const tax = subtotalWithTax - (subtotalWithTax / (1 + VAT_RATE));
-
-    // Subtotal without tax (for display)
-    const subtotal = subtotalWithTax / (1 + VAT_RATE);
-
-    // Total = products with tax (no shipping in cart)
-    const total = subtotalWithTax;
+    // Total = subtotal (no shipping or promo code on cart page)
+    const total = subtotal;
 
     const orderSummaryData = {
-        subtotal: subtotal,
-        shipping: 0,
-        tax: tax,
-        discount: discount,
-        total: total,
         items: optimisticItems,
+        originalSubtotal: originalSubtotal,
+        productDiscount: productDiscount,
+        subtotal: subtotal,
+        subtotalExclVat: subtotalExclVat,
+        vatAmount: vatAmount,
+        shipping: shipping,
+        promoCodeDiscount: promoCodeDiscount,
+        total: total,
     };
 
     return (

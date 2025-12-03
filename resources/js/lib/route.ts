@@ -62,6 +62,22 @@ const routeMap: Record<string, Record<string, string>> = {
     'admin.users.show': { en: 'admin/users', lt: 'admin/users' },
     'admin.users.toggle-role': { en: 'admin/users', lt: 'admin/users' },
     'admin.dashboard': { en: 'admin/dashboard', lt: 'admin/dashboard' },
+    // Admin Product Discounts routes
+    'admin.product-discounts.index': { en: 'admin/product-discounts', lt: 'admin/product-discounts' },
+    'admin.product-discounts.create': { en: 'admin/product-discounts/create', lt: 'admin/product-discounts/create' },
+    'admin.product-discounts.store': { en: 'admin/product-discounts', lt: 'admin/product-discounts' },
+    'admin.product-discounts.edit': { en: 'admin/product-discounts', lt: 'admin/product-discounts' },
+    'admin.product-discounts.update': { en: 'admin/product-discounts', lt: 'admin/product-discounts' },
+    'admin.product-discounts.destroy': { en: 'admin/product-discounts', lt: 'admin/product-discounts' },
+    // Admin Promo Codes routes
+    'admin.promo-codes.index': { en: 'admin/promo-codes', lt: 'admin/promo-codes' },
+    'admin.promo-codes.create': { en: 'admin/promo-codes/create', lt: 'admin/promo-codes/create' },
+    'admin.promo-codes.store': { en: 'admin/promo-codes', lt: 'admin/promo-codes' },
+    'admin.promo-codes.edit': { en: 'admin/promo-codes', lt: 'admin/promo-codes' },
+    'admin.promo-codes.update': { en: 'admin/promo-codes', lt: 'admin/promo-codes' },
+    'admin.promo-codes.destroy': { en: 'admin/promo-codes', lt: 'admin/promo-codes' },
+    // API routes
+    'api.promo-code.validate': { en: 'api/promo-code/validate', lt: 'api/promo-code/validate' },
 };
 
 // Non-localized routes (auth routes that don't have locale prefix)
@@ -71,6 +87,7 @@ const nonLocalizedRoutes = [
     'logout',
     'password.email',
     'password.update',
+    'api.promo-code.validate',
 ];
 
 /**
@@ -103,7 +120,7 @@ export function route(name: string, params: Record<string, string | number | boo
         path += `/${segment}`;
     }
 
-    // Handle route parameters (like {slug}, {orderNumber}, {id}, {category}, {product}, {order}, {user})
+    // Handle route parameters (like {slug}, {orderNumber}, {id}, {category}, {product}, {order}, {user}, {product_discount}, {promo_code})
     if (params.slug) {
         path += `/${params.slug}`;
     } else if (params.orderNumber) {
@@ -116,6 +133,12 @@ export function route(name: string, params: Record<string, string | number | boo
         path += `/${params.category}`;
     } else if (params.product) {
         path += `/${params.product}`;
+    } else if (params.product_discount) {
+        path += `/${params.product_discount}`;
+    } else if (params.promo_code) {
+        path += `/${params.promo_code}`;
+    } else if (params.brand) {
+        path += `/${params.brand}`;
     } else if (params.id) {
         path += `/${params.id}`;
     }
@@ -158,6 +181,9 @@ export function route(name: string, params: Record<string, string | number | boo
     delete queryParams.user; // Remove user as it's already in the path
     delete queryParams.category; // Remove category as it's already in the path
     delete queryParams.product; // Remove product as it's already in the path
+    delete queryParams.product_discount; // Remove product_discount as it's already in the path
+    delete queryParams.promo_code; // Remove promo_code as it's already in the path
+    delete queryParams.brand; // Remove brand as it's already in the path
     delete queryParams.id; // Remove id as it's already in the path
 
     const queryString = Object.keys(queryParams)
