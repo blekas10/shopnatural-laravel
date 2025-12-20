@@ -6,9 +6,11 @@ import AuthLayout from '@/layouts/auth-layout';
 import { logout } from '@/routes';
 import { useForm } from '@inertiajs/react';
 import SEO from '@/components/seo';
+import { useTranslation } from '@/hooks/use-translation';
 
 export default function VerifyEmail({ status }: { status?: string }) {
-    const { post, processing } = useForm();
+    const { locale } = useTranslation();
+    const { post, processing } = useForm({ locale });
 
     const handleResend = (e: React.FormEvent) => {
         e.preventDefault();

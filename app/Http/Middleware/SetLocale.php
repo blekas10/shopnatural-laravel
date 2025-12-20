@@ -42,7 +42,7 @@ class SetLocale
      */
     private function isFortifyRoute(Request $request): bool
     {
-        // Only preserve locale for register POST requests
-        return $request->is('register') && $request->isMethod('POST');
+        // Preserve locale for auth POST requests (login, register, etc.)
+        return $request->isMethod('POST') && $request->is('login', 'register', 'forgot-password', 'reset-password', 'logout');
     }
 }

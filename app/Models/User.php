@@ -24,6 +24,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
+        'google_id',
+        'avatar',
         'phone',
         'billing_address',
         'billing_city',
@@ -69,6 +71,29 @@ class User extends Authenticatable implements MustVerifyEmail
     public function orders()
     {
         return $this->hasMany(Order::class);
+    }
+
+    /**
+     * Link any guest orders made with this user's email to their account.
+     * Called after email verification or Google OAuth registration.
+     *
+     * @return int Number of orders linked
+     */
+    public function linkGuestOrders(): int
+    {
+        $count = Order::whereNull('user_id')
+            ->where('customer_email', $this->email)
+            ->update(['user_id' => $this->id]);
+
+        if ($count > 0) {
+            \Illuminate\Support\Facades\Log::info('Linked guest orders to user', [
+                'user_id' => $this->id,
+                'email' => $this->email,
+                'orders_linked' => $count,
+            ]);
+        }
+
+        return $count;
     }
 
     /**

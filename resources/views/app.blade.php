@@ -33,6 +33,7 @@
         <title inertia>{{ config('app.name', 'Laravel') }}</title>
 
         <meta name="csrf-token" content="{{ csrf_token() }}">
+        <meta name="verify-paysera" content="44b366b9787063b1e776e58588479c1e">
 
         <link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png">
         <link rel="icon" href="/favicon-192x192.png" sizes="192x192" type="image/png">

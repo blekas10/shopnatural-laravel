@@ -13,8 +13,8 @@ class LoginResponse implements LoginResponseContract
      */
     public function toResponse($request): Response
     {
-        // Get locale from session (set by SetLocale middleware)
-        $locale = session('locale', config('app.locale'));
+        // Get locale from request (sent by login form)
+        $locale = $request->input('locale', 'en');
 
         // Build locale-aware dashboard URL
         $dashboardPath = $locale === 'en' ? '/dashboard' : '/' . $locale . '/dashboard';

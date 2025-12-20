@@ -10,20 +10,17 @@ class OrderPolicy
     /**
      * Determine if the user can view the order.
      *
-     * This policy allows:
-     * 1. Authenticated users to view their own orders
-     * 2. Guest users to view orders if their email matches the session
+     * - Authenticated users can view their own orders
+     * - Guest orders (user_id = null) are accessible to anyone
      */
     public function view(?User $user, Order $order): bool
     {
-        // For authenticated users: verify order ownership
-        if ($user !== null) {
-            return $order->user_id === $user->id;
+        // Guest orders are accessible to anyone
+        if ($order->user_id === null) {
+            return true;
         }
 
-        // For guest users: verify email in session matches order email
-        $guestEmail = session('guest_order_email');
-
-        return $guestEmail !== null && $guestEmail === $order->customer_email;
+        // Authenticated users can only view their own orders
+        return $user !== null && $order->user_id === $user->id;
     }
 }

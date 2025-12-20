@@ -55,6 +55,7 @@ class Order extends Model
         'billing_phone',
         'customer_email',
         'customer_notes',
+        'locale',
         'tracking_number',
         'shipped_at',
         'delivered_at',
@@ -248,7 +249,9 @@ class Order extends Model
      */
     public function sendOrderConfirmationEmails(): void
     {
-        $locale = app()->getLocale();
+        // Use the locale stored on the order (set during checkout)
+        // This ensures emails are sent in the correct language even from webhooks
+        $locale = $this->locale ?? app()->getLocale();
 
         \Log::info('Order: Sending confirmation emails', [
             'order_id' => $this->id,

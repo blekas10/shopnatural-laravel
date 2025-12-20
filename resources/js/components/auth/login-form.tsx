@@ -7,6 +7,7 @@ import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import InputError from '@/components/input-error';
 import { useTranslation } from '@/hooks/use-translation';
+import { GoogleLoginButton, SocialAuthDivider } from './google-login-button';
 
 interface LoginFormProps {
     onSwitchToRegister: () => void;
@@ -14,12 +15,13 @@ interface LoginFormProps {
 }
 
 export function LoginForm({ onSwitchToRegister, onSwitchToForgotPassword }: LoginFormProps) {
-    const { t, route } = useTranslation();
+    const { t, route, locale } = useTranslation();
     const [showPassword, setShowPassword] = useState(false);
     const { data, setData, post, processing, errors, reset, clearErrors } = useForm({
         email: '',
         password: '',
         remember: false,
+        locale: locale, // Send locale with login request
     });
 
     useEffect(() => {
@@ -125,6 +127,10 @@ export function LoginForm({ onSwitchToRegister, onSwitchToForgotPassword }: Logi
                     t('auth.login', 'Login')
                 )}
             </Button>
+
+            <SocialAuthDivider />
+
+            <GoogleLoginButton />
 
             <div className="text-center text-sm">
                 <span className="text-gray-600">{t('auth.no_account', "Don't have an account?")}</span>{' '}

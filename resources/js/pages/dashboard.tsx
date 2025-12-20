@@ -46,8 +46,7 @@ const cardVariants = {
 };
 
 export default function Dashboard({ auth, stats, recentOrders: recentOrdersData, emailVerified = true, status }: DashboardProps) {
-    const { t, route } = useTranslation();
-    const { locale } = usePage<PageProps>().props;
+    const { t, route, locale } = useTranslation();
     const [resending, setResending] = useState(false);
 
     // Normalize orders data - handle both array and ResourceCollection format
@@ -62,7 +61,7 @@ export default function Dashboard({ auth, stats, recentOrders: recentOrdersData,
 
     const handleResendVerification = () => {
         setResending(true);
-        router.post('/email/verification-notification', {}, {
+        router.post('/email/verification-notification', { locale }, {
             preserveScroll: true,
             onFinish: () => setResending(false),
         });

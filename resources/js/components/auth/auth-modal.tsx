@@ -50,7 +50,7 @@ export function AuthModal({ isOpen, onClose, initialView = 'login' }: AuthModalP
 
     return (
         <Dialog open={isOpen} onOpenChange={handleClose}>
-            <DialogContent className="sm:max-w-[480px] p-0">
+            <DialogContent className="sm:max-w-[480px] p-0 max-h-[90vh] overflow-y-auto">
                 <DialogHeader className="px-6 pt-6">
                     <DialogTitle className="text-2xl font-bold uppercase tracking-wide text-center">
                         {getTitle()}

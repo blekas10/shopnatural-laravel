@@ -20,7 +20,7 @@ interface ProfileProps {
 }
 
 export default function Profile({ mustVerifyEmail, status }: ProfileProps) {
-    const { t, route } = useTranslation();
+    const { t, route, locale } = useTranslation();
     const { auth } = usePage<SharedData>().props;
 
     const [showPassword, setShowPassword] = useState(false);
@@ -211,7 +211,7 @@ export default function Profile({ mustVerifyEmail, status }: ProfileProps) {
                                                 variant="outline"
                                                 size="sm"
                                                 onClick={() => {
-                                                    router.post('/email/verification-notification', {}, {
+                                                    router.post('/email/verification-notification', { locale }, {
                                                         preserveScroll: true,
                                                     });
                                                 }}

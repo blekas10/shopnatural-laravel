@@ -25,6 +25,9 @@ class EmailVerificationController extends Controller
 
         if ($request->user()->markEmailAsVerified()) {
             event(new Verified($request->user()));
+
+            // Link any guest orders made with this email to the user
+            $request->user()->linkGuestOrders();
         }
 
         // Redirect to dashboard with success message
@@ -41,8 +44,8 @@ class EmailVerificationController extends Controller
             return back()->with('status', 'email-already-verified');
         }
 
-        // Get locale from session and set app locale
-        $locale = session('locale', 'en');
+        // Get locale from request first, then session
+        $locale = $request->input('locale') ?? session('locale', 'en');
         app()->setLocale($locale);
 
         $request->user()->sendEmailVerificationNotification();

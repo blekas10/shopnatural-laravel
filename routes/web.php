@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\ProductDiscountController as AdminProductDiscountController;
 use App\Http\Controllers\Admin\PromoCodeController as AdminPromoCodeController;
 use App\Http\Controllers\Auth\EmailVerificationController;
+use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ContactController;
@@ -34,6 +35,10 @@ Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 've
 Route::post('/email/verification-notification', [EmailVerificationController::class, 'resend'])
     ->middleware(['auth', 'throttle:6,1'])
     ->name('verification.send');
+
+// Google OAuth routes (accessible without locale prefix)
+Route::get('auth/google', [SocialAuthController::class, 'redirectToGoogle'])->name('auth.google');
+Route::get('auth/google/callback', [SocialAuthController::class, 'handleGoogleCallback'])->name('auth.google.callback');
 
 // Payment webhooks and callbacks (must be accessible without CSRF protection)
 Route::post('stripe/webhook', [StripeWebhookController::class, 'handle'])->name('stripe.webhook');
@@ -105,12 +110,12 @@ Route::group([], function () {
     Route::middleware('auth')->group(function () {
         Route::get('orders', [OrderController::class, 'index'])->name('en.orders.index');
         Route::get('orders/{orderNumber}', [OrderController::class, 'show'])->name('en.orders.show');
-        Route::get('orders/{orderNumber}/invoice/download', [OrderController::class, 'downloadInvoice'])->name('en.orders.invoice.download');
         Route::get('orders/{orderNumber}/invoice/view', [OrderController::class, 'viewInvoice'])->name('en.orders.invoice.view');
     });
 
-    // Order confirmation - accessible after checkout (uses policy for authorization)
+    // Order confirmation & invoice download - accessible after checkout (uses session-based authorization)
     Route::get('order/confirmation/{orderNumber}', [OrderController::class, 'confirmation'])->name('en.order.confirmation');
+    Route::get('orders/{orderNumber}/invoice/download', [OrderController::class, 'downloadInvoice'])->name('en.orders.invoice.download');
 });
 
 // Lithuanian routes (with /lt prefix and translated segments)
@@ -145,12 +150,12 @@ Route::group(['prefix' => 'lt'], function () {
     Route::middleware('auth')->group(function () {
         Route::get('uzsakymai', [OrderController::class, 'index'])->name('lt.orders.index');
         Route::get('uzsakymai/{orderNumber}', [OrderController::class, 'show'])->name('lt.orders.show');
-        Route::get('uzsakymai/{orderNumber}/saskaita/atsisiusti', [OrderController::class, 'downloadInvoice'])->name('lt.orders.invoice.download');
         Route::get('uzsakymai/{orderNumber}/saskaita/perziureti', [OrderController::class, 'viewInvoice'])->name('lt.orders.invoice.view');
     });
 
-    // Order confirmation - accessible after checkout (uses policy for authorization)
+    // Order confirmation & invoice download - accessible after checkout (uses session-based authorization)
     Route::get('uzsakymas/patvirtinimas/{orderNumber}', [OrderController::class, 'confirmation'])->name('lt.order.confirmation');
+    Route::get('uzsakymai/{orderNumber}/saskaita/atsisiusti', [OrderController::class, 'downloadInvoice'])->name('lt.orders.invoice.download');
 
     // Password reset routes (Lithuanian)
     Route::get('reset-password/{token}', function ($token) {

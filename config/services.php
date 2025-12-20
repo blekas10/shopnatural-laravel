@@ -56,4 +56,25 @@ return [
         'auto_create_shipment' => env('VENIPAK_AUTO_CREATE_SHIPMENT', false),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Google OAuth Configuration
+    |--------------------------------------------------------------------------
+    |
+    | To set up Google OAuth:
+    | 1. Go to https://console.cloud.google.com/
+    | 2. Create a new project or select existing
+    | 3. Enable "Google+ API" or "Google Identity" in APIs & Services
+    | 4. Go to Credentials > Create Credentials > OAuth 2.0 Client ID
+    | 5. Set Application type to "Web application"
+    | 6. Add authorized redirect URI: https://yourdomain.com/auth/google/callback
+    | 7. Copy Client ID and Client Secret to .env file
+    |
+    */
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect' => env('GOOGLE_REDIRECT_URI', '/auth/google/callback'),
+    ],
+
 ];

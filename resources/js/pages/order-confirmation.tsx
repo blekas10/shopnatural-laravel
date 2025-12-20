@@ -546,7 +546,7 @@ export default function OrderConfirmation({ order }: OrderConfirmationProps) {
                                             href={
                                                 auth?.user
                                                     ? route('orders.index')
-                                                    : route('register')
+                                                    : route('home') + '?auth=login'
                                             }
                                         >
                                             <Button

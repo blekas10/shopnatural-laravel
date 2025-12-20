@@ -281,43 +281,53 @@
         <table class="products-table">
             <thead>
                 <tr>
-                    <th style="width: 40%;">{{ $locale === 'lt' ? 'PRODUKTAS' : 'PRODUCT' }}</th>
-                    <th style="width: 10%;" class="text-center">{{ $locale === 'lt' ? 'KODAS' : 'CODE' }}</th>
-                    <th style="width: 8%;" class="text-center">{{ $locale === 'lt' ? 'KIEKIS' : 'QTY' }}</th>
-                    <th style="width: 14%;" class="text-right">{{ $locale === 'lt' ? 'KAINA BE PVM' : 'PRICE EX VAT' }}</th>
-                    <th style="width: 8%;" class="text-center">{{ $locale === 'lt' ? 'PVM (%)' : 'VAT (%)' }}</th>
-                    <th style="width: 10%;" class="text-right">{{ $locale === 'lt' ? 'PVM (€)' : 'VAT (€)' }}</th>
+                    <th style="width: 24%;">{{ $locale === 'lt' ? 'PRODUKTAS' : 'PRODUCT' }}</th>
+                    <th style="width: 10%;" class="text-center">{{ $locale === 'lt' ? 'KODAS' : 'SKU' }}</th>
+                    <th style="width: 6%;" class="text-center">{{ $locale === 'lt' ? 'KIEKIS' : 'QTY' }}</th>
+                    <th style="width: 10%;" class="text-right">{{ $locale === 'lt' ? 'KAINA' : 'PRICE' }}</th>
+                    <th style="width: 10%;" class="text-right">{{ $locale === 'lt' ? 'NUOLAIDA' : 'DISCOUNT' }}</th>
+                    <th style="width: 12%;" class="text-right">{{ $locale === 'lt' ? 'BE PVM' : 'EX VAT' }}</th>
+                    <th style="width: 8%;" class="text-center">{{ $locale === 'lt' ? 'PVM %' : 'VAT %' }}</th>
+                    <th style="width: 10%;" class="text-right">{{ $locale === 'lt' ? 'PVM €' : 'VAT €' }}</th>
                     <th style="width: 10%;" class="text-right">{{ $locale === 'lt' ? 'VISO' : 'TOTAL' }}</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($order->items as $item)
                 @php
-                    $itemTotal = $item->total;
                     $vatRate = 21;
-                    $priceExVat = $itemTotal / (1 + $vatRate / 100);
-                    $vatAmount = $itemTotal - $priceExVat;
-                    $hasDiscount = $item->original_unit_price && $item->original_unit_price > $item->unit_price;
-                    $originalPriceExVat = $hasDiscount ? ($item->original_unit_price * $item->quantity) / (1 + $vatRate / 100) : null;
+                    // Original unit price (before discount), or current price if no discount
+                    $originalUnitPrice = $item->original_unit_price ?? $item->unit_price;
+                    // Current unit price (after discount)
+                    $unitPrice = $item->unit_price;
+                    // Discount per unit
+                    $discountPerUnit = $originalUnitPrice - $unitPrice;
+                    $hasDiscount = $discountPerUnit > 0;
+                    // Unit price without VAT (after discount)
+                    $unitPriceExVat = $unitPrice / (1 + $vatRate / 100);
+                    // VAT amount for line
+                    $lineTotal = $item->total;
+                    $linePriceExVat = $lineTotal / (1 + $vatRate / 100);
+                    $lineVatAmount = $lineTotal - $linePriceExVat;
                 @endphp
                 <tr>
                     <td>
                         {{ $item->product_name }}@if($item->variant_size) - {{ $item->variant_size }}@endif
-                        @if($hasDiscount)
-                            <br><span style="color: #888; font-size: 7pt;">{{ $locale === 'lt' ? 'Pirminė kaina' : 'Original price' }}: <span style="text-decoration: line-through;">{{ number_format($item->original_unit_price, 2, ',', ' ') }} €</span> → {{ number_format($item->unit_price, 2, ',', ' ') }} €</span>
-                        @endif
                     </td>
                     <td class="text-center">{{ $item->product_sku }}</td>
                     <td class="text-center">{{ $item->quantity }}</td>
+                    <td class="text-right">{{ number_format($originalUnitPrice, 2, ',', ' ') }} €</td>
                     <td class="text-right">
                         @if($hasDiscount)
-                            <span style="color: #888; text-decoration: line-through; font-size: 7pt; display: block;">{{ number_format($originalPriceExVat, 2, ',', ' ') }} €</span>
+                            <span style="color: #C2A363;">-{{ number_format($discountPerUnit, 2, ',', ' ') }} €</span>
+                        @else
+                            -
                         @endif
-                        {{ number_format($priceExVat, 2, ',', ' ') }} €
                     </td>
+                    <td class="text-right">{{ number_format($unitPriceExVat, 2, ',', ' ') }} €</td>
                     <td class="text-center">{{ $vatRate }}%</td>
-                    <td class="text-right">{{ number_format($vatAmount, 2, ',', ' ') }} €</td>
-                    <td class="text-right">{{ number_format($itemTotal, 2, ',', ' ') }} €</td>
+                    <td class="text-right">{{ number_format($lineVatAmount, 2, ',', ' ') }} €</td>
+                    <td class="text-right">{{ number_format($lineTotal, 2, ',', ' ') }} €</td>
                 </tr>
                 @endforeach
             </tbody>

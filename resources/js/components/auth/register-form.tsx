@@ -8,6 +8,7 @@ import { AlertCircle, Loader2, Check, Info, Eye, EyeOff } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/hooks/use-translation';
+import { GoogleLoginButton, SocialAuthDivider } from './google-login-button';
 
 interface RegisterFormProps {
     onSwitchToLogin: () => void;
@@ -266,6 +267,10 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
                     t('auth.register', 'Register')
                 )}
             </Button>
+
+            <SocialAuthDivider />
+
+            <GoogleLoginButton />
 
             <div className="text-center text-sm">
                 <span className="text-gray-600">{t('auth.already_have_account', 'Already have an account?')}</span>{' '}

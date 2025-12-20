@@ -205,6 +205,7 @@ class CheckoutController extends Controller
                 'billing_phone' => $validated['contact']['phone'] ?? '',
 
                 'customer_email' => $validated['contact']['email'],
+                'locale' => app()->getLocale(),
             ]);
 
             Log::info('Checkout: Order created', [
@@ -283,11 +284,7 @@ class CheckoutController extends Controller
             // Mark cart as completed and link to order
             $this->completeCart($order);
 
-            // For guest orders, store the email in session to allow confirmation page access
-            if (!auth()->check()) {
-                $request->session()->put('guest_order_email', $validated['contact']['email']);
-            }
-
+            
             $locale = app()->getLocale();
             $paymentMethod = $validated['paymentMethod'];
 

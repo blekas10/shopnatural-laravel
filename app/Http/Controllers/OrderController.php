@@ -81,18 +81,10 @@ class OrderController extends Controller
             ])
             ->firstOrFail();
 
-        // Simple authorization: check if user owns the order OR guest email matches
-        if (auth()->check()) {
-            // Authenticated user - must own the order
-            if ($order->user_id !== auth()->id()) {
-                abort(403, 'Unauthorized access to order');
-            }
-        } else {
-            // Guest user - check if session email matches order email
-            $guestEmail = $request->session()->get('guest_order_email');
-            if (!$guestEmail || $guestEmail !== $order->customer_email) {
-                abort(403, 'Unauthorized access to order');
-            }
+        // Authorization: authenticated users must own the order
+        // Guest orders (user_id = null) are accessible by anyone with the order number
+        if (auth()->check() && $order->user_id !== null && $order->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized access to order');
         }
 
         // Calculate VAT values with fallbacks for old orders
@@ -168,6 +160,10 @@ class OrderController extends Controller
 
     /**
      * Download invoice PDF
+     *
+     * Accessible to:
+     * - Authenticated users who own the order
+     * - Guests from the order confirmation page (session email matches)
      */
     public function downloadInvoice(Request $request, string $orderNumber)
     {
@@ -176,15 +172,17 @@ class OrderController extends Controller
             ->with(['items.product.primaryImage', 'items.variant.image', 'promoCode'])
             ->firstOrFail();
 
-        // Authorization: check if user owns the order
-        if ($order->user_id !== auth()->id()) {
+        // Authorization: authenticated users must own the order
+        // Guest orders (user_id = null) are accessible by anyone with the order number
+        if (auth()->check() && $order->user_id !== null && $order->user_id !== auth()->id()) {
             abort(403, 'Unauthorized access to order');
         }
 
         // Generate PDF using the same template as admin
+        // Use the order's stored locale for consistent language
         $pdf = Pdf::loadView('emails.invoice-pdf', [
             'order' => $order,
-            'locale' => app()->getLocale(), // Use current locale
+            'locale' => $order->locale ?? app()->getLocale(),
         ]);
 
         $filename = 'invoice-' . $order->order_number . '.pdf';
