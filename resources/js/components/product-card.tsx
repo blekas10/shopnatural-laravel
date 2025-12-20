@@ -79,17 +79,7 @@ export function ProductCard({ product, href, index = 0, className }: ProductCard
                             </div>
                         )}
 
-                        {/* Quick Add Button - Shows on hover */}
-                        <motion.button
-                            initial={{ opacity: 0, y: 10 }}
-                            whileHover={{ scale: 1.05 }}
-                            className="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-lg bg-gold px-4 py-2 text-sm font-bold uppercase tracking-wide text-white opacity-0 shadow-lg shadow-gold/30 transition-all duration-300 hover:bg-gold/90 group-hover:opacity-100"
-                            onClick={handleQuickAdd}
-                            disabled={isAdding}
-                        >
-                            <ShoppingCart className="mr-2 inline size-4" />
-                            {isAdding ? t('shop.adding', 'Adding...') : t('shop.quick_add', 'Quick Add')}
-                        </motion.button>
+
                     </div>
 
                     {/* Product Info */}
