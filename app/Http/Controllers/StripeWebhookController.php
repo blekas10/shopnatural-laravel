@@ -124,6 +124,8 @@ class StripeWebhookController extends Controller
         Log::info('Stripe webhook: Confirmation emails dispatched', [
             'order_id' => $order->id,
         ]);
+
+        // Venipak shipment is created manually via admin panel
     }
 
     /**

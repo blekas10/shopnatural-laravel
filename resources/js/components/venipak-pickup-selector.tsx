@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 
 export interface VenipakPickupPoint {
     id: number;
+    code: string; // Venipak pickup point code (required for shipment creation)
     name: string;
     display_name?: string;
     address: string;

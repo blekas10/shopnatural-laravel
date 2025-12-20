@@ -220,6 +220,11 @@ Route::group(['prefix' => 'lt'], function () {
             Route::patch('orders/{order}/payment-status', [AdminOrderController::class, 'updatePaymentStatus'])->name('lt.admin.orders.update-payment-status');
             Route::get('orders/{order}/saskaita/atsisiusti', [AdminOrderController::class, 'downloadInvoice'])->name('lt.admin.orders.invoice.download');
             Route::get('orders/{order}/saskaita/perziureti', [AdminOrderController::class, 'viewInvoice'])->name('lt.admin.orders.invoice.view');
+            // Venipak shipment management
+            Route::post('orders/{order}/venipak/create', [AdminOrderController::class, 'createVenipakShipment'])->name('lt.admin.orders.venipak.create');
+            Route::post('orders/{order}/venipak/retry', [AdminOrderController::class, 'retryVenipakShipment'])->name('lt.admin.orders.venipak.retry');
+            Route::get('orders/{order}/venipak/label', [AdminOrderController::class, 'downloadVenipakLabel'])->name('lt.admin.orders.venipak.label');
+            Route::post('orders/{order}/venipak/refresh-tracking', [AdminOrderController::class, 'refreshVenipakTracking'])->name('lt.admin.orders.venipak.refresh-tracking');
 
             // User management
             Route::get('users', [AdminUserController::class, 'index'])->name('lt.admin.users.index');
@@ -292,6 +297,11 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('orders/{order}/payment-status', [AdminOrderController::class, 'updatePaymentStatus'])->name('admin.orders.update-payment-status');
         Route::get('orders/{order}/invoice/download', [AdminOrderController::class, 'downloadInvoice'])->name('admin.orders.invoice.download');
         Route::get('orders/{order}/invoice/view', [AdminOrderController::class, 'viewInvoice'])->name('admin.orders.invoice.view');
+        // Venipak shipment management
+        Route::post('orders/{order}/venipak/create', [AdminOrderController::class, 'createVenipakShipment'])->name('admin.orders.venipak.create');
+        Route::post('orders/{order}/venipak/retry', [AdminOrderController::class, 'retryVenipakShipment'])->name('admin.orders.venipak.retry');
+        Route::get('orders/{order}/venipak/label', [AdminOrderController::class, 'downloadVenipakLabel'])->name('admin.orders.venipak.label');
+        Route::post('orders/{order}/venipak/refresh-tracking', [AdminOrderController::class, 'refreshVenipakTracking'])->name('admin.orders.venipak.refresh-tracking');
 
         // User management
         Route::get('users', [AdminUserController::class, 'index'])->name('admin.users.index');

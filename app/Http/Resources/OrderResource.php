@@ -91,6 +91,20 @@ class OrderResource extends JsonResource
             'shippedAt' => $this->shipped_at?->toIso8601String(),
             'completedAt' => $this->delivered_at?->toIso8601String(),
 
+            // Venipak shipment info
+            'venipakPackNo' => $this->venipak_pack_no,
+            'venipakTrackingUrl' => $this->venipak_pack_no
+                ? 'https://go.venipak.lt/ws/tracking.php?type=1&output=html&code=' . $this->venipak_pack_no
+                : null,
+            'venipakShipmentCreatedAt' => $this->venipak_shipment_created_at?->toIso8601String(),
+            'venipakStatus' => $this->venipak_status,
+            'venipakStatusUpdatedAt' => $this->venipak_status_updated_at?->toIso8601String(),
+            'venipakDeliveredAt' => $this->venipak_delivered_at?->toIso8601String(),
+            // Secondary carrier info (for global shipments)
+            'venipakCarrierCode' => $this->venipak_carrier_code,
+            'venipakCarrierTracking' => $this->venipak_carrier_tracking,
+            'venipakShipmentId' => $this->venipak_shipment_id,
+
             // Timeline for frontend display
             'timeline' => [
                 'ordered' => $this->created_at->toIso8601String(),

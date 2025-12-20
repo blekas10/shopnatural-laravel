@@ -19,6 +19,7 @@ import {
     Mail,
     Package,
     ShoppingBag,
+    Truck,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -465,6 +466,32 @@ export default function OrderConfirmation({ order }: OrderConfirmationProps) {
                                 transition={{ delay: 0.6 }}
                                 className="sticky top-24 space-y-4"
                             >
+                                {/* Tracking Info */}
+                                {(order.venipakPackNo || order.trackingNumber) && (
+                                    <div className="rounded-2xl border-2 border-gold/20 bg-gold/5 p-6">
+                                        <h3 className="mb-3 flex items-center gap-2 text-sm font-bold tracking-wide uppercase">
+                                            <Truck className="size-4 text-gold" />
+                                            {t('order.tracking', 'Tracking')}
+                                        </h3>
+                                        <p className="font-mono text-lg font-bold text-gold break-all">
+                                            {order.venipakPackNo || order.trackingNumber}
+                                        </p>
+                                        {order.venipakTrackingUrl && (
+                                            <a
+                                                href={order.venipakTrackingUrl}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="mt-3 inline-flex items-center gap-1 text-sm text-gold hover:underline"
+                                            >
+                                                {t('order.track_shipment', 'Track Shipment')}
+                                                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                                </svg>
+                                            </a>
+                                        )}
+                                    </div>
+                                )}
+
                                 {/* Estimated Delivery */}
                                 {order.estimatedDelivery && (
                                     <div className="rounded-2xl border-2 border-border bg-background p-6">

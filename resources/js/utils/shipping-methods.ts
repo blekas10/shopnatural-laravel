@@ -39,44 +39,62 @@ export interface ShippingMethod {
 
 type TranslationFunction = (key: string, fallback: string, params?: Record<string, string>) => string;
 
+// Baltic countries - Venipak domestic delivery with pickup points
+const BALTIC_COUNTRIES = ['LT', 'LV', 'EE'];
+
+// International countries - Venipak courier only, same price as Baltic
+const INTERNATIONAL_COUNTRIES = ['PL', 'FI'];
+
 /**
  * Get available shipping methods based on country code
  * Pricing structure:
- * - Lithuania: Venipak Courier €4, Venipak Pickup €4
- * - Other EU: Venipak Courier €4
- * - Rest of World: Courier Shipping €20
+ * - Baltic (LT, LV, EE): Venipak Courier €4, Venipak Pickup €4, 1-5 days
+ * - International (PL, FI): Venipak Courier €4, 1-5 days
+ * - Global (other EU + World): Courier €20, 2-10 days
  */
 export function getShippingMethods(countryCode: string, t: TranslationFunction): ShippingMethod[] {
-    const isLithuania = countryCode === 'LT';
+    const isBaltic = BALTIC_COUNTRIES.includes(countryCode);
+    const isInternational = INTERNATIONAL_COUNTRIES.includes(countryCode);
     const isEU = EU_COUNTRIES.includes(countryCode);
 
-    if (isLithuania) {
-        // Lithuania: Both courier and pickup available at €4
+    if (isBaltic) {
+        // Baltic countries (LT, LV, EE): Both courier and pickup available at €4
         return [
             {
                 id: 'venipak-courier',
                 name: t('shipping.venipak_courier', 'Venipak Courier'),
                 description: t('shipping.venipak_courier_description', 'Delivery to your door'),
                 price: 4,
-                estimatedDays: t('shipping.venipak_courier_days_lt', '1-2 business days'),
+                estimatedDays: t('shipping.delivery_days_baltic', '1-5 business days'),
             },
             {
                 id: 'venipak-pickup',
                 name: t('shipping.venipak_pickup', 'Venipak Pickup Location'),
                 description: t('shipping.venipak_pickup_description', 'Pick up from Venipak location'),
                 price: 4,
-                estimatedDays: t('shipping.venipak_pickup_days', 'Available next day'),
+                estimatedDays: t('shipping.delivery_days_baltic', '1-5 business days'),
             },
         ];
-    } else if (isEU) {
-        // Europe: Only courier available at €4
+    } else if (isInternational) {
+        // International (PL, FI): Only courier available at €4
         return [
             {
                 id: 'venipak-courier',
                 name: t('shipping.venipak_courier', 'Venipak Courier'),
                 description: t('shipping.venipak_courier_description', 'Delivery to your door'),
                 price: 4,
-                estimatedDays: t('shipping.venipak_courier_days_eu', '3-5 business days'),
+                estimatedDays: t('shipping.delivery_days_international', '1-5 business days'),
+            },
+        ];
+    } else if (isEU) {
+        // Global EU: Only courier at €20
+        return [
+            {
+                id: 'venipak-courier',
+                name: t('shipping.venipak_courier', 'Venipak Courier'),
+                description: t('shipping.venipak_courier_description', 'Delivery to your door'),
+                price: 20,
+                estimatedDays: t('shipping.delivery_days_global', '2-10 business days'),
             },
         ];
     } else {
@@ -87,10 +105,17 @@ export function getShippingMethods(countryCode: string, t: TranslationFunction):
                 name: t('shipping.courier', 'Courier Shipping'),
                 description: t('shipping.courier_description', 'International delivery'),
                 price: 20,
-                estimatedDays: t('shipping.courier_days_world', '7-14 business days'),
+                estimatedDays: t('shipping.delivery_days_global', '2-10 business days'),
             },
         ];
     }
+}
+
+/**
+ * Check if country has pickup points available
+ */
+export function hasPickupPoints(countryCode: string): boolean {
+    return BALTIC_COUNTRIES.includes(countryCode);
 }
 
 /**

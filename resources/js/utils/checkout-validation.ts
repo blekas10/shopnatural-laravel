@@ -1,4 +1,5 @@
 import type { ContactInformation, ShippingAddress, CardDetails } from '@/types/checkout';
+import { isValidPhoneNumber } from 'react-phone-number-input';
 
 interface ValidationErrors {
     [key: string]: string | undefined;
@@ -42,12 +43,14 @@ export class CheckoutValidator {
         return emailRegex.test(email);
     }
 
-    // Phone validation (basic)
+    // Phone validation using libphonenumber (via react-phone-number-input)
     private isValidPhone(phone: string): boolean {
-        // Remove spaces, dashes, parentheses
-        const cleanPhone = phone.replace(/[\s\-()]/g, '');
-        // Should have at least 6 digits
-        return cleanPhone.length >= 6;
+        // Use the library's validation for proper international phone number validation
+        try {
+            return isValidPhoneNumber(phone);
+        } catch {
+            return false;
+        }
     }
 
     // Validate contact information

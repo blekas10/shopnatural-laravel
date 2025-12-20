@@ -63,6 +63,8 @@ class PayseraController extends Controller
                 Log::info('Paysera: Confirmation emails dispatched', [
                     'order_id' => $order->id,
                 ]);
+
+                // Venipak shipment is created manually via admin panel
             } elseif ($response['status'] == '0') {
                 // Payment pending
                 Log::info('Paysera payment pending', [

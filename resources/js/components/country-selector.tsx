@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Check, ChevronsUpDown, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -9,114 +9,126 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from '@/components/ui/popover';
-import { Input } from '@/components/ui/input';
+import flags from 'react-phone-number-input/flags';
 
 interface Country {
     code: string;
     name: string;
     nativeName: string;
-    flag: string;
 }
 
 const countries: Country[] = [
     // Europe
-    { code: 'LT', name: 'Lithuania', nativeName: 'Lietuva', flag: '🇱🇹' },
-    { code: 'LV', name: 'Latvia', nativeName: 'Latvija', flag: '🇱🇻' },
-    { code: 'EE', name: 'Estonia', nativeName: 'Eesti', flag: '🇪🇪' },
-    { code: 'PL', name: 'Poland', nativeName: 'Polska', flag: '🇵🇱' },
-    { code: 'DE', name: 'Germany', nativeName: 'Deutschland', flag: '🇩🇪' },
-    { code: 'FR', name: 'France', nativeName: 'France', flag: '🇫🇷' },
-    { code: 'ES', name: 'Spain', nativeName: 'España', flag: '🇪🇸' },
-    { code: 'IT', name: 'Italy', nativeName: 'Italia', flag: '🇮🇹' },
-    { code: 'GB', name: 'United Kingdom', nativeName: 'United Kingdom', flag: '🇬🇧' },
-    { code: 'NL', name: 'Netherlands', nativeName: 'Nederland', flag: '🇳🇱' },
-    { code: 'BE', name: 'Belgium', nativeName: 'België', flag: '🇧🇪' },
-    { code: 'AT', name: 'Austria', nativeName: 'Österreich', flag: '🇦🇹' },
-    { code: 'DK', name: 'Denmark', nativeName: 'Danmark', flag: '🇩🇰' },
-    { code: 'SE', name: 'Sweden', nativeName: 'Sverige', flag: '🇸🇪' },
-    { code: 'NO', name: 'Norway', nativeName: 'Norge', flag: '🇳🇴' },
-    { code: 'FI', name: 'Finland', nativeName: 'Suomi', flag: '🇫🇮' },
-    { code: 'CZ', name: 'Czech Republic', nativeName: 'Česko', flag: '🇨🇿' },
-    { code: 'SK', name: 'Slovakia', nativeName: 'Slovensko', flag: '🇸🇰' },
-    { code: 'HU', name: 'Hungary', nativeName: 'Magyarország', flag: '🇭🇺' },
-    { code: 'RO', name: 'Romania', nativeName: 'România', flag: '🇷🇴' },
-    { code: 'BG', name: 'Bulgaria', nativeName: 'България', flag: '🇧🇬' },
-    { code: 'HR', name: 'Croatia', nativeName: 'Hrvatska', flag: '🇭🇷' },
-    { code: 'SI', name: 'Slovenia', nativeName: 'Slovenija', flag: '🇸🇮' },
-    { code: 'PT', name: 'Portugal', nativeName: 'Portugal', flag: '🇵🇹' },
-    { code: 'GR', name: 'Greece', nativeName: 'Ελλάδα', flag: '🇬🇷' },
-    { code: 'IE', name: 'Ireland', nativeName: 'Éire', flag: '🇮🇪' },
-    { code: 'LU', name: 'Luxembourg', nativeName: 'Luxembourg', flag: '🇱🇺' },
-    { code: 'MT', name: 'Malta', nativeName: 'Malta', flag: '🇲🇹' },
-    { code: 'CY', name: 'Cyprus', nativeName: 'Κύπρος', flag: '🇨🇾' },
-    { code: 'CH', name: 'Switzerland', nativeName: 'Schweiz', flag: '🇨🇭' },
-    { code: 'IS', name: 'Iceland', nativeName: 'Ísland', flag: '🇮🇸' },
-    { code: 'AL', name: 'Albania', nativeName: 'Shqipëri', flag: '🇦🇱' },
-    { code: 'AD', name: 'Andorra', nativeName: 'Andorra', flag: '🇦🇩' },
-    { code: 'BY', name: 'Belarus', nativeName: 'Беларусь', flag: '🇧🇾' },
-    { code: 'BA', name: 'Bosnia and Herzegovina', nativeName: 'Bosna i Hercegovina', flag: '🇧🇦' },
-    { code: 'XK', name: 'Kosovo', nativeName: 'Kosova', flag: '🇽🇰' },
-    { code: 'MD', name: 'Moldova', nativeName: 'Moldova', flag: '🇲🇩' },
-    { code: 'MC', name: 'Monaco', nativeName: 'Monaco', flag: '🇲🇨' },
-    { code: 'ME', name: 'Montenegro', nativeName: 'Crna Gora', flag: '🇲🇪' },
-    { code: 'MK', name: 'North Macedonia', nativeName: 'Македонија', flag: '🇲🇰' },
-    { code: 'RS', name: 'Serbia', nativeName: 'Србија', flag: '🇷🇸' },
-    { code: 'SM', name: 'San Marino', nativeName: 'San Marino', flag: '🇸🇲' },
-    { code: 'UA', name: 'Ukraine', nativeName: 'Україна', flag: '🇺🇦' },
-    { code: 'VA', name: 'Vatican City', nativeName: 'Città del Vaticano', flag: '🇻🇦' },
-    { code: 'RU', name: 'Russia', nativeName: 'Россия', flag: '🇷🇺' },
-    { code: 'TR', name: 'Turkey', nativeName: 'Türkiye', flag: '🇹🇷' },
+    { code: 'LT', name: 'Lithuania', nativeName: 'Lietuva' },
+    { code: 'LV', name: 'Latvia', nativeName: 'Latvija' },
+    { code: 'EE', name: 'Estonia', nativeName: 'Eesti' },
+    { code: 'PL', name: 'Poland', nativeName: 'Polska' },
+    { code: 'DE', name: 'Germany', nativeName: 'Deutschland' },
+    { code: 'FR', name: 'France', nativeName: 'France' },
+    { code: 'ES', name: 'Spain', nativeName: 'España' },
+    { code: 'IT', name: 'Italy', nativeName: 'Italia' },
+    { code: 'GB', name: 'United Kingdom', nativeName: 'United Kingdom' },
+    { code: 'NL', name: 'Netherlands', nativeName: 'Nederland' },
+    { code: 'BE', name: 'Belgium', nativeName: 'België' },
+    { code: 'AT', name: 'Austria', nativeName: 'Österreich' },
+    { code: 'DK', name: 'Denmark', nativeName: 'Danmark' },
+    { code: 'SE', name: 'Sweden', nativeName: 'Sverige' },
+    { code: 'NO', name: 'Norway', nativeName: 'Norge' },
+    { code: 'FI', name: 'Finland', nativeName: 'Suomi' },
+    { code: 'CZ', name: 'Czech Republic', nativeName: 'Česko' },
+    { code: 'SK', name: 'Slovakia', nativeName: 'Slovensko' },
+    { code: 'HU', name: 'Hungary', nativeName: 'Magyarország' },
+    { code: 'RO', name: 'Romania', nativeName: 'România' },
+    { code: 'BG', name: 'Bulgaria', nativeName: 'България' },
+    { code: 'HR', name: 'Croatia', nativeName: 'Hrvatska' },
+    { code: 'SI', name: 'Slovenia', nativeName: 'Slovenija' },
+    { code: 'PT', name: 'Portugal', nativeName: 'Portugal' },
+    { code: 'GR', name: 'Greece', nativeName: 'Ελλάδα' },
+    { code: 'IE', name: 'Ireland', nativeName: 'Éire' },
+    { code: 'LU', name: 'Luxembourg', nativeName: 'Luxembourg' },
+    { code: 'MT', name: 'Malta', nativeName: 'Malta' },
+    { code: 'CY', name: 'Cyprus', nativeName: 'Κύπρος' },
+    { code: 'CH', name: 'Switzerland', nativeName: 'Schweiz' },
+    { code: 'IS', name: 'Iceland', nativeName: 'Ísland' },
+    { code: 'AL', name: 'Albania', nativeName: 'Shqipëri' },
+    { code: 'AD', name: 'Andorra', nativeName: 'Andorra' },
+    { code: 'BY', name: 'Belarus', nativeName: 'Беларусь' },
+    { code: 'BA', name: 'Bosnia and Herzegovina', nativeName: 'Bosna i Hercegovina' },
+    { code: 'XK', name: 'Kosovo', nativeName: 'Kosova' },
+    { code: 'MD', name: 'Moldova', nativeName: 'Moldova' },
+    { code: 'MC', name: 'Monaco', nativeName: 'Monaco' },
+    { code: 'ME', name: 'Montenegro', nativeName: 'Crna Gora' },
+    { code: 'MK', name: 'North Macedonia', nativeName: 'Македонија' },
+    { code: 'RS', name: 'Serbia', nativeName: 'Србија' },
+    { code: 'SM', name: 'San Marino', nativeName: 'San Marino' },
+    { code: 'UA', name: 'Ukraine', nativeName: 'Україна' },
+    { code: 'VA', name: 'Vatican City', nativeName: 'Città del Vaticano' },
+    { code: 'RU', name: 'Russia', nativeName: 'Россия' },
+    { code: 'TR', name: 'Turkey', nativeName: 'Türkiye' },
 
     // Americas
-    { code: 'US', name: 'United States', nativeName: 'United States', flag: '🇺🇸' },
-    { code: 'CA', name: 'Canada', nativeName: 'Canada', flag: '🇨🇦' },
-    { code: 'MX', name: 'Mexico', nativeName: 'México', flag: '🇲🇽' },
-    { code: 'BR', name: 'Brazil', nativeName: 'Brasil', flag: '🇧🇷' },
-    { code: 'AR', name: 'Argentina', nativeName: 'Argentina', flag: '🇦🇷' },
-    { code: 'CL', name: 'Chile', nativeName: 'Chile', flag: '🇨🇱' },
-    { code: 'CO', name: 'Colombia', nativeName: 'Colombia', flag: '🇨🇴' },
-    { code: 'PE', name: 'Peru', nativeName: 'Perú', flag: '🇵🇪' },
-    { code: 'VE', name: 'Venezuela', nativeName: 'Venezuela', flag: '🇻🇪' },
-    { code: 'EC', name: 'Ecuador', nativeName: 'Ecuador', flag: '🇪🇨' },
-    { code: 'BO', name: 'Bolivia', nativeName: 'Bolivia', flag: '🇧🇴' },
-    { code: 'PY', name: 'Paraguay', nativeName: 'Paraguay', flag: '🇵🇾' },
-    { code: 'UY', name: 'Uruguay', nativeName: 'Uruguay', flag: '🇺🇾' },
+    { code: 'US', name: 'United States', nativeName: 'United States' },
+    { code: 'CA', name: 'Canada', nativeName: 'Canada' },
+    { code: 'MX', name: 'Mexico', nativeName: 'México' },
+    { code: 'BR', name: 'Brazil', nativeName: 'Brasil' },
+    { code: 'AR', name: 'Argentina', nativeName: 'Argentina' },
+    { code: 'CL', name: 'Chile', nativeName: 'Chile' },
+    { code: 'CO', name: 'Colombia', nativeName: 'Colombia' },
+    { code: 'PE', name: 'Peru', nativeName: 'Perú' },
+    { code: 'VE', name: 'Venezuela', nativeName: 'Venezuela' },
+    { code: 'EC', name: 'Ecuador', nativeName: 'Ecuador' },
+    { code: 'BO', name: 'Bolivia', nativeName: 'Bolivia' },
+    { code: 'PY', name: 'Paraguay', nativeName: 'Paraguay' },
+    { code: 'UY', name: 'Uruguay', nativeName: 'Uruguay' },
 
     // Asia
-    { code: 'CN', name: 'China', nativeName: '中国', flag: '🇨🇳' },
-    { code: 'JP', name: 'Japan', nativeName: '日本', flag: '🇯🇵' },
-    { code: 'KR', name: 'South Korea', nativeName: '대한민국', flag: '🇰🇷' },
-    { code: 'IN', name: 'India', nativeName: 'भारत', flag: '🇮🇳' },
-    { code: 'ID', name: 'Indonesia', nativeName: 'Indonesia', flag: '🇮🇩' },
-    { code: 'TH', name: 'Thailand', nativeName: 'ประเทศไทย', flag: '🇹🇭' },
-    { code: 'VN', name: 'Vietnam', nativeName: 'Việt Nam', flag: '🇻🇳' },
-    { code: 'MY', name: 'Malaysia', nativeName: 'Malaysia', flag: '🇲🇾' },
-    { code: 'SG', name: 'Singapore', nativeName: 'Singapore', flag: '🇸🇬' },
-    { code: 'PH', name: 'Philippines', nativeName: 'Pilipinas', flag: '🇵🇭' },
-    { code: 'PK', name: 'Pakistan', nativeName: 'پاکستان', flag: '🇵🇰' },
-    { code: 'BD', name: 'Bangladesh', nativeName: 'বাংলাদেশ', flag: '🇧🇩' },
-    { code: 'IL', name: 'Israel', nativeName: 'ישראל', flag: '🇮🇱' },
-    { code: 'AE', name: 'United Arab Emirates', nativeName: 'الإمارات', flag: '🇦🇪' },
-    { code: 'SA', name: 'Saudi Arabia', nativeName: 'السعودية', flag: '🇸🇦' },
-    { code: 'KW', name: 'Kuwait', nativeName: 'الكويت', flag: '🇰🇼' },
-    { code: 'QA', name: 'Qatar', nativeName: 'قطر', flag: '🇶🇦' },
-    { code: 'OM', name: 'Oman', nativeName: 'عمان', flag: '🇴🇲' },
-    { code: 'JO', name: 'Jordan', nativeName: 'الأردن', flag: '🇯🇴' },
-    { code: 'LB', name: 'Lebanon', nativeName: 'لبنان', flag: '🇱🇧' },
+    { code: 'CN', name: 'China', nativeName: '中国' },
+    { code: 'JP', name: 'Japan', nativeName: '日本' },
+    { code: 'KR', name: 'South Korea', nativeName: '대한민국' },
+    { code: 'IN', name: 'India', nativeName: 'भारत' },
+    { code: 'ID', name: 'Indonesia', nativeName: 'Indonesia' },
+    { code: 'TH', name: 'Thailand', nativeName: 'ประเทศไทย' },
+    { code: 'VN', name: 'Vietnam', nativeName: 'Việt Nam' },
+    { code: 'MY', name: 'Malaysia', nativeName: 'Malaysia' },
+    { code: 'SG', name: 'Singapore', nativeName: 'Singapore' },
+    { code: 'PH', name: 'Philippines', nativeName: 'Pilipinas' },
+    { code: 'PK', name: 'Pakistan', nativeName: 'پاکستان' },
+    { code: 'BD', name: 'Bangladesh', nativeName: 'বাংলাদেশ' },
+    { code: 'IL', name: 'Israel', nativeName: 'ישראל' },
+    { code: 'AE', name: 'United Arab Emirates', nativeName: 'الإمارات' },
+    { code: 'SA', name: 'Saudi Arabia', nativeName: 'السعودية' },
+    { code: 'KW', name: 'Kuwait', nativeName: 'الكويت' },
+    { code: 'QA', name: 'Qatar', nativeName: 'قطر' },
+    { code: 'OM', name: 'Oman', nativeName: 'عمان' },
+    { code: 'JO', name: 'Jordan', nativeName: 'الأردن' },
+    { code: 'LB', name: 'Lebanon', nativeName: 'لبنان' },
 
     // Oceania
-    { code: 'AU', name: 'Australia', nativeName: 'Australia', flag: '🇦🇺' },
-    { code: 'NZ', name: 'New Zealand', nativeName: 'New Zealand', flag: '🇳🇿' },
+    { code: 'AU', name: 'Australia', nativeName: 'Australia' },
+    { code: 'NZ', name: 'New Zealand', nativeName: 'New Zealand' },
 
     // Africa
-    { code: 'ZA', name: 'South Africa', nativeName: 'South Africa', flag: '🇿🇦' },
-    { code: 'EG', name: 'Egypt', nativeName: 'مصر', flag: '🇪🇬' },
-    { code: 'NG', name: 'Nigeria', nativeName: 'Nigeria', flag: '🇳🇬' },
-    { code: 'KE', name: 'Kenya', nativeName: 'Kenya', flag: '🇰🇪' },
-    { code: 'MA', name: 'Morocco', nativeName: 'المغرب', flag: '🇲🇦' },
-    { code: 'TN', name: 'Tunisia', nativeName: 'تونس', flag: '🇹🇳' },
-    { code: 'GH', name: 'Ghana', nativeName: 'Ghana', flag: '🇬🇭' },
+    { code: 'ZA', name: 'South Africa', nativeName: 'South Africa' },
+    { code: 'EG', name: 'Egypt', nativeName: 'مصر' },
+    { code: 'NG', name: 'Nigeria', nativeName: 'Nigeria' },
+    { code: 'KE', name: 'Kenya', nativeName: 'Kenya' },
+    { code: 'MA', name: 'Morocco', nativeName: 'المغرب' },
+    { code: 'TN', name: 'Tunisia', nativeName: 'تونس' },
+    { code: 'GH', name: 'Ghana', nativeName: 'Ghana' },
 ].sort((a, b) => a.nativeName.localeCompare(b.nativeName));
+
+// Flag component wrapper for consistent styling
+function Flag({ code, className }: { code: string; className?: string }) {
+    const FlagComponent = flags[code as keyof typeof flags];
+    if (!FlagComponent) {
+        return <span className={cn("inline-block bg-muted rounded", className)} />;
+    }
+    return (
+        <span className={cn("inline-block overflow-hidden rounded-sm", className)}>
+            <FlagComponent title={code} />
+        </span>
+    );
+}
 
 interface CountrySelectorProps {
     value: string;
@@ -136,10 +148,15 @@ export function CountrySelector({
 
     const selectedCountry = countries.find((country) => country.code === value);
 
-    const filteredCountries = countries.filter((country) =>
-        country.nativeName.toLowerCase().includes(search.toLowerCase()) ||
-        country.name.toLowerCase().includes(search.toLowerCase())
-    );
+    const filteredCountries = useMemo(() => {
+        if (!search.trim()) return countries;
+        const searchLower = search.toLowerCase();
+        return countries.filter((country) =>
+            country.nativeName.toLowerCase().includes(searchLower) ||
+            country.name.toLowerCase().includes(searchLower) ||
+            country.code.toLowerCase().includes(searchLower)
+        );
+    }, [search]);
 
     return (
         <div className="space-y-2">
@@ -158,7 +175,7 @@ export function CountrySelector({
                     >
                         {selectedCountry ? (
                             <span className="flex items-center gap-2">
-                                <span className="text-2xl">{selectedCountry.flag}</span>
+                                <Flag code={selectedCountry.code} className="w-5 h-3.5" />
                                 <span>{selectedCountry.nativeName}</span>
                             </span>
                         ) : (
@@ -168,13 +185,15 @@ export function CountrySelector({
                     </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-full p-0" align="start">
-                    <div className="flex items-center border-b px-3">
+                    <div className="flex items-center border-b px-3 py-2">
                         <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
-                        <Input
+                        <input
+                            type="text"
                             placeholder="Search countries..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="h-11 border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                            className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+                            autoFocus
                         />
                     </div>
                     <div className="max-h-[300px] overflow-y-auto p-1">
@@ -186,6 +205,7 @@ export function CountrySelector({
                             filteredCountries.map((country) => (
                                 <button
                                     key={country.code}
+                                    type="button"
                                     onClick={() => {
                                         onChange(country.code);
                                         setOpen(false);
@@ -196,7 +216,7 @@ export function CountrySelector({
                                         value === country.code && 'bg-gold/20 text-gold font-medium'
                                     )}
                                 >
-                                    <span className="text-2xl">{country.flag}</span>
+                                    <Flag code={country.code} className="w-5 h-3.5 flex-shrink-0" />
                                     <span className="flex-1 text-left">
                                         {country.nativeName}
                                         {country.nativeName !== country.name && (
@@ -206,7 +226,7 @@ export function CountrySelector({
                                         )}
                                     </span>
                                     {value === country.code && (
-                                        <Check className="h-4 w-4 text-gold" />
+                                        <Check className="h-4 w-4 text-gold flex-shrink-0" />
                                     )}
                                 </button>
                             ))
@@ -217,3 +237,6 @@ export function CountrySelector({
         </div>
     );
 }
+
+// Export Flag component for reuse
+export { Flag, countries };

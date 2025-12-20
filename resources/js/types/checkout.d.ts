@@ -129,6 +129,10 @@ export interface Order {
     shippingMethod: ShippingMethod;
     paymentMethod: PaymentMethod;
     trackingNumber?: string;
+    // Venipak tracking
+    venipakPackNo?: string;
+    venipakTrackingUrl?: string;
+    venipakShipmentCreatedAt?: string;
     estimatedDelivery?: string;
     timeline: OrderTimeline[];
     createdAt: string;

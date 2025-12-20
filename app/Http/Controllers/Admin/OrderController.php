@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\CreateVenipakShipment;
 use App\Models\Order;
+use App\Services\VenipakShipmentService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class OrderController extends Controller
@@ -105,36 +108,50 @@ class OrderController extends Controller
 
                 // Customer info
                 'customer_email' => $order->customer_email,
+                'customer_phone' => $order->shipping_phone ?: $order->billing_phone,
                 'customer_notes' => $order->customer_notes,
 
                 // Shipping address
                 'shipping_first_name' => $order->shipping_first_name,
                 'shipping_last_name' => $order->shipping_last_name,
                 'shipping_company' => $order->shipping_company,
-                'shipping_street_address' => $order->shipping_street_address,
-                'shipping_apartment' => $order->shipping_apartment,
+                'shipping_address' => trim(($order->shipping_street_address ?: '') . ($order->shipping_apartment ? ', ' . $order->shipping_apartment : '')),
                 'shipping_city' => $order->shipping_city,
                 'shipping_state' => $order->shipping_state,
                 'shipping_postal_code' => $order->shipping_postal_code,
                 'shipping_country' => $order->shipping_country,
-                'shipping_phone' => $order->shipping_phone,
 
                 // Billing address
                 'billing_first_name' => $order->billing_first_name,
                 'billing_last_name' => $order->billing_last_name,
                 'billing_company' => $order->billing_company,
-                'billing_street_address' => $order->billing_street_address,
-                'billing_apartment' => $order->billing_apartment,
+                'billing_address' => trim(($order->billing_street_address ?: '') . ($order->billing_apartment ? ', ' . $order->billing_apartment : '')),
                 'billing_city' => $order->billing_city,
                 'billing_state' => $order->billing_state,
                 'billing_postal_code' => $order->billing_postal_code,
                 'billing_country' => $order->billing_country,
-                'billing_phone' => $order->billing_phone,
 
                 // Shipping details
                 'shipping_method' => $order->shipping_method,
                 'venipak_pickup_point' => $order->venipak_pickup_point,
                 'tracking_number' => $order->tracking_number,
+
+                // Venipak shipment info
+                'venipak_pack_no' => $order->venipak_pack_no,
+                'venipak_manifest_id' => $order->venipak_manifest_id,
+                'venipak_label_path' => $order->venipak_label_path,
+                'venipak_shipment_created_at' => $order->venipak_shipment_created_at?->format('Y-m-d H:i:s'),
+                'venipak_error' => $order->venipak_error,
+                'venipak_tracking_url' => $order->venipak_pack_no
+                    ? 'https://go.venipak.lt/ws/tracking.php?type=1&output=html&code=' . $order->venipak_pack_no
+                    : null,
+                'venipak_status' => $order->venipak_status,
+                'venipak_status_updated_at' => $order->venipak_status_updated_at?->format('Y-m-d H:i:s'),
+                'venipak_delivered_at' => $order->venipak_delivered_at?->format('Y-m-d H:i:s'),
+                // Secondary carrier info (for global shipments)
+                'venipak_carrier_code' => $order->venipak_carrier_code,
+                'venipak_carrier_tracking' => $order->venipak_carrier_tracking,
+                'venipak_shipment_id' => $order->venipak_shipment_id,
 
                 // Price breakdown
                 'original_subtotal' => $order->original_subtotal ?? $order->subtotal,
@@ -164,6 +181,7 @@ class OrderController extends Controller
                         'product_name' => $item->product_name,
                         'product_sku' => $item->product_sku,
                         'variant_size' => $item->variant_size,
+                        'original_unit_price' => $item->original_unit_price,
                         'unit_price' => $item->unit_price,
                         'quantity' => $item->quantity,
                         'subtotal' => $item->subtotal,
@@ -277,5 +295,136 @@ class OrderController extends Controller
         ]);
 
         return $pdf->stream('invoice-' . $order->order_number . '.pdf');
+    }
+
+    /**
+     * Create Venipak shipment manually
+     */
+    public function createVenipakShipment(Order $order, VenipakShipmentService $venipakService)
+    {
+        // Check if Venipak is properly configured
+        if (!$venipakService->isConfigured()) {
+            return redirect()->back()->with('error', __('order.venipak_not_configured'));
+        }
+
+        // Check if shipment already exists
+        if ($order->venipak_pack_no) {
+            return redirect()->back()->with('error', __('order.venipak_shipment_exists'));
+        }
+
+        // Check if country is supported
+        if (!$venipakService->isCountrySupported($order->shipping_country)) {
+            return redirect()->back()->with('error', __('order.venipak_country_not_supported'));
+        }
+
+        // Clear any previous error
+        $order->update(['venipak_error' => null]);
+
+        // Dispatch job to create shipment - catch exception for sync queue
+        try {
+            CreateVenipakShipment::dispatch($order);
+        } catch (\Throwable $e) {
+            // Job failed - error is already saved on order, just redirect back
+            $order->refresh();
+            return redirect()->back();
+        }
+
+        // Check if shipment was created successfully (for sync queue)
+        $order->refresh();
+        if ($order->venipak_pack_no) {
+            return redirect()->back()->with('success', __('order.venipak_shipment_created'));
+        }
+
+        // If error occurred (saved by job), just redirect - error shows in UI
+        if ($order->venipak_error) {
+            return redirect()->back();
+        }
+
+        return redirect()->back()->with('success', __('order.venipak_shipment_queued'));
+    }
+
+    /**
+     * Retry failed Venipak shipment
+     */
+    public function retryVenipakShipment(Order $order, VenipakShipmentService $venipakService)
+    {
+        // Check if shipment already exists
+        if ($order->venipak_pack_no) {
+            return redirect()->back()->with('error', __('order.venipak_shipment_exists'));
+        }
+
+        // Clear any previous error
+        $order->update(['venipak_error' => null]);
+
+        // Dispatch job to create shipment - catch exception for sync queue
+        try {
+            CreateVenipakShipment::dispatch($order);
+        } catch (\Throwable $e) {
+            // Job failed - error is already saved on order, just redirect back
+            $order->refresh();
+            return redirect()->back();
+        }
+
+        // Check if shipment was created successfully (for sync queue)
+        $order->refresh();
+        if ($order->venipak_pack_no) {
+            return redirect()->back()->with('success', __('order.venipak_shipment_created'));
+        }
+
+        // If error occurred (saved by job), just redirect - error shows in UI
+        if ($order->venipak_error) {
+            return redirect()->back();
+        }
+
+        return redirect()->back()->with('success', __('order.venipak_shipment_retry_queued'));
+    }
+
+    /**
+     * Download Venipak shipping label
+     */
+    public function downloadVenipakLabel(Order $order, VenipakShipmentService $venipakService)
+    {
+        // Check if label exists
+        if (!$order->venipak_label_path) {
+            // Try to get label if we have a pack number
+            if ($order->venipak_pack_no) {
+                $labelPath = $venipakService->getAndStoreLabel($order->venipak_pack_no, $order);
+                if ($labelPath) {
+                    $order->update(['venipak_label_path' => $labelPath]);
+                } else {
+                    return redirect()->back()->with('error', __('order.venipak_label_not_available'));
+                }
+            } else {
+                return redirect()->back()->with('error', __('order.venipak_no_shipment'));
+            }
+        }
+
+        // Download the label
+        if (Storage::disk('local')->exists($order->venipak_label_path)) {
+            return Storage::disk('local')->download(
+                $order->venipak_label_path,
+                'venipak-label-' . $order->order_number . '.pdf'
+            );
+        }
+
+        return redirect()->back()->with('error', __('order.venipak_label_not_found'));
+    }
+
+    /**
+     * Refresh Venipak tracking status
+     */
+    public function refreshVenipakTracking(Order $order, VenipakShipmentService $venipakService)
+    {
+        if (!$order->venipak_pack_no) {
+            return redirect()->back()->with('error', __('order.venipak_no_shipment'));
+        }
+
+        $result = $venipakService->updateOrderTracking($order);
+
+        if ($result) {
+            return redirect()->back()->with('success', __('order.venipak_tracking_updated'));
+        }
+
+        return redirect()->back()->with('error', __('order.venipak_tracking_failed'));
     }
 }

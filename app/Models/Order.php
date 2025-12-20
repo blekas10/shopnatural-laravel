@@ -58,6 +58,19 @@ class Order extends Model
         'tracking_number',
         'shipped_at',
         'delivered_at',
+        // Venipak shipment fields
+        'venipak_pack_no',
+        'venipak_manifest_id',
+        'venipak_label_path',
+        'venipak_shipment_created_at',
+        'venipak_error',
+        'venipak_status',
+        'venipak_status_updated_at',
+        'venipak_delivered_at',
+        // Secondary carrier (for global shipments)
+        'venipak_carrier_code',
+        'venipak_carrier_tracking',
+        'venipak_shipment_id',
     ];
 
     protected function casts(): array
@@ -75,6 +88,9 @@ class Order extends Model
             'venipak_pickup_point' => 'array',
             'shipped_at' => 'datetime',
             'delivered_at' => 'datetime',
+            'venipak_shipment_created_at' => 'datetime',
+            'venipak_status_updated_at' => 'datetime',
+            'venipak_delivered_at' => 'datetime',
         ];
     }
 

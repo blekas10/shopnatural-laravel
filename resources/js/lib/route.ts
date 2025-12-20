@@ -58,6 +58,9 @@ const routeMap: Record<string, Record<string, string>> = {
     'admin.orders.update-payment-status': { en: 'admin/orders', lt: 'admin/orders' },
     'admin.orders.invoice.download': { en: 'admin/orders', lt: 'admin/orders' },
     'admin.orders.invoice.view': { en: 'admin/orders', lt: 'admin/orders' },
+    'admin.orders.venipak.create': { en: 'admin/orders', lt: 'admin/orders' },
+    'admin.orders.venipak.retry': { en: 'admin/orders', lt: 'admin/orders' },
+    'admin.orders.venipak.label': { en: 'admin/orders', lt: 'admin/orders' },
     'admin.users.index': { en: 'admin/users', lt: 'admin/users' },
     'admin.users.show': { en: 'admin/users', lt: 'admin/users' },
     'admin.users.toggle-role': { en: 'admin/users', lt: 'admin/users' },
@@ -171,6 +174,21 @@ export function route(name: string, params: Record<string, string | number | boo
     // Add /toggle-role suffix for user role toggle routes
     if (name.endsWith('.toggle-role')) {
         path += '/toggle-role';
+    }
+
+    // Add /venipak/create suffix for Venipak shipment creation routes
+    if (name.endsWith('.venipak.create')) {
+        path += '/venipak/create';
+    }
+
+    // Add /venipak/retry suffix for Venipak shipment retry routes
+    if (name.endsWith('.venipak.retry')) {
+        path += '/venipak/retry';
+    }
+
+    // Add /venipak/label suffix for Venipak label download routes
+    if (name.endsWith('.venipak.label')) {
+        path += '/venipak/label';
     }
 
     // Handle query parameters

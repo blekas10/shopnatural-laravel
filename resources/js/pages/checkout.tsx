@@ -18,6 +18,7 @@ import { AddressForm } from '@/components/address-form';
 import { PaymentForm } from '@/components/payment-form';
 import { CountrySelector } from '@/components/country-selector';
 import { VenipakPickupSelector, VenipakPickupPoint } from '@/components/venipak-pickup-selector';
+import { PhoneInputField, isValidPhoneNumber } from '@/components/ui/phone-input';
 import type {
     CheckoutFormData,
     ShippingAddress,
@@ -29,7 +30,7 @@ import type { SharedData } from '@/types';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { CheckoutValidator } from '@/utils/checkout-validation';
-import { getShippingMethods, calculateShippingCost } from '@/utils/shipping-methods';
+import { getShippingMethods, calculateShippingCost, hasPickupPoints } from '@/utils/shipping-methods';
 
 const CHECKOUT_DATA_KEY = 'shop-natural-checkout-data';
 
@@ -454,8 +455,8 @@ export default function Checkout({
                     break;
                 }
 
-                // Validate Venipak pickup point if Lithuania + Venipak Pickup selected
-                if (selectedShippingMethod === 'venipak-pickup' && shippingAddress.country === 'LT') {
+                // Validate Venipak pickup point if Baltic country + Venipak Pickup selected
+                if (selectedShippingMethod === 'venipak-pickup' && hasPickupPoints(shippingAddress.country)) {
                     if (!selectedVenipakPoint) {
                         toast.error(t('venipak.please_select', 'Please select a Venipak pickup point'));
                         isValid = false;
@@ -731,27 +732,27 @@ export default function Checkout({
                                                     <Label htmlFor="phone" className="text-sm font-bold uppercase tracking-wide">
                                                         {t('checkout.phone', 'Phone')} *
                                                     </Label>
-                                                    <Input
-                                                        id="phone"
-                                                        type="tel"
-                                                        value={contact.phone}
-                                                        onChange={(e) => {
-                                                            setContact((prev) => ({
-                                                                ...prev,
-                                                                phone: e.target.value,
-                                                            }));
-                                                            // Clear error when user types
-                                                            if (contactErrors.phone) {
-                                                                setContactErrors((prev) => ({ ...prev, phone: undefined }));
-                                                            }
-                                                        }}
-                                                        placeholder="+370 600 12345"
-                                                        className="mt-1.5"
-                                                        error={contactErrors.phone}
-                                                    />
-                                                    {contactErrors.phone && (
-                                                        <p className="mt-1 text-sm text-red-600">{contactErrors.phone}</p>
-                                                    )}
+                                                    <div className="mt-1.5">
+                                                        <PhoneInputField
+                                                            value={contact.phone || ''}
+                                                            onChange={(value) => {
+                                                                setContact((prev) => ({
+                                                                    ...prev,
+                                                                    phone: value || '',
+                                                                }));
+                                                                // Clear error when user types
+                                                                if (contactErrors.phone) {
+                                                                    setContactErrors((prev) => ({ ...prev, phone: undefined }));
+                                                                }
+                                                            }}
+                                                            defaultCountry="LT"
+                                                            placeholder="+370 612 34567"
+                                                            error={contactErrors.phone}
+                                                        />
+                                                        {contactErrors.phone && (
+                                                            <p className="mt-1 text-sm text-red-600">{contactErrors.phone}</p>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
                                             <Button
@@ -942,8 +943,8 @@ export default function Checkout({
                                                 </div>
                                             </RadioGroup>
 
-                                            {/* Venipak Pickup Point Selector - Show when Venipak Pickup + Lithuania */}
-                                            {selectedShippingMethod === 'venipak-pickup' && shippingAddress.country === 'LT' && (
+                                            {/* Venipak Pickup Point Selector - Show when Venipak Pickup + Baltic countries */}
+                                            {selectedShippingMethod === 'venipak-pickup' && hasPickupPoints(shippingAddress.country) && (
                                                 <div className="mt-6">
                                                     <VenipakPickupSelector
                                                         country={shippingAddress.country}

@@ -101,10 +101,12 @@ class CheckoutController extends Controller
             'shippingMethod' => 'required|string',
             'venipakPickupPoint' => 'nullable|array',
             'venipakPickupPoint.id' => 'nullable|integer',
+            'venipakPickupPoint.code' => 'nullable|string', // Venipak pickup point code (required for shipment)
             'venipakPickupPoint.name' => 'nullable|string',
             'venipakPickupPoint.address' => 'nullable|string',
             'venipakPickupPoint.city' => 'nullable|string',
             'venipakPickupPoint.zip' => 'nullable|string',
+            'venipakPickupPoint.country' => 'nullable|string',
             'paymentMethod' => 'required|string|in:stripe,paysera',
             'items' => 'required|array|min:1',
             'items.*.productId' => 'required|integer|exists:products,id',
@@ -237,7 +239,10 @@ class CheckoutController extends Controller
                     'product_sku' => $variant->sku,
                     'variant_size' => $variant->size,
 
-                    // Pricing
+                    // Pricing - store original price if discounted
+                    'original_unit_price' => isset($item['originalPrice']) && $item['originalPrice'] > $unitPrice
+                        ? $item['originalPrice']
+                        : null,
                     'unit_price' => $unitPrice,
                     'quantity' => $quantity,
                     'subtotal' => $subtotal,

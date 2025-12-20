@@ -25,6 +25,7 @@ class OrderItemResource extends JsonResource
             'variantSize' => $this->variant_size,
 
             // Pricing at time of order
+            'originalUnitPrice' => $this->original_unit_price ? (float) $this->original_unit_price : null,
             'unitPrice' => (float) $this->unit_price,
             'quantity' => $this->quantity,
             'subtotal' => (float) $this->subtotal,

@@ -35,4 +35,25 @@ return [
         ],
     ],
 
+    'venipak' => [
+        // API URLs
+        // Production: https://go.venipak.lt
+        // UAT/Test: https://venipak.uat.megodata.com
+        'base_url' => env('VENIPAK_BASE_URL', 'https://go.venipak.lt'),
+
+        // Credentials
+        'username' => env('VENIPAK_USERNAME', ''),
+        'password' => env('VENIPAK_PASSWORD', ''),
+        'user_id' => env('VENIPAK_USER_ID', '10281'),
+
+        // Pack number configuration
+        // First pack number to use if no previous shipments exist
+        // Format: V{user_id}E{7-digit-number}
+        'first_pack_number' => env('VENIPAK_FIRST_PACK_NUMBER', 1000050),
+
+        // Feature flags
+        'enabled' => env('VENIPAK_ENABLED', true),
+        'auto_create_shipment' => env('VENIPAK_AUTO_CREATE_SHIPMENT', false),
+    ],
+
 ];

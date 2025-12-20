@@ -297,12 +297,24 @@
                     $vatRate = 21;
                     $priceExVat = $itemTotal / (1 + $vatRate / 100);
                     $vatAmount = $itemTotal - $priceExVat;
+                    $hasDiscount = $item->original_unit_price && $item->original_unit_price > $item->unit_price;
+                    $originalPriceExVat = $hasDiscount ? ($item->original_unit_price * $item->quantity) / (1 + $vatRate / 100) : null;
                 @endphp
                 <tr>
-                    <td>{{ $item->product_name }}@if($item->variant_size) - {{ $item->variant_size }}@endif</td>
+                    <td>
+                        {{ $item->product_name }}@if($item->variant_size) - {{ $item->variant_size }}@endif
+                        @if($hasDiscount)
+                            <br><span style="color: #888; font-size: 7pt;">{{ $locale === 'lt' ? 'Pirminė kaina' : 'Original price' }}: <span style="text-decoration: line-through;">{{ number_format($item->original_unit_price, 2, ',', ' ') }} €</span> → {{ number_format($item->unit_price, 2, ',', ' ') }} €</span>
+                        @endif
+                    </td>
                     <td class="text-center">{{ $item->product_sku }}</td>
                     <td class="text-center">{{ $item->quantity }}</td>
-                    <td class="text-right">{{ number_format($priceExVat, 2, ',', ' ') }} €</td>
+                    <td class="text-right">
+                        @if($hasDiscount)
+                            <span style="color: #888; text-decoration: line-through; font-size: 7pt; display: block;">{{ number_format($originalPriceExVat, 2, ',', ' ') }} €</span>
+                        @endif
+                        {{ number_format($priceExVat, 2, ',', ' ') }} €
+                    </td>
                     <td class="text-center">{{ $vatRate }}%</td>
                     <td class="text-right">{{ number_format($vatAmount, 2, ',', ' ') }} €</td>
                     <td class="text-right">{{ number_format($itemTotal, 2, ',', ' ') }} €</td>

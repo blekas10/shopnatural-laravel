@@ -36,6 +36,9 @@ import {
     MapPin,
     User,
     FileText,
+    Truck,
+    RefreshCw,
+    AlertCircle,
 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -45,6 +48,7 @@ interface OrderItem {
     product_name: string;
     product_sku: string;
     variant_size: string;
+    original_unit_price: string | null;
     unit_price: string;
     quantity: number;
     total: string;
@@ -75,6 +79,20 @@ interface Order {
     shipping_method: string | null;
     venipak_pickup_point: { id: string; name: string; address: string; city: string; zip?: string } | null;
     tracking_number: string | null;
+    // Venipak shipment info
+    venipak_pack_no: string | null;
+    venipak_manifest_id: string | null;
+    venipak_label_path: string | null;
+    venipak_shipment_created_at: string | null;
+    venipak_error: string | null;
+    venipak_tracking_url: string | null;
+    venipak_status: string | null;
+    venipak_status_updated_at: string | null;
+    venipak_delivered_at: string | null;
+    // Secondary carrier (for global shipments)
+    venipak_carrier_code: string | null;
+    venipak_carrier_tracking: string | null;
+    venipak_shipment_id: string | null;
     // Price breakdown
     original_subtotal: string;
     product_discount: string;
@@ -108,6 +126,7 @@ export default function OrderShow({ order, statuses, paymentStatuses }: OrderSho
     const [selectedPaymentStatus, setSelectedPaymentStatus] = useState(order.payment_status);
     const [trackingNumber, setTrackingNumber] = useState(order.tracking_number || '');
     const [saving, setSaving] = useState(false);
+    const [venipakLoading, setVenipakLoading] = useState(false);
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -218,6 +237,55 @@ export default function OrderShow({ order, statuses, paymentStatuses }: OrderSho
     const handleDownloadInvoice = () => {
         window.location.href = route('admin.orders.invoice.download', { order: order.id });
         toast.success(t('orders.invoice_downloading', 'Invoice download started'));
+    };
+
+    const handleCreateVenipakShipment = () => {
+        if (venipakLoading) return;
+
+        setVenipakLoading(true);
+        router.post(
+            route('admin.orders.venipak.create', { order: order.id }),
+            {},
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    toast.success(t('orders.venipak_shipment_queued', 'Venipak shipment creation queued'));
+                },
+                onError: (errors) => {
+                    toast.error(Object.values(errors)[0] as string || t('orders.venipak_error', 'Failed to create shipment'));
+                },
+                onFinish: () => {
+                    setVenipakLoading(false);
+                },
+            }
+        );
+    };
+
+    const handleRetryVenipakShipment = () => {
+        if (venipakLoading) return;
+
+        setVenipakLoading(true);
+        router.post(
+            route('admin.orders.venipak.retry', { order: order.id }),
+            {},
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    toast.success(t('orders.venipak_retry_queued', 'Venipak shipment retry queued'));
+                },
+                onError: (errors) => {
+                    toast.error(Object.values(errors)[0] as string || t('orders.venipak_error', 'Failed to retry shipment'));
+                },
+                onFinish: () => {
+                    setVenipakLoading(false);
+                },
+            }
+        );
+    };
+
+    const handleDownloadVenipakLabel = () => {
+        window.location.href = route('admin.orders.venipak.label', { order: order.id });
+        toast.success(t('orders.venipak_label_downloading', 'Venipak label download started'));
     };
 
     return (
@@ -400,8 +468,19 @@ export default function OrderShow({ order, statuses, paymentStatuses }: OrderSho
                                                         <TableCell className="text-gray-600">
                                                             {item.variant_size}
                                                         </TableCell>
-                                                        <TableCell className="text-right text-gray-900">
-                                                            {formatPrice(item.unit_price)}
+                                                        <TableCell className="text-right">
+                                                            {item.original_unit_price ? (
+                                                                <div className="flex flex-col items-end">
+                                                                    <span className="text-gray-400 line-through text-xs">
+                                                                        {formatPrice(item.original_unit_price)}
+                                                                    </span>
+                                                                    <span className="text-green-600 font-medium">
+                                                                        {formatPrice(item.unit_price)}
+                                                                    </span>
+                                                                </div>
+                                                            ) : (
+                                                                <span className="text-gray-900">{formatPrice(item.unit_price)}</span>
+                                                            )}
                                                         </TableCell>
                                                         <TableCell className="text-center text-gray-900">
                                                             {item.quantity}
@@ -635,6 +714,165 @@ export default function OrderShow({ order, statuses, paymentStatuses }: OrderSho
                                     </CardContent>
                                 </Card>
                             )}
+
+                            {/* Venipak Shipment */}
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle className="text-lg font-semibold text-gold flex items-center gap-2">
+                                        <Truck className="w-5 h-5" />
+                                        {t('orders.venipak_shipment', 'Venipak Shipment')}
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-3">
+                                    {/* Shipment Status */}
+                                    {order.venipak_pack_no ? (
+                                        <>
+                                            <div>
+                                                <Label className="text-xs font-medium text-gray-500 uppercase">
+                                                    {t('orders.pack_number', 'Pack Number')}
+                                                </Label>
+                                                <p className="mt-1 text-sm text-gray-900 font-mono font-bold">
+                                                    {order.venipak_pack_no}
+                                                </p>
+                                            </div>
+
+                                            {/* Secondary carrier info (for global shipments) */}
+                                            {order.venipak_carrier_tracking && (
+                                                <div className="p-3 rounded-lg bg-blue-50 border border-blue-200">
+                                                    <Label className="text-xs font-medium text-blue-700 uppercase">
+                                                        {t('orders.carrier_tracking', 'Carrier Tracking')}
+                                                        {order.venipak_carrier_code && (
+                                                            <span className="ml-2 text-blue-500 normal-case">
+                                                                ({order.venipak_carrier_code})
+                                                            </span>
+                                                        )}
+                                                    </Label>
+                                                    <p className="mt-1 text-sm text-blue-900 font-mono font-bold">
+                                                        {order.venipak_carrier_tracking}
+                                                    </p>
+                                                    {order.venipak_shipment_id && (
+                                                        <p className="text-xs text-blue-600 mt-1">
+                                                            Shipment ID: {order.venipak_shipment_id}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            )}
+
+                                            {order.venipak_status && (
+                                                <div>
+                                                    <Label className="text-xs font-medium text-gray-500 uppercase">
+                                                        {t('orders.tracking_status', 'Tracking Status')}
+                                                    </Label>
+                                                    <p className="mt-1 text-sm font-medium text-gray-900">
+                                                        {order.venipak_status}
+                                                    </p>
+                                                    {order.venipak_status_updated_at && (
+                                                        <p className="text-xs text-gray-500 mt-0.5">
+                                                            {t('orders.last_updated', 'Last updated')}: {formatDate(order.venipak_status_updated_at)}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            )}
+
+                                            {order.venipak_delivered_at && (
+                                                <div>
+                                                    <Label className="text-xs font-medium text-gray-500 uppercase">
+                                                        {t('orders.venipak_delivered_at', 'Delivered At')}
+                                                    </Label>
+                                                    <p className="mt-1 text-sm text-green-600 font-medium">
+                                                        {formatDate(order.venipak_delivered_at)}
+                                                    </p>
+                                                </div>
+                                            )}
+
+                                            {order.venipak_shipment_created_at && (
+                                                <div>
+                                                    <Label className="text-xs font-medium text-gray-500 uppercase">
+                                                        {t('orders.shipment_created', 'Shipment Created')}
+                                                    </Label>
+                                                    <p className="mt-1 text-sm text-gray-900">
+                                                        {formatDate(order.venipak_shipment_created_at)}
+                                                    </p>
+                                                </div>
+                                            )}
+
+                                            {order.venipak_tracking_url && (
+                                                <a
+                                                    href={order.venipak_tracking_url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center gap-1 text-sm text-gold hover:underline"
+                                                >
+                                                    <ExternalLink className="w-4 h-4" />
+                                                    {t('orders.view_tracking', 'View Tracking')}
+                                                </a>
+                                            )}
+
+                                            <Button
+                                                onClick={handleDownloadVenipakLabel}
+                                                variant="outline"
+                                                size="sm"
+                                                className="w-full border-gold/30 hover:bg-gold/10"
+                                            >
+                                                <Download className="w-4 h-4 mr-2" />
+                                                {t('orders.download_label', 'Download Label')}
+                                            </Button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            {/* No shipment yet */}
+                                            {order.venipak_error && (
+                                                <div className="p-3 rounded-lg bg-red-50 border border-red-200">
+                                                    <div className="flex items-start gap-2">
+                                                        <AlertCircle className="w-4 h-4 text-red-500 mt-0.5 shrink-0" />
+                                                        <div className="text-sm">
+                                                            <p className="font-medium text-red-800">
+                                                                {t('orders.venipak_error_title', 'Shipment Error')}
+                                                            </p>
+                                                            <p className="text-red-600 mt-1">
+                                                                {order.venipak_error}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            <p className="text-sm text-gray-600">
+                                                {t('orders.no_venipak_shipment', 'No Venipak shipment created yet.')}
+                                            </p>
+
+                                            {order.venipak_error ? (
+                                                <Button
+                                                    onClick={handleRetryVenipakShipment}
+                                                    disabled={venipakLoading}
+                                                    variant="outline"
+                                                    className="w-full border-gold/30 hover:bg-gold/10"
+                                                >
+                                                    {venipakLoading ? (
+                                                        <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                                                    ) : (
+                                                        <RefreshCw className="w-4 h-4 mr-2" />
+                                                    )}
+                                                    {t('orders.retry_shipment', 'Retry Shipment')}
+                                                </Button>
+                                            ) : (
+                                                <Button
+                                                    onClick={handleCreateVenipakShipment}
+                                                    disabled={venipakLoading}
+                                                    className="w-full bg-gold hover:bg-gold/90 text-white"
+                                                >
+                                                    {venipakLoading ? (
+                                                        <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                                                    ) : (
+                                                        <Truck className="w-4 h-4 mr-2" />
+                                                    )}
+                                                    {t('orders.create_shipment', 'Create Shipment')}
+                                                </Button>
+                                            )}
+                                        </>
+                                    )}
+                                </CardContent>
+                            </Card>
 
                             {/* Actions */}
                             <Card>

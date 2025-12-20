@@ -35,6 +35,7 @@ interface OrderItem {
     productName: string;
     productSku: string;
     variantSize: string;
+    originalUnitPrice: number | null;
     unitPrice: number;
     quantity: number;
     total: number;
@@ -84,6 +85,14 @@ interface Order {
         zip: string;
     } | null;
     trackingNumber: string | null;
+    // Venipak tracking
+    venipakPackNo: string | null;
+    venipakTrackingUrl: string | null;
+    venipakShipmentCreatedAt: string | null;
+    // Secondary carrier (for global shipments)
+    venipakCarrierCode: string | null;
+    venipakCarrierTracking: string | null;
+    venipakShipmentId: string | null;
     // Price breakdown
     originalSubtotal: number;
     productDiscount: number;
@@ -304,9 +313,21 @@ export default function OrderShow({ order: orderData }: OrderShowProps) {
 
                                             <div className="flex items-center justify-between gap-4">
                                                 <div className="flex items-center gap-2 text-sm">
-                                                    <span className="text-muted-foreground">
-                                                        {formatPrice(item.unitPrice)} x
-                                                    </span>
+                                                    {item.originalUnitPrice ? (
+                                                        <span className="flex items-center gap-1.5">
+                                                            <span className="text-muted-foreground/60 line-through text-xs">
+                                                                {formatPrice(item.originalUnitPrice)}
+                                                            </span>
+                                                            <span className="text-green-600 dark:text-green-400 font-medium">
+                                                                {formatPrice(item.unitPrice)}
+                                                            </span>
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-muted-foreground">
+                                                            {formatPrice(item.unitPrice)}
+                                                        </span>
+                                                    )}
+                                                    <span className="text-muted-foreground">x</span>
                                                     <span className="rounded-md bg-gold/10 px-2 py-1 font-bold text-gold">
                                                         {item.quantity}
                                                     </span>
@@ -500,7 +521,7 @@ export default function OrderShow({ order: orderData }: OrderShowProps) {
                         className="md:col-span-2 lg:col-span-1 space-y-4"
                     >
                         {/* Tracking Information */}
-                        {order.trackingNumber && (
+                        {(order.trackingNumber || order.venipakPackNo) && (
                             <Card>
                                 <CardHeader className="pb-3">
                                     <CardTitle className="flex items-center gap-2 text-base md:text-lg">
@@ -508,15 +529,63 @@ export default function OrderShow({ order: orderData }: OrderShowProps) {
                                         {t('orders.tracking', 'Tracking')}
                                     </CardTitle>
                                 </CardHeader>
-                                <CardContent className="p-4 md:p-6">
+                                <CardContent className="p-4 md:p-6 space-y-4">
                                     <div className="rounded-lg border border-gold/20 bg-gold/5 p-4">
                                         <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground mb-2">
                                             {t('orders.tracking_number', 'Tracking Number')}
                                         </p>
                                         <p className="font-mono text-sm font-bold text-gold break-all md:text-base">
-                                            {order.trackingNumber}
+                                            {order.venipakPackNo || order.trackingNumber}
                                         </p>
                                     </div>
+
+                                    {/* Secondary carrier tracking (for global shipments) */}
+                                    {order.venipakCarrierTracking && (
+                                        <div className="rounded-lg border border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950 p-4">
+                                            <p className="text-xs font-bold uppercase tracking-wide text-blue-700 dark:text-blue-300 mb-2">
+                                                {t('orders.carrier_tracking', 'Carrier Tracking')}
+                                                {order.venipakCarrierCode && (
+                                                    <span className="ml-2 text-blue-500 dark:text-blue-400 normal-case font-normal">
+                                                        ({order.venipakCarrierCode})
+                                                    </span>
+                                                )}
+                                            </p>
+                                            <p className="font-mono text-sm font-bold text-blue-900 dark:text-blue-100 break-all md:text-base">
+                                                {order.venipakCarrierTracking}
+                                            </p>
+                                            <p className="text-xs text-blue-600 dark:text-blue-400 mt-2">
+                                                {t('orders.carrier_tracking_note', 'Use this number to track with the delivery carrier')}
+                                            </p>
+                                        </div>
+                                    )}
+
+                                    {/* Venipak tracking iframe */}
+                                    {order.venipakTrackingUrl && (
+                                        <div className="space-y-2">
+                                            <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                                                {t('orders.tracking_status', 'Tracking Status')}
+                                            </p>
+                                            <div className="rounded-lg border border-border overflow-hidden bg-white">
+                                                <iframe
+                                                    src={order.venipakTrackingUrl}
+                                                    className="w-full min-h-[200px]"
+                                                    title="Venipak Tracking"
+                                                    sandbox="allow-same-origin"
+                                                />
+                                            </div>
+                                            <a
+                                                href={order.venipakTrackingUrl}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-xs text-gold hover:underline inline-flex items-center gap-1"
+                                            >
+                                                {t('orders.view_full_tracking', 'View full tracking page')}
+                                                <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                                </svg>
+                                            </a>
+                                        </div>
+                                    )}
                                 </CardContent>
                             </Card>
                         )}
