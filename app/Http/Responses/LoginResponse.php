@@ -2,7 +2,7 @@
 
 namespace App\Http\Responses;
 
-use Illuminate\Http\JsonResponse;
+use Inertia\Inertia;
 use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -19,8 +19,12 @@ class LoginResponse implements LoginResponseContract
         // Build locale-aware dashboard URL
         $dashboardPath = $locale === 'en' ? '/dashboard' : '/' . $locale . '/dashboard';
 
-        return $request->wantsJson()
-            ? new JsonResponse('', 204)
-            : redirect()->intended($dashboardPath);
+        // Use Inertia::location() to force a full page reload after login
+        // This ensures the CSRF token is refreshed after session regeneration
+        if ($request->wantsJson()) {
+            return Inertia::location($dashboardPath);
+        }
+
+        return redirect()->intended($dashboardPath);
     }
 }
