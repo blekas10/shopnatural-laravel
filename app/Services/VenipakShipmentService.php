@@ -405,14 +405,60 @@ XML;
     }
 
     /**
-     * Calculate order weight
+     * Calculate order weight based on product sizes
+     * Parses variant sizes (e.g., "250ml", "1000ml", "30VNT") and converts to kg
+     * For liquids: 1ml ≈ 1g + packaging weight
      */
     private function calculateOrderWeight(Order $order): float
     {
-        $defaultWeight = 0.5; // kg per item
-        $totalItems = $order->items->sum('quantity');
+        $totalGrams = 0;
+        $packagingWeightGrams = 50; // Average packaging weight per item (bottle, cap, box)
 
-        return max(0.1, $totalItems * $defaultWeight);
+        foreach ($order->items as $item) {
+            $quantity = $item->quantity;
+            $size = $item->variant_size ?? '';
+
+            // Parse size string to extract numeric value and unit
+            $itemGrams = $this->parseSizeToGrams($size);
+
+            // Add packaging weight per item
+            $totalGrams += ($itemGrams + $packagingWeightGrams) * $quantity;
+        }
+
+        // Convert to kg, minimum 0.1kg
+        $weightKg = $totalGrams / 1000;
+
+        return max(0.1, round($weightKg, 2));
+    }
+
+    /**
+     * Parse size string to grams
+     * Supports: ml (1ml = 1g), GR/g (direct), VNT (count items ~30g each)
+     */
+    private function parseSizeToGrams(string $size): float
+    {
+        // Default weight if size cannot be parsed
+        $defaultGrams = 100;
+
+        if (empty($size)) {
+            return $defaultGrams;
+        }
+
+        // Extract numeric value and unit using regex
+        // Handles: "250ml", "1000ML", "50 ml", "30VNT", "10.5GR", etc.
+        if (preg_match('/^([\d.]+)\s*(ml|gr|g|vnt)?$/i', trim($size), $matches)) {
+            $value = (float) $matches[1];
+            $unit = strtolower($matches[2] ?? 'ml');
+
+            return match ($unit) {
+                'ml' => $value,              // 1ml ≈ 1g for cosmetics (water-based)
+                'gr', 'g' => $value,         // Already in grams
+                'vnt' => $value * 30,        // Count items, ~30g each
+                default => $value,           // Assume ml if no unit
+            };
+        }
+
+        return $defaultGrams;
     }
 
     /**
