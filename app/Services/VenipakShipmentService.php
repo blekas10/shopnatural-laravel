@@ -492,21 +492,31 @@ XML;
 
     /**
      * Get and store shipping label PDF
+     * For international/global shipments, fetches all labels (Venipak + carrier)
      */
     public function getAndStoreLabel(string $packNo, Order $order): ?string
     {
         try {
+            // Determine shipment type to decide which labels to fetch
+            $countryCode = $this->mapCountryCode($order->shipping_country);
+            $shipmentType = $this->getShipmentType($countryCode);
+
+            // For global/international, use carrier=all to get both labels
+            $carrier = in_array($shipmentType, ['global', 'international']) ? 'all' : 'venipak';
+
             $response = Http::asForm()->post("{$this->baseUrl}/ws/print_label", [
                 'user' => $this->username,
                 'pass' => $this->password,
                 'pack_no' => $packNo,
                 'format' => 'other', // 100x150mm sticker
+                'carrier' => $carrier,
             ]);
 
             if (!$response->successful()) {
                 Log::error('Venipak: Failed to get label', [
                     'pack_no' => $packNo,
                     'status' => $response->status(),
+                    'carrier' => $carrier,
                 ]);
                 return null;
             }
@@ -523,7 +533,12 @@ XML;
             $filename = "venipak-labels/{$order->order_number}-{$packNo}.pdf";
             Storage::disk('local')->put($filename, $body);
 
-            Log::info('Venipak: Label stored', ['pack_no' => $packNo, 'filename' => $filename]);
+            Log::info('Venipak: Label stored', [
+                'pack_no' => $packNo,
+                'filename' => $filename,
+                'shipment_type' => $shipmentType,
+                'carrier_param' => $carrier,
+            ]);
 
             return $filename;
 
