@@ -1,6 +1,6 @@
 import '../css/app.css';
 
-import { createInertiaApp, router } from '@inertiajs/react';
+import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -16,35 +16,6 @@ if (token) {
     axios.defaults.headers.common['X-CSRF-TOKEN'] = token.getAttribute('content');
 } else {
     console.error('CSRF token not found');
-}
-
-// Enable scroll position restoration for back/forward navigation
-if (typeof window !== 'undefined') {
-    const scrollPositions: Record<string, { x: number; y: number }> = {};
-
-    // Store scroll position before navigating away
-    router.on('before', (event) => {
-        // Only store for regular navigation (not form submissions)
-        if (event.detail.visit.method === 'get') {
-            scrollPositions[window.location.href] = {
-                x: window.scrollX,
-                y: window.scrollY,
-            };
-        }
-    });
-
-    // Restore scroll position after navigation completes
-    router.on('navigate', (event) => {
-        const url = window.location.href;
-        const saved = scrollPositions[url];
-
-        // Only restore for back/forward navigation (popstate)
-        if (saved && event.detail.page.props) {
-            setTimeout(() => {
-                window.scrollTo(saved.x, saved.y);
-            }, 50);
-        }
-    });
 }
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
