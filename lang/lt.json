@@ -45,6 +45,8 @@
     "auth.continue_with_google": "Tęsti su Google",
     "auth.or": "arba",
     "auth.google_auth_failed": "Google autentifikacija nepavyko. Bandykite dar kartą.",
+    "auth.failed": "Šie prisijungimo duomenys neatitinka mūsų įrašų.",
+    "auth.throttle": "Per daug bandymų prisijungti. Bandykite dar kartą po :seconds sekundžių.",
     "nav.my_account": "Mano paskyra",
     "nav.my_orders": "Mano užsakymai",
     "nav.settings": "Nustatymai",

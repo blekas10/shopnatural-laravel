@@ -45,6 +45,8 @@
     "auth.continue_with_google": "Continue with Google",
     "auth.or": "or",
     "auth.google_auth_failed": "Google authentication failed. Please try again.",
+    "auth.failed": "These credentials do not match our records.",
+    "auth.throttle": "Too many login attempts. Please try again in :seconds seconds.",
     "nav.my_account": "My Account",
     "nav.my_orders": "My Orders",
     "nav.settings": "Settings",
