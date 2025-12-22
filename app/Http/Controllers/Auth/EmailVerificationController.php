@@ -14,9 +14,13 @@ class EmailVerificationController extends Controller
      */
     public function verify(EmailVerificationRequest $request)
     {
-        // Get locale from session
-        $locale = session('locale', app()->getLocale()) ?? 'en';
+        // Get locale from URL parameter (included in verification link), fallback to session/default
+        $locale = $request->query('locale', session('locale', 'en'));
         $dashboardRoute = $locale === 'lt' ? 'lt.dashboard' : 'dashboard';
+
+        // Set app locale for any translations
+        app()->setLocale($locale);
+        session(['locale' => $locale]);
 
         if ($request->user()->hasVerifiedEmail()) {
             return redirect()->intended(route($dashboardRoute))

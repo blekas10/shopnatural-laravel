@@ -66,6 +66,7 @@ class WelcomeVerificationNotification extends Notification
 
     /**
      * Get the verification URL for the given notifiable.
+     * Includes locale parameter so user lands on correct language after verification.
      */
     protected function verificationUrl($notifiable): string
     {
@@ -75,6 +76,7 @@ class WelcomeVerificationNotification extends Notification
             [
                 'id' => $notifiable->getKey(),
                 'hash' => sha1($notifiable->getEmailForVerification()),
+                'locale' => $this->emailLocale,
             ]
         );
     }
