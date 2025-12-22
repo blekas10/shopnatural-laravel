@@ -1003,5 +1003,9 @@
     "2-3 business days": "2-3 darbo dienos",
     "1-2 business days": "1-2 darbo dienos",
     "1-5 business days": "1-5 darbo dienos",
-    "2-10 business days": "2-10 darbo dienų"
+    "2-10 business days": "2-10 darbo dienų",
+    "payment.stripe_name": "Debeto / Kredito kortelė",
+    "payment.stripe_description": "Mokėkite saugiai kortele, Apple Pay arba Google Pay",
+    "payment.paysera_name": "Paysera",
+    "payment.paysera_description": "Banko pavedimas arba kortelės per Paysera"
 }

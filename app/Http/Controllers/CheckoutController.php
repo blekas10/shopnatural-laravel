@@ -53,13 +53,13 @@ class CheckoutController extends Controller
         $paymentMethods = [
             [
                 'id' => 'stripe',
-                'name' => 'Credit / Debit Card',
-                'description' => 'Pay securely with Stripe',
+                'name' => __('payment.stripe_name'),
+                'description' => __('payment.stripe_description'),
             ],
             [
                 'id' => 'paysera',
-                'name' => 'Paysera',
-                'description' => 'Pay with Paysera (Bank transfer, cards)',
+                'name' => __('payment.paysera_name'),
+                'description' => __('payment.paysera_description'),
             ],
         ];
 

@@ -18,6 +18,7 @@ import { AddressForm } from '@/components/address-form';
 import { PaymentForm } from '@/components/payment-form';
 import { CountrySelector } from '@/components/country-selector';
 import { VenipakPickupSelector, VenipakPickupPoint } from '@/components/venipak-pickup-selector';
+import { VenipakLogo } from '@/components/payment-logos';
 import { PhoneInputField, isValidPhoneNumber } from '@/components/ui/phone-input';
 import type {
     CheckoutFormData,
@@ -917,20 +918,24 @@ export default function Checkout({
                                                                 />
                                                                 <div className="flex-1">
                                                                     <div className="flex items-start justify-between">
-                                                                        <div>
-                                                                            <p className="font-bold uppercase tracking-wide text-foreground">
-                                                                                {method.name}
-                                                                            </p>
-                                                                            <p className="mt-1 text-sm text-muted-foreground">
-                                                                                {
-                                                                                    method.description
-                                                                                }
-                                                                            </p>
-                                                                            <p className="mt-1 text-xs text-muted-foreground">
-                                                                                {
-                                                                                    method.estimatedDays
-                                                                                }
-                                                                            </p>
+                                                                        <div className="flex items-start gap-3">
+                                                                            {/* Venipak logo for venipak methods */}
+                                                                            {method.id.startsWith('venipak') && (
+                                                                                <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-white border border-border">
+                                                                                    <VenipakLogo className="h-4" />
+                                                                                </div>
+                                                                            )}
+                                                                            <div>
+                                                                                <p className="font-bold uppercase tracking-wide text-foreground">
+                                                                                    {method.name}
+                                                                                </p>
+                                                                                <p className="mt-1 text-sm text-muted-foreground">
+                                                                                    {method.description}
+                                                                                </p>
+                                                                                <p className="mt-1 text-xs text-muted-foreground">
+                                                                                    {method.estimatedDays}
+                                                                                </p>
+                                                                            </div>
                                                                         </div>
                                                                         <p className="font-bold text-gold">
                                                                             €{method.price.toFixed(2)}

@@ -6,6 +6,7 @@ import { useTranslation } from '@/hooks/use-translation';
 import { CreditCard, Wallet, Building2, Banknote } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import { StripeLogo, PayseraLogo, ApplePayLogo, GooglePayLogo, VisaLogo, MastercardLogo } from './payment-logos';
 
 interface PaymentFormProps {
     selectedMethod: string;
@@ -21,6 +22,28 @@ const paymentIcons: Record<string, React.ElementType> = {
     card: CreditCard,
     paypal: Wallet,
     bank_transfer: Building2,
+    stripe: CreditCard,
+    paysera: Building2,
+};
+
+// Payment method logo components
+const PaymentMethodLogo = ({ methodId }: { methodId: string }) => {
+    switch (methodId) {
+        case 'stripe':
+            return (
+                <div className="flex flex-col gap-1">
+                    <StripeLogo className="h-5" />
+                    <div className="flex items-center gap-1.5 mt-1">
+                        <ApplePayLogo className="h-4 opacity-70" />
+                        <GooglePayLogo className="h-4 opacity-70" />
+                    </div>
+                </div>
+            );
+        case 'paysera':
+            return <PayseraLogo className="h-5" />;
+        default:
+            return null;
+    }
 };
 
 // Card type detection
@@ -89,6 +112,7 @@ export function PaymentForm({
                     {availableMethods.map((method) => {
                         const Icon = paymentIcons[method.id] || CreditCard;
                         const isSelected = selectedMethod === method.id;
+                        const hasLogo = method.id === 'stripe' || method.id === 'paysera';
 
                         return (
                             <label
@@ -107,16 +131,22 @@ export function PaymentForm({
                                     className="mt-0.5"
                                 />
                                 <div className="flex flex-1 items-start gap-3">
-                                    <div
-                                        className={cn(
-                                            'rounded-lg p-2',
-                                            isSelected
-                                                ? 'bg-gold/10 text-gold'
-                                                : 'bg-muted text-muted-foreground',
-                                        )}
-                                    >
-                                        <Icon className="size-5" />
-                                    </div>
+                                    {hasLogo ? (
+                                        <div className="flex min-w-[80px] shrink-0 items-start justify-center rounded-lg border border-border bg-white p-2">
+                                            <PaymentMethodLogo methodId={method.id} />
+                                        </div>
+                                    ) : (
+                                        <div
+                                            className={cn(
+                                                'rounded-lg p-2',
+                                                isSelected
+                                                    ? 'bg-gold/10 text-gold'
+                                                    : 'bg-muted text-muted-foreground',
+                                            )}
+                                        >
+                                            <Icon className="size-5" />
+                                        </div>
+                                    )}
                                     <div className="flex-1">
                                         <p className="font-bold uppercase tracking-wide text-foreground">
                                             {method.name}
@@ -124,6 +154,13 @@ export function PaymentForm({
                                         <p className="mt-1 text-sm text-muted-foreground">
                                             {method.description}
                                         </p>
+                                        {/* Show card brands for Stripe */}
+                                        {method.id === 'stripe' && (
+                                            <div className="mt-2 flex items-center gap-2">
+                                                <VisaLogo className="h-4" />
+                                                <MastercardLogo className="h-4" />
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </label>

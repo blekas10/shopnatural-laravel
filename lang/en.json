@@ -986,5 +986,9 @@
     "2-3 business days": "2-3 business days",
     "1-2 business days": "1-2 business days",
     "1-5 business days": "1-5 business days",
-    "2-10 business days": "2-10 business days"
+    "2-10 business days": "2-10 business days",
+    "payment.stripe_name": "Credit / Debit Card",
+    "payment.stripe_description": "Pay securely with card, Apple Pay or Google Pay",
+    "payment.paysera_name": "Paysera",
+    "payment.paysera_description": "Bank transfer or cards via Paysera"
 }
