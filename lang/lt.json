@@ -422,6 +422,7 @@
     "orders.shipping_address": "Pristatymo adresas",
     "orders.pickup_point": "Atsiėmimo punktas",
     "orders.tracking": "Sekimas",
+    "orders.tracking_status": "Sekimo būsena",
     "orders.notes": "Pastabos",
     "admin.products.table.image": "Nuotrauka",
     "admin.products.table.name": "Pavadinimas",
