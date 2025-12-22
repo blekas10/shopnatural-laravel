@@ -381,28 +381,27 @@ class OrderController extends Controller
 
     /**
      * Download Venipak shipping label
+     * Always fetches fresh label to ensure all carrier labels are included
      */
     public function downloadVenipakLabel(Order $order, VenipakShipmentService $venipakService)
     {
-        // Check if label exists
-        if (!$order->venipak_label_path) {
-            // Try to get label if we have a pack number
-            if ($order->venipak_pack_no) {
-                $labelPath = $venipakService->getAndStoreLabel($order->venipak_pack_no, $order);
-                if ($labelPath) {
-                    $order->update(['venipak_label_path' => $labelPath]);
-                } else {
-                    return redirect()->back()->with('error', __('order.venipak_label_not_available'));
-                }
-            } else {
-                return redirect()->back()->with('error', __('order.venipak_no_shipment'));
-            }
+        if (!$order->venipak_pack_no) {
+            return redirect()->back()->with('error', __('order.venipak_no_shipment'));
         }
 
+        // Always fetch fresh label to ensure we get all carrier labels (Venipak + GLS/TNT for international)
+        $labelPath = $venipakService->getAndStoreLabel($order->venipak_pack_no, $order);
+
+        if (!$labelPath) {
+            return redirect()->back()->with('error', __('order.venipak_label_not_available'));
+        }
+
+        $order->update(['venipak_label_path' => $labelPath]);
+
         // Download the label
-        if (Storage::disk('local')->exists($order->venipak_label_path)) {
+        if (Storage::disk('local')->exists($labelPath)) {
             return Storage::disk('local')->download(
-                $order->venipak_label_path,
+                $labelPath,
                 'venipak-label-' . $order->order_number . '.pdf'
             );
         }
