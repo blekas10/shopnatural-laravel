@@ -33,9 +33,16 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        $exceptions->render(function (NotFoundHttpException $e, Request $request) {
-            // Load translations for the current locale
-            $locale = app()->getLocale();
+        $exceptions->render(function (NotFoundHttpException $_e, Request $request) {
+            // Detect locale from URL segment (same logic as SetLocale middleware)
+            $firstSegment = $request->segment(1);
+            $availableLocales = config('app.available_locales', ['en', 'lt']);
+            $locale = in_array($firstSegment, $availableLocales) ? $firstSegment : config('app.locale', 'en');
+
+            // Set locale for the app
+            app()->setLocale($locale);
+
+            // Load translations for the detected locale
             $filePath = lang_path("{$locale}.json");
             $translations = file_exists($filePath)
                 ? json_decode(file_get_contents($filePath), true) ?? []
@@ -44,7 +51,7 @@ return Application::configure(basePath: dirname(__DIR__))
             return Inertia::render('errors/404')
                 ->with([
                     'locale' => $locale,
-                    'availableLocales' => config('app.available_locales'),
+                    'availableLocales' => $availableLocales,
                     'translations' => $translations,
                     'seo' => [
                         'siteName' => config('app.name'),
