@@ -21,7 +21,8 @@ class RegisterResponse implements RegisterResponseContract
 
         // Use Inertia::location() to force a full page reload after registration
         // This ensures the CSRF token is refreshed after session regeneration
-        if ($request->wantsJson()) {
+        // Check for Inertia request via X-Inertia header (not wantsJson)
+        if ($request->hasHeader('X-Inertia')) {
             return Inertia::location($dashboardPath);
         }
 
