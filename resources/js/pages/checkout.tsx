@@ -254,7 +254,10 @@ export default function Checkout({
                 // Only restore if auth user matches or is guest
                 const canRestore = !auth?.user || !parsed.userId || parsed.userId === auth.user.id;
 
-                if (canRestore) {
+                // Only restore if data is less than 30 minutes old
+                const isRecent = parsed.timestamp && (Date.now() - parsed.timestamp) < 30 * 60 * 1000;
+
+                if (canRestore && isRecent) {
                     console.log('Restoring saved checkout data');
 
                     // Restore form data
@@ -276,6 +279,9 @@ export default function Checkout({
 
                     toast.success(t('checkout.data_restored', 'Your checkout information has been restored'));
                 }
+
+                // Clear the saved data after processing (to avoid showing toast repeatedly)
+                localStorage.removeItem(CHECKOUT_DATA_KEY);
             }
         } catch (error) {
             console.error('Failed to restore checkout data:', error);
