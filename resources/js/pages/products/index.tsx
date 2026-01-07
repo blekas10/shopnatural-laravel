@@ -28,6 +28,8 @@ interface Filters {
     priceRange: [number, number];
     sort: string;
     search: string;
+    onSale: boolean;
+    inStock: boolean;
 }
 
 interface PageProps {
@@ -61,6 +63,8 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
         const sort = urlParams.get('sort') || 'featured';
         const minPrice = urlParams.get('minPrice');
         const maxPrice = urlParams.get('maxPrice');
+        const onSale = urlParams.get('onSale') === 'true';
+        const inStock = urlParams.get('inStock') === 'true';
 
         const priceRange: [number, number] = [
             minPrice ? parseFloat(minPrice) : priceExtent[0],
@@ -73,13 +77,25 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
             priceRange,
             sort,
             search,
+            onSale,
+            inStock,
         };
     });
+
+    // Debounced search state
+    const [searchInput, setSearchInput] = useState(filters.search);
+
+    // Debounce search input
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setFilters(prev => ({ ...prev, search: searchInput }));
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [searchInput]);
 
     const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
     const [expandedBrands, setExpandedBrands] = useState<number[]>([]);
     const [expandedCategories, setExpandedCategories] = useState<number[]>([]);
-    const [visibleProductCount, setVisibleProductCount] = useState(20);
 
     // Update URL when filters change
     const updateURL = useCallback((newFilters: Filters) => {
@@ -103,6 +119,12 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
         if (newFilters.priceRange[1] !== priceExtent[1]) {
             params.set('maxPrice', newFilters.priceRange[1].toString());
         }
+        if (newFilters.onSale) {
+            params.set('onSale', 'true');
+        }
+        if (newFilters.inStock) {
+            params.set('inStock', 'true');
+        }
 
         const queryString = params.toString();
         const newUrl = queryString ? `?${queryString}` : window.location.pathname;
@@ -115,13 +137,6 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
     useEffect(() => {
         updateURL(filters);
     }, [filters, updateURL]);
-
-    // Reset visible count when filters change - use key based on filter string
-    const filterKey = useMemo(() => JSON.stringify(filters), [filters]);
-    useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect -- Legitimate reset on filter change
-        setVisibleProductCount(20);
-    }, [filterKey]);
 
 
     // Helper to find a brand by ID in hierarchical structure
@@ -252,6 +267,16 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
             p.price >= filters.priceRange[0] && p.price <= filters.priceRange[1]
         );
 
+        // Filter by on sale
+        if (filters.onSale) {
+            filtered = filtered.filter(p => p.isOnSale);
+        }
+
+        // Filter by in stock
+        if (filters.inStock) {
+            filtered = filtered.filter(p => p.inStock);
+        }
+
         // Sort
         switch (filters.sort) {
             case 'price_asc':
@@ -281,17 +306,22 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
         if (filters.brandIds.length > 0) count += filters.brandIds.length;
         if (filters.priceRange[0] !== priceExtent[0] || filters.priceRange[1] !== priceExtent[1]) count += 1;
         if (filters.search) count += 1;
+        if (filters.onSale) count += 1;
+        if (filters.inStock) count += 1;
         return count;
     }, [filters, priceExtent]);
 
     // Clear all filters
     const clearFilters = () => {
+        setSearchInput('');
         setFilters({
             categoryIds: [],
             brandIds: [],
             priceRange: priceExtent as [number, number],
             sort: filters.sort,
             search: '',
+            onSale: false,
+            inStock: false,
         });
     };
 
@@ -576,18 +606,56 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
                                         <Input
                                             type="text"
                                             placeholder={t('products.search_placeholder', 'Search products...')}
-                                            value={filters.search}
-                                            onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+                                            value={searchInput}
+                                            onChange={(e) => setSearchInput(e.target.value)}
                                             className="pl-10 pr-10"
                                         />
-                                        {filters.search && (
+                                        {searchInput && (
                                             <button
-                                                onClick={() => setFilters(prev => ({ ...prev, search: '' }))}
+                                                onClick={() => {
+                                                    setSearchInput('');
+                                                    setFilters(prev => ({ ...prev, search: '' }));
+                                                }}
                                                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                                             >
                                                 <X className="size-4" />
                                             </button>
                                         )}
+                                    </div>
+                                </div>
+
+                                {/* Quick Filters */}
+                                <div className="rounded-2xl border-2 border-border bg-background p-6 transition-all duration-300">
+                                    <h3 className="mb-4 text-sm font-bold uppercase tracking-wide text-gold">
+                                        {t('products.quick_filters', 'Quick Filters')}
+                                    </h3>
+                                    <div className="space-y-3">
+                                        <label className="flex items-center gap-3 cursor-pointer group">
+                                            <Checkbox
+                                                checked={filters.onSale}
+                                                onCheckedChange={(checked) => setFilters(prev => ({ ...prev, onSale: checked === true }))}
+                                                className="border-2 data-[state=checked]:bg-gold data-[state=checked]:border-gold"
+                                            />
+                                            <span className={cn(
+                                                'text-sm transition-colors',
+                                                filters.onSale ? 'font-semibold text-gold' : 'text-foreground group-hover:text-gold'
+                                            )}>
+                                                {t('products.on_sale', 'On Sale')}
+                                            </span>
+                                        </label>
+                                        <label className="flex items-center gap-3 cursor-pointer group">
+                                            <Checkbox
+                                                checked={filters.inStock}
+                                                onCheckedChange={(checked) => setFilters(prev => ({ ...prev, inStock: checked === true }))}
+                                                className="border-2 data-[state=checked]:bg-gold data-[state=checked]:border-gold"
+                                            />
+                                            <span className={cn(
+                                                'text-sm transition-colors',
+                                                filters.inStock ? 'font-semibold text-gold' : 'text-foreground group-hover:text-gold'
+                                            )}>
+                                                {t('products.in_stock', 'In Stock')}
+                                            </span>
+                                        </label>
                                     </div>
                                 </div>
 
@@ -618,7 +686,26 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
                                             <div className="flex items-center gap-2 rounded-full border-2 border-gold bg-gold/10 px-3 py-1 text-sm font-medium text-gold">
                                                 <Search className="size-3.5" />
                                                 "{filters.search}"
-                                                <button onClick={() => setFilters(prev => ({ ...prev, search: '' }))} className="ml-1 rounded-full hover:bg-gold/20 p-0.5 transition-colors">
+                                                <button onClick={() => {
+                                                    setSearchInput('');
+                                                    setFilters(prev => ({ ...prev, search: '' }));
+                                                }} className="ml-1 rounded-full hover:bg-gold/20 p-0.5 transition-colors">
+                                                    <X className="size-3.5 stroke-[2.5]" />
+                                                </button>
+                                            </div>
+                                        )}
+                                        {filters.onSale && (
+                                            <div className="flex items-center gap-2 rounded-full border-2 border-gold bg-gold/10 px-3 py-1 text-sm font-medium text-gold">
+                                                {t('products.on_sale', 'On Sale')}
+                                                <button onClick={() => setFilters(prev => ({ ...prev, onSale: false }))} className="ml-1 rounded-full hover:bg-gold/20 p-0.5 transition-colors">
+                                                    <X className="size-3.5 stroke-[2.5]" />
+                                                </button>
+                                            </div>
+                                        )}
+                                        {filters.inStock && (
+                                            <div className="flex items-center gap-2 rounded-full border-2 border-gold bg-gold/10 px-3 py-1 text-sm font-medium text-gold">
+                                                {t('products.in_stock', 'In Stock')}
+                                                <button onClick={() => setFilters(prev => ({ ...prev, inStock: false }))} className="ml-1 rounded-full hover:bg-gold/20 p-0.5 transition-colors">
                                                     <X className="size-3.5 stroke-[2.5]" />
                                                 </button>
                                             </div>
@@ -663,7 +750,7 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
                             {/* Sort and Results Count */}
                             <div className="mb-6 flex items-center justify-between gap-4">
                                 <div className="text-sm text-muted-foreground">
-                                    {t('products.showing', 'Showing')} {Math.min(visibleProductCount, filteredProducts.length)} {t('products.of', 'of')} {filteredProducts.length} {filteredProducts.length === 1 ? t('products.product', 'product') : t('products.products', 'products')}
+                                    {filteredProducts.length} {filteredProducts.length === 1 ? t('products.product', 'product') : t('products.products', 'products')}
                                 </div>
 
                                 <Select
@@ -685,34 +772,16 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
 
                             {/* Products Grid */}
                             {filteredProducts.length > 0 ? (
-                                <>
-                                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 items-stretch">
-                                        {filteredProducts.slice(0, visibleProductCount).map((product, index) => (
-                                            <ProductCard
-                                                key={product.id}
-                                                product={product}
-                                                href={route('products.show', { slug: product.slug })}
-                                                index={index}
-                                            />
-                                        ))}
-                                    </div>
-
-                                    {/* Load More Button */}
-                                    {filteredProducts.length > visibleProductCount && (
-                                        <div className="mt-12 flex justify-center">
-                                            <Button
-                                                onClick={() => setVisibleProductCount(prev => prev + 20)}
-                                                variant="outline"
-                                                className="border-2 border-gold text-gold hover:bg-gold hover:text-white transition-all duration-300 px-8 py-6 text-base font-bold uppercase"
-                                            >
-                                                {t('products.load_more', 'Load More Products')}
-                                                <span className="ml-2 text-sm">
-                                                    ({visibleProductCount} / {filteredProducts.length})
-                                                </span>
-                                            </Button>
-                                        </div>
-                                    )}
-                                </>
+                                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 items-stretch">
+                                    {filteredProducts.map((product, index) => (
+                                        <ProductCard
+                                            key={product.id}
+                                            product={product}
+                                            href={route('products.show', { slug: product.slug })}
+                                            index={index}
+                                        />
+                                    ))}
+                                </div>
                             ) : (
                                 <div className="flex flex-col items-center justify-center py-16 text-center">
                                     <div className="rounded-2xl border-2 border-dashed border-border p-12">
@@ -770,18 +839,56 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
                                     <Input
                                         type="text"
                                         placeholder={t('products.search_placeholder', 'Search products...')}
-                                        value={filters.search}
-                                        onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+                                        value={searchInput}
+                                        onChange={(e) => setSearchInput(e.target.value)}
                                         className="pl-10 pr-10"
                                     />
-                                    {filters.search && (
+                                    {searchInput && (
                                         <button
-                                            onClick={() => setFilters(prev => ({ ...prev, search: '' }))}
+                                            onClick={() => {
+                                                setSearchInput('');
+                                                setFilters(prev => ({ ...prev, search: '' }));
+                                            }}
                                             className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                                         >
                                             <X className="size-4" />
                                         </button>
                                     )}
+                                </div>
+                            </div>
+
+                            {/* Quick Filters */}
+                            <div className="rounded-2xl border-2 border-border bg-background p-6 transition-all duration-300">
+                                <h3 className="mb-4 text-sm font-bold uppercase tracking-wide text-gold">
+                                    {t('products.quick_filters', 'Quick Filters')}
+                                </h3>
+                                <div className="space-y-3">
+                                    <label className="flex items-center gap-3 cursor-pointer group">
+                                        <Checkbox
+                                            checked={filters.onSale}
+                                            onCheckedChange={(checked) => setFilters(prev => ({ ...prev, onSale: checked === true }))}
+                                            className="border-2 data-[state=checked]:bg-gold data-[state=checked]:border-gold"
+                                        />
+                                        <span className={cn(
+                                            'text-sm transition-colors',
+                                            filters.onSale ? 'font-semibold text-gold' : 'text-foreground group-hover:text-gold'
+                                        )}>
+                                            {t('products.on_sale', 'On Sale')}
+                                        </span>
+                                    </label>
+                                    <label className="flex items-center gap-3 cursor-pointer group">
+                                        <Checkbox
+                                            checked={filters.inStock}
+                                            onCheckedChange={(checked) => setFilters(prev => ({ ...prev, inStock: checked === true }))}
+                                            className="border-2 data-[state=checked]:bg-gold data-[state=checked]:border-gold"
+                                        />
+                                        <span className={cn(
+                                            'text-sm transition-colors',
+                                            filters.inStock ? 'font-semibold text-gold' : 'text-foreground group-hover:text-gold'
+                                        )}>
+                                            {t('products.in_stock', 'In Stock')}
+                                        </span>
+                                    </label>
                                 </div>
                             </div>
 

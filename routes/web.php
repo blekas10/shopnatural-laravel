@@ -223,8 +223,8 @@ Route::group(['prefix' => 'lt'], function () {
             Route::get('orders/{order}', [AdminOrderController::class, 'show'])->name('lt.admin.orders.show');
             Route::patch('orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('lt.admin.orders.update-status');
             Route::patch('orders/{order}/payment-status', [AdminOrderController::class, 'updatePaymentStatus'])->name('lt.admin.orders.update-payment-status');
-            Route::get('orders/{order}/saskaita/atsisiusti', [AdminOrderController::class, 'downloadInvoice'])->name('lt.admin.orders.invoice.download');
-            Route::get('orders/{order}/saskaita/perziureti', [AdminOrderController::class, 'viewInvoice'])->name('lt.admin.orders.invoice.view');
+            Route::get('orders/{order}/saskaita/atsisiusti/{lang?}', [AdminOrderController::class, 'downloadInvoice'])->name('lt.admin.orders.invoice.download');
+            Route::get('orders/{order}/saskaita/perziureti/{lang?}', [AdminOrderController::class, 'viewInvoice'])->name('lt.admin.orders.invoice.view');
             // Venipak shipment management
             Route::post('orders/{order}/venipak/create', [AdminOrderController::class, 'createVenipakShipment'])->name('lt.admin.orders.venipak.create');
             Route::post('orders/{order}/venipak/retry', [AdminOrderController::class, 'retryVenipakShipment'])->name('lt.admin.orders.venipak.retry');
@@ -300,8 +300,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('orders/{order}', [AdminOrderController::class, 'show'])->name('admin.orders.show');
         Route::patch('orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('admin.orders.update-status');
         Route::patch('orders/{order}/payment-status', [AdminOrderController::class, 'updatePaymentStatus'])->name('admin.orders.update-payment-status');
-        Route::get('orders/{order}/invoice/download', [AdminOrderController::class, 'downloadInvoice'])->name('admin.orders.invoice.download');
-        Route::get('orders/{order}/invoice/view', [AdminOrderController::class, 'viewInvoice'])->name('admin.orders.invoice.view');
+        Route::get('orders/{order}/invoice/download/{lang?}', [AdminOrderController::class, 'downloadInvoice'])->name('admin.orders.invoice.download');
+        Route::get('orders/{order}/invoice/view/{lang?}', [AdminOrderController::class, 'viewInvoice'])->name('admin.orders.invoice.view');
         // Venipak shipment management
         Route::post('orders/{order}/venipak/create', [AdminOrderController::class, 'createVenipakShipment'])->name('admin.orders.venipak.create');
         Route::post('orders/{order}/venipak/retry', [AdminOrderController::class, 'retryVenipakShipment'])->name('admin.orders.venipak.retry');

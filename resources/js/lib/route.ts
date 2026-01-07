@@ -154,11 +154,19 @@ export function route(name: string, params: Record<string, string | number | boo
     // Add /invoice/download suffix for invoice download routes (localized)
     if (name.endsWith('.invoice.download')) {
         path += locale === 'lt' ? '/saskaita/atsisiusti' : '/invoice/download';
+        // Append language parameter if specified (for admin bilingual invoice downloads)
+        if (params.lang) {
+            path += `/${params.lang}`;
+        }
     }
 
     // Add /invoice/view suffix for invoice view routes (localized)
     if (name.endsWith('.invoice.view')) {
         path += locale === 'lt' ? '/saskaita/perziureti' : '/invoice/view';
+        // Append language parameter if specified
+        if (params.lang) {
+            path += `/${params.lang}`;
+        }
     }
 
     // Add /status suffix for status update routes
@@ -203,6 +211,7 @@ export function route(name: string, params: Record<string, string | number | boo
     delete queryParams.promo_code; // Remove promo_code as it's already in the path
     delete queryParams.brand; // Remove brand as it's already in the path
     delete queryParams.id; // Remove id as it's already in the path
+    delete queryParams.lang; // Remove lang as it's already in the path for invoice routes
 
     const queryString = Object.keys(queryParams)
         .filter(key => queryParams[key] !== undefined && queryParams[key] !== null)

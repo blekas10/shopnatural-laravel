@@ -262,19 +262,19 @@ class OrderController extends Controller
     /**
      * Download invoice PDF
      */
-    public function downloadInvoice(Order $order)
+    public function downloadInvoice(Order $order, ?string $lang = null)
     {
         $order->load(['items.product', 'items.variant', 'promoCode']);
 
-        // Use current locale (from URL prefix)
-        $locale = app()->getLocale();
+        // Use specified locale or fall back to current locale
+        $locale = in_array($lang, ['en', 'lt']) ? $lang : app()->getLocale();
 
         $pdf = Pdf::loadView('emails.invoice-pdf', [
             'order' => $order,
             'locale' => $locale,
         ]);
 
-        $filename = 'invoice-' . $order->order_number . '.pdf';
+        $filename = 'invoice-' . $order->order_number . ($lang ? "-{$lang}" : '') . '.pdf';
 
         return $pdf->download($filename);
     }
@@ -282,12 +282,12 @@ class OrderController extends Controller
     /**
      * View invoice in browser
      */
-    public function viewInvoice(Order $order)
+    public function viewInvoice(Order $order, ?string $lang = null)
     {
         $order->load(['items.product', 'items.variant', 'promoCode']);
 
-        // Use current locale (from URL prefix)
-        $locale = app()->getLocale();
+        // Use specified locale or fall back to current locale
+        $locale = in_array($lang, ['en', 'lt']) ? $lang : app()->getLocale();
 
         $pdf = Pdf::loadView('emails.invoice-pdf', [
             'order' => $order,

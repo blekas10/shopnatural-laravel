@@ -77,6 +77,9 @@ class ProductResource extends JsonResource
             $data['categoryIds'] = $this->categories->pluck('id')->toArray();
         }
 
+        // Add stock status
+        $data['inStock'] = $this->inStock();
+
         return $data;
     }
 }

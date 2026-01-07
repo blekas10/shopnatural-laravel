@@ -16,6 +16,7 @@ export interface ProductListItem extends BaseProduct {
     brandId: number | null;
     brandName: string | null;
     categoryIds: number[];
+    inStock: boolean;
 }
 
 export interface ProductVariant {

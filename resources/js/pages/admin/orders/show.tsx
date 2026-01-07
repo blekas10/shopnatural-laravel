@@ -230,12 +230,14 @@ export default function OrderShow({ order, statuses, paymentStatuses }: OrderSho
         );
     };
 
-    const handleViewInvoice = () => {
-        window.open(route('admin.orders.invoice.view', { order: order.id }), '_blank');
+    const handleViewInvoice = (lang?: string) => {
+        const params: Record<string, string | number> = { order: order.id };
+        if (lang) params.lang = lang;
+        window.open(route('admin.orders.invoice.view', params), '_blank');
     };
 
-    const handleDownloadInvoice = () => {
-        window.location.href = route('admin.orders.invoice.download', { order: order.id });
+    const handleDownloadInvoice = (lang: string) => {
+        window.location.href = route('admin.orders.invoice.download', { order: order.id, lang });
         toast.success(t('orders.invoice_downloading', 'Invoice download started'));
     };
 
@@ -884,21 +886,34 @@ export default function OrderShow({ order, statuses, paymentStatuses }: OrderSho
                                 </CardHeader>
                                 <CardContent className="space-y-3">
                                     <Button
-                                        onClick={handleViewInvoice}
+                                        onClick={() => handleViewInvoice()}
                                         variant="outline"
                                         className="w-full border-gold/30 hover:bg-gold/10"
                                     >
                                         <ExternalLink className="w-4 h-4 mr-2" />
                                         {t('orders.view_invoice', 'View Invoice')}
                                     </Button>
-                                    <Button
-                                        onClick={handleDownloadInvoice}
-                                        variant="outline"
-                                        className="w-full border-gold/30 hover:bg-gold/10"
-                                    >
-                                        <Download className="w-4 h-4 mr-2" />
-                                        {t('orders.download_invoice', 'Download Invoice')}
-                                    </Button>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <Button
+                                            onClick={() => handleDownloadInvoice('en')}
+                                            variant="outline"
+                                            className="border-gold/30 hover:bg-gold/10"
+                                        >
+                                            <Download className="w-4 h-4 mr-2" />
+                                            EN
+                                        </Button>
+                                        <Button
+                                            onClick={() => handleDownloadInvoice('lt')}
+                                            variant="outline"
+                                            className="border-gold/30 hover:bg-gold/10"
+                                        >
+                                            <Download className="w-4 h-4 mr-2" />
+                                            LT
+                                        </Button>
+                                    </div>
+                                    <p className="text-xs text-muted-foreground text-center">
+                                        {t('orders.download_invoice_lang', 'Download Invoice')}
+                                    </p>
                                 </CardContent>
                             </Card>
                         </div>

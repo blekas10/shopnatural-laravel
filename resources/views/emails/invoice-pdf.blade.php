@@ -352,6 +352,12 @@
                         <td class="label">{{ $locale === 'lt' ? 'Pristatymo būdas' : 'Shipping Method' }}</td>
                         <td class="value">{{ $order->shipping_method ? ucwords(str_replace(['-', '_'], ' ', $order->shipping_method)) : '-' }}</td>
                     </tr>
+                    @if($order->venipak_pickup_point && isset($order->venipak_pickup_point['name']))
+                    <tr>
+                        <td class="label">{{ $locale === 'lt' ? 'Atsiėmimo vieta' : 'Pickup Location' }}</td>
+                        <td class="value">{{ $order->venipak_pickup_point['name'] }}@if(isset($order->venipak_pickup_point['address'])), {{ $order->venipak_pickup_point['address'] }}@endif</td>
+                    </tr>
+                    @endif
                     <tr>
                         <td class="label">{{ $locale === 'lt' ? 'Prekių kaina' : 'Product Price' }}</td>
                         <td class="value">{{ number_format($originalSubtotal, 2, ',', ' ') }} €</td>
