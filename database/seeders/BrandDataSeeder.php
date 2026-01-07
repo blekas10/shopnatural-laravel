@@ -334,7 +334,44 @@ class BrandDataSeeder extends Seeder
                     'lt' => 'Breathe – tai tvaraus grožio prekės ženklas, kuriam svarbiausia ekologinė atsakomybė ir natūralus gerbūvis.',
                 ],
                 'logo' => '/images/brands/breathe-hero.jpg',
-                'children' => [], // No specific collections found
+                'children' => [
+                    [
+                        'name' => ['en' => 'Body Therapy', 'lt' => 'Kūno terapija'],
+                        'slug' => 'breathe-body-therapy',
+                        'description' => [
+                            'en' => 'Breathe Body Therapy offers luxurious organic body care with firming creams, natural deodorants, and slimming treatments. These eco-conscious formulas rejuvenate and tone your body while respecting your skin and the environment.',
+                            'lt' => 'Breathe Body Therapy siūlo prabangią ekologišką kūno priežiūrą su stangrinančiais kremais, natūraliais dezodorantais ir lieknėjimo priemonėmis. Šios ekologiškos formulės atjaunina ir tonizuoja jūsų kūną.',
+                        ],
+                        'logo' => '/images/brands/collections/breathe/body-therapy.png',
+                    ],
+                    [
+                        'name' => ['en' => 'Philosophy', 'lt' => 'Philosophy'],
+                        'slug' => 'breathe-philosophy',
+                        'description' => [
+                            'en' => 'Breathe Philosophy is a premium anti-aging collection featuring concentrated elixirs and eye fillers. These advanced formulas harness nature\'s most potent ingredients to restore youthful radiance and vitality.',
+                            'lt' => 'Breathe Philosophy – tai aukščiausios klasės anti-aging kolekcija su koncentruotais eliksyrais ir akių užpildais. Šios pažangios formulės panaudoja galingiausias gamtos sudedamąsias dalis.',
+                        ],
+                        'logo' => '/images/brands/collections/breathe/philosophy.png',
+                    ],
+                    [
+                        'name' => ['en' => 'Weekly Care', 'lt' => 'Savaitinė priežiūra'],
+                        'slug' => 'breathe-weekly-care',
+                        'description' => [
+                            'en' => 'Breathe Weekly Care provides intensive treatments including age-correction masks and gentle peeling gels. Perfect for your weekly self-care ritual, these products deliver deep renewal and visible results.',
+                            'lt' => 'Breathe Weekly Care siūlo intensyvias procedūras, įskaitant amžiaus korekcijos kaukes ir švelnius pilingus. Puikiai tinka jūsų savaitiniam savęs priežiūros ritualui.',
+                        ],
+                        'logo' => '/images/brands/collections/breathe/weekly-care.png',
+                    ],
+                    [
+                        'name' => ['en' => 'Daily Care', 'lt' => 'Kasdienė priežiūra'],
+                        'slug' => 'breathe-daily-care',
+                        'description' => [
+                            'en' => 'Breathe Daily Care is your everyday skincare essentials collection featuring moisturizing creams, balancing lotions, serums, and eye masks. Formulated for daily use, these products provide consistent hydration and protection.',
+                            'lt' => 'Breathe Daily Care – tai kasdienės odos priežiūros kolekcija su drėkinančiais kremais, balansuojančiais losjonais, serumais ir akių kaukėmis. Sukurta kasdieniam naudojimui.',
+                        ],
+                        'logo' => '/images/brands/collections/breathe/daily-care.png',
+                    ],
+                ],
             ],
         ];
     }

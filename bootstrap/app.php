@@ -7,6 +7,9 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -30,5 +33,25 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        $exceptions->render(function (NotFoundHttpException $e, Request $request) {
+            // Load translations for the current locale
+            $locale = app()->getLocale();
+            $filePath = lang_path("{$locale}.json");
+            $translations = file_exists($filePath)
+                ? json_decode(file_get_contents($filePath), true) ?? []
+                : [];
+
+            return Inertia::render('errors/404')
+                ->with([
+                    'locale' => $locale,
+                    'availableLocales' => config('app.available_locales'),
+                    'translations' => $translations,
+                    'seo' => [
+                        'siteName' => config('app.name'),
+                        'siteUrl' => config('app.url'),
+                    ],
+                ])
+                ->toResponse($request)
+                ->setStatusCode(404);
+        });
     })->create();

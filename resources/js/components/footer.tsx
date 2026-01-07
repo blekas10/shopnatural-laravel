@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { Facebook, Instagram, Twitter } from 'lucide-react';
+import { Facebook, Instagram } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/hooks/use-translation';
 
@@ -8,27 +8,26 @@ interface FooterProps {
 }
 
 const socialLinks = [
-    { icon: Facebook, href: '#', label: 'Facebook' },
-    { icon: Instagram, href: '#', label: 'Instagram' },
-    { icon: Twitter, href: '#', label: 'Twitter' },
+    { icon: Facebook, href: 'https://www.facebook.com/shopnatural.lt', label: 'Facebook' },
+    { icon: Instagram, href: 'https://www.instagram.com/shopnatural.lt', label: 'Instagram' },
 ];
 
 export default function Footer({ className }: FooterProps) {
-    const { t } = useTranslation();
+    const { t, route } = useTranslation();
 
+    // Category IDs: Face Care=60, Body Care=58, Hair Care=80
     const footerLinks = {
         shop: [
-            { label: t('footer.all_products'), href: '/products' },
-            { label: t('footer.face_care'), href: '/categories/face-care' },
-            { label: t('footer.body_care'), href: '/categories/body-care' },
-            { label: t('footer.hair_care'), href: '/categories/hair-care' },
+            { label: t('footer.all_products'), href: route('products.index') },
+            { label: t('footer.face_care'), href: `${route('products.index')}?categories=60` },
+            { label: t('footer.body_care'), href: `${route('products.index')}?categories=58` },
+            { label: t('footer.hair_care'), href: `${route('products.index')}?categories=80` },
         ],
 
         support: [
-            { label: t('footer.shipping_info'), href: '/shipping' },
-            { label: t('footer.returns'), href: '/returns' },
-            { label: t('footer.privacy'), href: '/privacy' },
-            { label: t('footer.terms'), href: '/terms' },
+            { label: t('footer.shipping_info'), href: route('shipping-policy') },
+            { label: t('footer.returns'), href: route('return-policy') },
+            { label: t('footer.privacy'), href: route('privacy-policy') },
         ],
     };
 
@@ -132,16 +131,16 @@ export default function Footer({ className }: FooterProps) {
                         <p>{t('footer.copyright').replace('{year}', new Date().getFullYear().toString())}</p>
                         <div className="flex gap-6">
                             <Link
-                                href="/privacy"
+                                href={route('privacy-policy')}
                                 className="transition-colors duration-300 hover:text-gold"
                             >
                                 {t('footer.privacy')}
                             </Link>
                             <Link
-                                href="/terms"
+                                href={route('return-policy')}
                                 className="transition-colors duration-300 hover:text-gold"
                             >
-                                {t('footer.terms')}
+                                {t('footer.returns')}
                             </Link>
                         </div>
                     </div>
