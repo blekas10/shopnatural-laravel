@@ -72,9 +72,9 @@ class OrderController extends Controller
      */
     public function confirmation(Request $request, string $orderNumber): Response
     {
-        // Find order by order_number or payment_reference
+        // Find order by order_number or ID
         $order = Order::where('order_number', $orderNumber)
-            ->orWhere('payment_reference', $orderNumber)
+            ->orWhere('id', $orderNumber)
             ->with([
                 'items.product.primaryImage',
                 'items.variant.image',

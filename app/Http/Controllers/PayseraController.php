@@ -30,16 +30,16 @@ class PayseraController extends Controller
             );
 
             Log::info('Paysera callback received', [
-                'payment_reference' => $response['orderid'],
+                'order_id' => $response['orderid'],
                 'status' => $response['status'],
                 'amount' => $response['amount'],
             ]);
 
-            // Find order by payment reference
-            $order = Order::where('payment_reference', $response['orderid'])->first();
+            // Find order by ID
+            $order = Order::find($response['orderid']);
 
             if (!$order) {
-                Log::error('Paysera callback: Order not found', ['payment_reference' => $response['orderid']]);
+                Log::error('Paysera callback: Order not found', ['order_id' => $response['orderid']]);
                 return response('Order not found', 404);
             }
 
@@ -124,14 +124,14 @@ class PayseraController extends Controller
                 config('paysera.sign_password')
             );
 
-            $paymentReference = $response['orderid'];
+            $orderId = $response['orderid'];
 
-            // Get order by payment reference
-            $order = Order::where('payment_reference', $paymentReference)->first();
+            // Get order by ID
+            $order = Order::find($orderId);
             $locale = $order?->locale ?? config('app.locale');
 
-            // Use order_number if assigned, otherwise payment_reference
-            $orderIdentifier = $order?->order_number ?? $paymentReference;
+            // Use order_number if assigned, otherwise order ID
+            $orderIdentifier = $order?->order_number ?? $orderId;
 
             return redirect()->route($locale . '.order.confirmation', ['orderNumber' => $orderIdentifier]);
         } catch (\WebToPayException $e) {
@@ -156,8 +156,8 @@ class PayseraController extends Controller
                     config('paysera.sign_password')
                 );
 
-                $paymentReference = $response['orderid'];
-                $order = Order::where('payment_reference', $paymentReference)->first();
+                $orderId = $response['orderid'];
+                $order = Order::find($orderId);
 
                 if ($order) {
                     $order->update(['payment_status' => 'failed']);

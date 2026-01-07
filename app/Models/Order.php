@@ -14,7 +14,6 @@ class Order extends Model
 
     protected $fillable = [
         'order_number',
-        'payment_reference',
         'invoice_number',
         'user_id',
         'status',
@@ -316,19 +315,6 @@ class Order extends Model
         if ($this->canBeCancelled()) {
             $this->update(['status' => 'cancelled']);
         }
-    }
-
-    /**
-     * Generate unique payment reference for payment gateway tracking
-     * Format: PAY-XXXXXXXXXX (random string)
-     */
-    public static function generatePaymentReference(): string
-    {
-        do {
-            $reference = 'PAY-' . strtoupper(\Illuminate\Support\Str::random(10));
-        } while (static::where('payment_reference', $reference)->exists());
-
-        return $reference;
     }
 
     /**

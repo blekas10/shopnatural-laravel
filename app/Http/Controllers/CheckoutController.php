@@ -161,10 +161,8 @@ class CheckoutController extends Controller
                 : $validated['billingAddress'];
 
             // Create the order with pending status (order_number assigned after payment)
-            $paymentReference = Order::generatePaymentReference();
             $order = Order::create([
                 'order_number' => null, // Assigned when payment is confirmed
-                'payment_reference' => $paymentReference,
                 'user_id' => auth()->id(), // null for guests
                 'status' => 'pending',
                 'payment_status' => 'pending',
@@ -212,9 +210,7 @@ class CheckoutController extends Controller
 
             Log::info('Checkout: Order created', [
                 'order_id' => $order->id,
-                'payment_reference' => $order->payment_reference,
                 'customer_email' => $order->customer_email,
-                'contact_email_from_request' => $validated['contact']['email'] ?? 'NOT SET',
                 'total' => $order->total,
             ]);
 
@@ -280,7 +276,6 @@ class CheckoutController extends Controller
 
             Log::info('Checkout: Transaction committed successfully', [
                 'order_id' => $order->id,
-                'payment_reference' => $order->payment_reference,
             ]);
 
             // Mark cart as completed and link to order
@@ -328,12 +323,11 @@ class CheckoutController extends Controller
                 $sessionParams = [
                     'line_items' => $lineItems,
                     'mode' => 'payment',
-                    'success_url' => route($locale . '.order.confirmation', ['orderNumber' => $order->payment_reference]),
+                    'success_url' => route($locale . '.order.confirmation', ['orderNumber' => $order->id]),
                     'cancel_url' => route($locale . '.checkout'),
                     'customer_email' => $order->customer_email,
                     'locale' => $locale,
                     'metadata' => [
-                        'payment_reference' => $order->payment_reference,
                         'order_id' => $order->id,
                     ],
                 ];
@@ -368,7 +362,6 @@ class CheckoutController extends Controller
 
                 Log::info('Checkout: Stripe session created, redirecting to payment', [
                     'order_id' => $order->id,
-                    'payment_reference' => $order->payment_reference,
                     'stripe_session_id' => $session->id,
                 ]);
 
@@ -382,7 +375,7 @@ class CheckoutController extends Controller
                 $payseraData = [
                     'projectid' => config('paysera.project_id'),
                     'sign_password' => config('paysera.sign_password'),
-                    'orderid' => $order->payment_reference,
+                    'orderid' => (string) $order->id,
                     'amount' => (int)($order->total * 100), // Convert to cents
                     'currency' => config('paysera.currency'),
                     'country' => 'LT',
@@ -407,7 +400,6 @@ class CheckoutController extends Controller
 
                     Log::info('Checkout: Paysera request created, redirecting to payment', [
                         'order_id' => $order->id,
-                        'payment_reference' => $order->payment_reference,
                     ]);
 
                     // Redirect to Paysera payment page
