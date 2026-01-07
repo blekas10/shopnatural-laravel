@@ -124,7 +124,10 @@ class PayseraController extends Controller
             );
 
             $orderNumber = $response['orderid'];
-            $locale = app()->getLocale();
+
+            // Get locale from the order (saved during checkout)
+            $order = Order::where('order_number', $orderNumber)->first();
+            $locale = $order?->locale ?? config('app.locale');
 
             return redirect()->route($locale . '.order.confirmation', ['orderNumber' => $orderNumber]);
         } catch (\WebToPayException $e) {
@@ -138,6 +141,8 @@ class PayseraController extends Controller
      */
     public function cancel(Request $request)
     {
+        $locale = config('app.locale');
+
         try {
             // Validate data if present
             if ($request->has('data')) {
@@ -152,12 +157,13 @@ class PayseraController extends Controller
 
                 if ($order) {
                     $order->update(['payment_status' => 'failed']);
+                    $locale = $order->locale ?? $locale;
                 }
             }
         } catch (\WebToPayException $e) {
             Log::error('Paysera cancel error', ['error' => $e->getMessage()]);
         }
 
-        return redirect()->route('checkout')->with('error', __('checkout.payment_cancelled'));
+        return redirect()->route($locale . '.checkout')->with('error', __('checkout.payment_cancelled'));
     }
 }
