@@ -373,6 +373,11 @@ class CheckoutController extends Controller
                 // Redirect to Stripe Checkout (external redirect for Inertia)
                 return \Inertia\Inertia::location($session->url);
             } elseif ($paymentMethod === 'paysera') {
+                // Use production URL for Paysera callbacks (localhost won't work)
+                $baseUrl = config('app.env') === 'local'
+                    ? config('app.url')
+                    : 'https://shop-natural.com';
+
                 // Create Paysera payment request
                 $payseraData = [
                     'projectid' => config('paysera.project_id'),
@@ -381,9 +386,9 @@ class CheckoutController extends Controller
                     'amount' => (int)($order->total * 100), // Convert to cents
                     'currency' => config('paysera.currency'),
                     'country' => 'LT',
-                    'accepturl' => route('paysera.accept'),
-                    'cancelurl' => route('paysera.cancel'),
-                    'callbackurl' => route('paysera.callback'),
+                    'accepturl' => $baseUrl . '/paysera/accept',
+                    'cancelurl' => $baseUrl . '/paysera/cancel',
+                    'callbackurl' => $baseUrl . '/paysera/callback',
                     'test' => config('paysera.test_mode') ? '1' : '0',
                     'p_email' => $order->customer_email,
                     'p_firstname' => $order->shipping_first_name,
