@@ -276,11 +276,9 @@ export default function Checkout({
                     // Mark all previous steps as completed and go to payment
                     setCompletedSteps([1, 2, 3]);
                     setCurrentStep(4);
-
-                    toast.success(t('checkout.data_restored', 'Your checkout information has been restored'));
                 }
 
-                // Clear the saved data after processing (to avoid showing toast repeatedly)
+                // Always clear saved data after processing
                 localStorage.removeItem(CHECKOUT_DATA_KEY);
             }
         } catch (error) {
