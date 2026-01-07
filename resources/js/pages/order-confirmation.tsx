@@ -250,9 +250,9 @@ export default function OrderConfirmation({ order }: OrderConfirmationProps) {
                                                         className="h-full w-full object-cover"
                                                     />
                                                 </div>
-                                                <div className="flex flex-1 items-start justify-between">
-                                                    <div>
-                                                        <p className="font-bold tracking-wide text-foreground uppercase">
+                                                <div className="flex flex-1 min-w-0 items-start justify-between gap-2">
+                                                    <div className="min-w-0 flex-1">
+                                                        <p className="font-bold tracking-wide text-foreground uppercase text-sm break-words">
                                                             {item.product.name}
                                                         </p>
                                                         {item.variant && (
