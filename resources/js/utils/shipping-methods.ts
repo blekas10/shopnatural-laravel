@@ -45,33 +45,49 @@ const BALTIC_COUNTRIES = ['LT', 'LV', 'EE'];
 // International countries - Venipak courier only, same price as Baltic
 const INTERNATIONAL_COUNTRIES = ['PL', 'FI'];
 
+// Free shipping threshold for Lithuania
+const FREE_SHIPPING_THRESHOLD_LT = 50;
+
 /**
- * Get available shipping methods based on country code
+ * Get available shipping methods based on country code and subtotal
  * Pricing structure:
+ * - Lithuania (LT): FREE shipping for orders over €50, otherwise €4
  * - Baltic (LT, LV, EE): Venipak Courier €4, Venipak Pickup €4, 1-5 days
  * - International (PL, FI): Venipak Courier €4, 1-5 days
  * - Global (other EU + World): Courier €20, 2-10 days
  */
-export function getShippingMethods(countryCode: string, t: TranslationFunction): ShippingMethod[] {
+export function getShippingMethods(countryCode: string, t: TranslationFunction, subtotal: number = 0): ShippingMethod[] {
     const isBaltic = BALTIC_COUNTRIES.includes(countryCode);
     const isInternational = INTERNATIONAL_COUNTRIES.includes(countryCode);
     const isEU = EU_COUNTRIES.includes(countryCode);
 
+    // Check if free shipping applies for Lithuania
+    const isLithuania = countryCode === 'LT';
+    const hasFreeShipping = isLithuania && subtotal >= FREE_SHIPPING_THRESHOLD_LT;
+
     if (isBaltic) {
-        // Baltic countries (LT, LV, EE): Both courier and pickup available at €4
+        // Baltic countries (LT, LV, EE): Both courier and pickup available
+        // Lithuania gets free shipping for orders over €50
+        const shippingPrice = hasFreeShipping ? 0 : 4;
+        const freeShippingNote = isLithuania && !hasFreeShipping
+            ? ` (${t('shipping.free_over', 'Free over')} €${FREE_SHIPPING_THRESHOLD_LT})`
+            : hasFreeShipping
+                ? ` (${t('shipping.free', 'Free!')})`
+                : '';
+
         return [
             {
                 id: 'venipak-courier',
                 name: t('shipping.venipak_courier', 'Venipak Courier'),
-                description: t('shipping.venipak_courier_description', 'Delivery to your door'),
-                price: 4,
+                description: t('shipping.venipak_courier_description', 'Delivery to your door') + freeShippingNote,
+                price: shippingPrice,
                 estimatedDays: t('shipping.delivery_days_baltic', '1-5 business days'),
             },
             {
                 id: 'venipak-pickup',
                 name: t('shipping.venipak_pickup', 'Venipak Pickup Location'),
-                description: t('shipping.venipak_pickup_description', 'Pick up from Venipak location'),
-                price: 4,
+                description: t('shipping.venipak_pickup_description', 'Pick up from Venipak location') + freeShippingNote,
+                price: shippingPrice,
                 estimatedDays: t('shipping.delivery_days_baltic', '1-5 business days'),
             },
         ];

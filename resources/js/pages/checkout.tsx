@@ -163,15 +163,16 @@ export default function Checkout({
         postalCode?: string;
     }>({});
 
-    // Get shipping methods based on selected country
+    // Get shipping methods based on selected country and cart total
+    // Free shipping for Lithuania when subtotal >= €50
     const shippingMethods = useMemo(() => {
         const country = shippingAddress.country;
         if (!country) {
             // Default to Lithuania if no country selected yet
-            return getShippingMethods('LT', t);
+            return getShippingMethods('LT', t, totalPrice);
         }
-        return getShippingMethods(country, t);
-    }, [shippingAddress.country, t]);
+        return getShippingMethods(country, t, totalPrice);
+    }, [shippingAddress.country, t, totalPrice]);
 
     // Autofill form with user data if authenticated
     useEffect(() => {

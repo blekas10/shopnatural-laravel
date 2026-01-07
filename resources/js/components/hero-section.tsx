@@ -7,7 +7,7 @@ interface HeroSectionProps {
 }
 
 export default function HeroSection({ className }: HeroSectionProps) {
-    const { t } = useTranslation();
+    const { t, route } = useTranslation();
 
     return (
         <section
@@ -43,7 +43,7 @@ export default function HeroSection({ className }: HeroSectionProps) {
                 </div>
 
                 <Link
-                    href="#"
+                    href={route('products.index')}
                     className="relative inline-flex items-center justify-center rounded-md border-2 border-gold px-8 py-3 text-base font-bold uppercase tracking-wide text-gold transition-all duration-300 ease-in-out hover:bg-gold hover:text-foreground hover:shadow-lg hover:shadow-gold/50"
                 >
                     {t('hero.cta')}
