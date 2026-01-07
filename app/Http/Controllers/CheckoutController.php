@@ -373,10 +373,8 @@ class CheckoutController extends Controller
                 // Redirect to Stripe Checkout (external redirect for Inertia)
                 return \Inertia\Inertia::location($session->url);
             } elseif ($paymentMethod === 'paysera') {
-                // Use production URL for Paysera callbacks (localhost won't work)
-                $baseUrl = config('app.env') === 'local'
-                    ? config('app.url')
-                    : 'https://shop-natural.com';
+                // Get base URL dynamically from the current request
+                $baseUrl = $request->getSchemeAndHttpHost();
 
                 // Create Paysera payment request
                 $payseraData = [
