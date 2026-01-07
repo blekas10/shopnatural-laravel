@@ -14,6 +14,13 @@ class PayseraController extends Controller
      */
     public function callback(Request $request)
     {
+        // Log raw request data for debugging
+        Log::info('Paysera callback RAW request', [
+            'all_data' => $request->all(),
+            'method' => $request->method(),
+            'url' => $request->fullUrl(),
+        ]);
+
         try {
             // Validate callback data
             $response = WebToPay::validateAndParseData(

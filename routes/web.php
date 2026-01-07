@@ -44,7 +44,7 @@ Route::get('auth/google/callback', [SocialAuthController::class, 'handleGoogleCa
 Route::post('stripe/webhook', [StripeWebhookController::class, 'handle'])->name('stripe.webhook');
 Route::get('paysera/accept', [PayseraController::class, 'accept'])->name('paysera.accept');
 Route::get('paysera/cancel', [PayseraController::class, 'cancel'])->name('paysera.cancel');
-Route::post('paysera/callback', [PayseraController::class, 'callback'])->name('paysera.callback');
+Route::any('paysera/callback', [PayseraController::class, 'callback'])->name('paysera.callback');
 
 // API routes for Venipak (accessible without locale prefix)
 Route::prefix('api')->group(function () {
