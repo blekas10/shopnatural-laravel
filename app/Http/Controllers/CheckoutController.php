@@ -162,7 +162,7 @@ class CheckoutController extends Controller
 
             // Create the order with pending status (will be confirmed after payment)
             $order = Order::create([
-                'order_number' => 'ORD-' . strtoupper(Str::random(10)),
+                'order_number' => Order::generateOrderNumber(),
                 'user_id' => auth()->id(), // null for guests
                 'status' => 'pending',
                 'payment_status' => 'pending',

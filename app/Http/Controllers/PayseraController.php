@@ -52,9 +52,13 @@ class PayseraController extends Controller
                     'payment_intent_id' => $response['requestid'] ?? null,
                 ]);
 
+                // Assign invoice number for paid orders
+                $order->assignInvoiceNumber();
+
                 Log::info('Paysera payment successful', [
                     'order_id' => $order->id,
                     'order_number' => $order->order_number,
+                    'invoice_number' => $order->invoice_number,
                 ]);
 
                 // Send confirmation emails

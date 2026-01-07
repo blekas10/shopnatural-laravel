@@ -22,7 +22,7 @@ class OrderController extends Controller
         $orders = Order::query()
             ->where('user_id', auth()->id())
             ->with(['items.product.primaryImage', 'items.variant.image'])
-            ->latest()
+            ->orderBy('id', 'asc')
             ->paginate(15);
 
         return Inertia::render('orders/index', [
@@ -185,7 +185,7 @@ class OrderController extends Controller
             'locale' => $order->locale ?? app()->getLocale(),
         ]);
 
-        $filename = 'invoice-' . $order->order_number . '.pdf';
+        $filename = 'invoice-' . ($order->invoice_number ?? $order->order_number) . '.pdf';
 
         return $pdf->download($filename);
     }
@@ -211,7 +211,7 @@ class OrderController extends Controller
             'locale' => app()->getLocale(),
         ]);
 
-        return $pdf->stream('invoice-' . $order->order_number . '.pdf');
+        return $pdf->stream('invoice-' . ($order->invoice_number ?? $order->order_number) . '.pdf');
     }
 
     /**

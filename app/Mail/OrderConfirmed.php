@@ -74,7 +74,7 @@ class OrderConfirmed extends Mailable implements ShouldQueue
             'locale' => $this->emailLocale,
         ]);
 
-        $filename = 'invoice-' . $this->order->order_number . '.pdf';
+        $filename = 'invoice-' . ($this->order->invoice_number ?? $this->order->order_number) . '.pdf';
 
         return [
             Attachment::fromData(fn () => $pdf->output(), $filename)

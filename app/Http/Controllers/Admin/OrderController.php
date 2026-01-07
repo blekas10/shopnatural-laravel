@@ -274,7 +274,7 @@ class OrderController extends Controller
             'locale' => $locale,
         ]);
 
-        $filename = 'invoice-' . $order->order_number . ($lang ? "-{$lang}" : '') . '.pdf';
+        $filename = 'invoice-' . ($order->invoice_number ?? $order->order_number) . ($lang ? "-{$lang}" : '') . '.pdf';
 
         return $pdf->download($filename);
     }
@@ -294,7 +294,7 @@ class OrderController extends Controller
             'locale' => $locale,
         ]);
 
-        return $pdf->stream('invoice-' . $order->order_number . '.pdf');
+        return $pdf->stream('invoice-' . ($order->invoice_number ?? $order->order_number) . '.pdf');
     }
 
     /**

@@ -105,9 +105,13 @@ class StripeWebhookController extends Controller
 
         $order->update($updateData);
 
+        // Assign invoice number for paid orders
+        $order->assignInvoiceNumber();
+
         Log::info('Stripe webhook: Order updated', [
             'order_id' => $order->id,
             'order_number' => $order->order_number,
+            'invoice_number' => $order->invoice_number,
             'payment_intent_id' => $session->payment_intent ?? null,
         ]);
 

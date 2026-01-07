@@ -14,6 +14,7 @@ class Order extends Model
 
     protected $fillable = [
         'order_number',
+        'invoice_number',
         'user_id',
         'status',
         'payment_status',
@@ -317,15 +318,59 @@ class Order extends Model
     }
 
     /**
-     * Generate unique order number
+     * Generate unique sequential order number (format: 6002, 6003, etc.)
      */
     public static function generateOrderNumber(): string
     {
-        do {
-            $orderNumber = 'ORD-' . strtoupper(uniqid());
-        } while (static::where('order_number', $orderNumber)->exists());
+        // Get the highest numeric order number
+        $lastOrder = static::withTrashed()
+            ->whereRaw("order_number REGEXP '^[0-9]+$'")
+            ->orderByRaw("CAST(order_number AS UNSIGNED) DESC")
+            ->first();
 
-        return $orderNumber;
+        if ($lastOrder && is_numeric($lastOrder->order_number)) {
+            // Increment the last number
+            $nextNumber = (int) $lastOrder->order_number + 1;
+        } else {
+            // Start from 6002
+            $nextNumber = 6002;
+        }
+
+        return (string) $nextNumber;
+    }
+
+    /**
+     * Generate unique sequential invoice number (format: IN001362, IN001363, etc.)
+     * Invoice numbers are only assigned when payment is confirmed.
+     */
+    public static function generateInvoiceNumber(): string
+    {
+        // Get the highest invoice number
+        $lastOrder = static::withTrashed()
+            ->whereNotNull('invoice_number')
+            ->whereRaw("invoice_number REGEXP '^IN[0-9]+$'")
+            ->orderByRaw("CAST(SUBSTRING(invoice_number, 3) AS UNSIGNED) DESC")
+            ->first();
+
+        if ($lastOrder && preg_match('/^IN(\d+)$/', $lastOrder->invoice_number, $matches)) {
+            // Increment the last number
+            $nextNumber = (int) $matches[1] + 1;
+        } else {
+            // Start from 1362 (continuing from IN001361)
+            $nextNumber = 1362;
+        }
+
+        return 'IN' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Assign invoice number when payment is confirmed
+     */
+    public function assignInvoiceNumber(): void
+    {
+        if (!$this->invoice_number) {
+            $this->update(['invoice_number' => static::generateInvoiceNumber()]);
+        }
     }
 
     /**

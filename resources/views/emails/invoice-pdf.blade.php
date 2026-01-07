@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $locale === 'lt' ? 'PVM sąskaita faktūra' : 'VAT Invoice' }} - {{ $invoice_number ?? $order->order_number }}</title>
+    <title>{{ $locale === 'lt' ? 'PVM sąskaita faktūra' : 'VAT Invoice' }} - {{ $order->order_number }}</title>
     <style>
         * {
             margin: 0;
@@ -223,7 +223,7 @@
                 <div class="invoice-meta">
                     <div class="invoice-meta-row">
                         <span class="invoice-meta-label">{{ $locale === 'lt' ? 'Sąskaitos numeris' : 'Invoice Number' }}</span>
-                        <span class="invoice-meta-value">{{ $invoice_number ?? 'IN' . str_pad($order->id, 6, '0', STR_PAD_LEFT) }}</span>
+                        <span class="invoice-meta-value">{{ $order->invoice_number ?? '-' }}</span>
                     </div>
                     <div class="invoice-meta-row">
                         <span class="invoice-meta-label">{{ $locale === 'lt' ? 'Užsakymo numeris' : 'Order Number' }}</span>
