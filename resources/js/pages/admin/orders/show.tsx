@@ -43,6 +43,25 @@ import {
 import { useState } from 'react';
 import { toast } from 'sonner';
 
+// Map Venipak statuses to Lithuanian
+const venipakStatusMap: Record<string, string> = {
+    'At sender': 'Pas siuntėją',
+    'In transit': 'Kelyje',
+    'In transit to pickup point': 'Kelyje į atsiėmimo punktą',
+    'Arrived at pickup point': 'Atvyko į atsiėmimo punktą',
+    'Ready for pickup': 'Paruošta atsiėmimui',
+    'Out for delivery': 'Pristatoma',
+    'Delivered': 'Pristatyta',
+    'Returned': 'Grąžinta',
+    'Failed delivery': 'Nepavykęs pristatymas',
+    'Awaiting pickup': 'Laukia atsiėmimo',
+};
+
+const translateVenipakStatus = (status: string | null): string => {
+    if (!status) return '';
+    return venipakStatusMap[status] || status;
+};
+
 interface OrderItem {
     id: number;
     product_name: string;
@@ -766,7 +785,7 @@ export default function OrderShow({ order, statuses, paymentStatuses }: OrderSho
                                                         {t('orders.tracking_status', 'Tracking Status')}
                                                     </Label>
                                                     <p className="mt-1 text-sm font-medium text-gray-900">
-                                                        {order.venipak_status}
+                                                        {translateVenipakStatus(order.venipak_status)}
                                                     </p>
                                                     {order.venipak_status_updated_at && (
                                                         <p className="text-xs text-gray-500 mt-0.5">

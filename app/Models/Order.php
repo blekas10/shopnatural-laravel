@@ -14,6 +14,7 @@ class Order extends Model
 
     protected $fillable = [
         'order_number',
+        'payment_reference',
         'invoice_number',
         'user_id',
         'status',
@@ -318,12 +319,27 @@ class Order extends Model
     }
 
     /**
+     * Generate unique payment reference for payment gateway tracking
+     * Format: PAY-XXXXXXXXXX (random string)
+     */
+    public static function generatePaymentReference(): string
+    {
+        do {
+            $reference = 'PAY-' . strtoupper(\Illuminate\Support\Str::random(10));
+        } while (static::where('payment_reference', $reference)->exists());
+
+        return $reference;
+    }
+
+    /**
      * Generate unique sequential order number (format: 6002, 6003, etc.)
+     * Only called when payment is confirmed.
      */
     public static function generateOrderNumber(): string
     {
         // Get the highest numeric order number
         $lastOrder = static::withTrashed()
+            ->whereNotNull('order_number')
             ->whereRaw("order_number REGEXP '^[0-9]+$'")
             ->orderByRaw("CAST(order_number AS UNSIGNED) DESC")
             ->first();
@@ -337,6 +353,16 @@ class Order extends Model
         }
 
         return (string) $nextNumber;
+    }
+
+    /**
+     * Assign order number when payment is confirmed
+     */
+    public function assignOrderNumber(): void
+    {
+        if (!$this->order_number) {
+            $this->update(['order_number' => static::generateOrderNumber()]);
+        }
     }
 
     /**

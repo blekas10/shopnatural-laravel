@@ -30,16 +30,16 @@ class PayseraController extends Controller
             );
 
             Log::info('Paysera callback received', [
-                'order_id' => $response['orderid'],
+                'payment_reference' => $response['orderid'],
                 'status' => $response['status'],
                 'amount' => $response['amount'],
             ]);
 
-            // Find order by order number
-            $order = Order::where('order_number', $response['orderid'])->first();
+            // Find order by payment reference
+            $order = Order::where('payment_reference', $response['orderid'])->first();
 
             if (!$order) {
-                Log::error('Paysera callback: Order not found', ['order_number' => $response['orderid']]);
+                Log::error('Paysera callback: Order not found', ['payment_reference' => $response['orderid']]);
                 return response('Order not found', 404);
             }
 
@@ -52,7 +52,8 @@ class PayseraController extends Controller
                     'payment_intent_id' => $response['requestid'] ?? null,
                 ]);
 
-                // Assign invoice number for paid orders
+                // Assign order number and invoice number for paid orders
+                $order->assignOrderNumber();
                 $order->assignInvoiceNumber();
 
                 Log::info('Paysera payment successful', [
@@ -123,13 +124,16 @@ class PayseraController extends Controller
                 config('paysera.sign_password')
             );
 
-            $orderNumber = $response['orderid'];
+            $paymentReference = $response['orderid'];
 
-            // Get locale from the order (saved during checkout)
-            $order = Order::where('order_number', $orderNumber)->first();
+            // Get order by payment reference
+            $order = Order::where('payment_reference', $paymentReference)->first();
             $locale = $order?->locale ?? config('app.locale');
 
-            return redirect()->route($locale . '.order.confirmation', ['orderNumber' => $orderNumber]);
+            // Use order_number if assigned, otherwise payment_reference
+            $orderIdentifier = $order?->order_number ?? $paymentReference;
+
+            return redirect()->route($locale . '.order.confirmation', ['orderNumber' => $orderIdentifier]);
         } catch (\WebToPayException $e) {
             Log::error('Paysera accept error', ['error' => $e->getMessage()]);
             return redirect()->route('checkout')->with('error', __('checkout.payment_validation_failed'));
@@ -152,8 +156,8 @@ class PayseraController extends Controller
                     config('paysera.sign_password')
                 );
 
-                $orderNumber = $response['orderid'];
-                $order = Order::where('order_number', $orderNumber)->first();
+                $paymentReference = $response['orderid'];
+                $order = Order::where('payment_reference', $paymentReference)->first();
 
                 if ($order) {
                     $order->update(['payment_status' => 'failed']);

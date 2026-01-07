@@ -78,17 +78,17 @@ class StripeWebhookController extends Controller
             'metadata' => $session->metadata,
         ]);
 
-        $orderNumber = $session->metadata->order_number ?? null;
+        $paymentReference = $session->metadata->payment_reference ?? null;
 
-        if (!$orderNumber) {
-            Log::error('Stripe webhook: No order number in metadata');
+        if (!$paymentReference) {
+            Log::error('Stripe webhook: No payment reference in metadata');
             return;
         }
 
-        $order = Order::where('order_number', $orderNumber)->first();
+        $order = Order::where('payment_reference', $paymentReference)->first();
 
         if (!$order) {
-            Log::error('Stripe webhook: Order not found', ['order_number' => $orderNumber]);
+            Log::error('Stripe webhook: Order not found', ['payment_reference' => $paymentReference]);
             return;
         }
 
@@ -105,7 +105,8 @@ class StripeWebhookController extends Controller
 
         $order->update($updateData);
 
-        // Assign invoice number for paid orders
+        // Assign order number and invoice number for paid orders
+        $order->assignOrderNumber();
         $order->assignInvoiceNumber();
 
         Log::info('Stripe webhook: Order updated', [
