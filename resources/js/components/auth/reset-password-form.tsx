@@ -15,7 +15,7 @@ interface ResetPasswordFormProps {
 }
 
 export function ResetPasswordForm({ token, email }: ResetPasswordFormProps) {
-    const { t, route } = useTranslation();
+    const { t, route, locale } = useTranslation();
     const [showPassword, setShowPassword] = useState(false);
     const [showPasswordConfirmation, setShowPasswordConfirmation] = useState(false);
 
@@ -24,6 +24,7 @@ export function ResetPasswordForm({ token, email }: ResetPasswordFormProps) {
         email: email,
         password: '',
         password_confirmation: '',
+        locale: locale, // Include locale for validation messages
     });
 
     // Password requirements checker

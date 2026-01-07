@@ -20,10 +20,16 @@ class SetLocale
 
         // Check if the first segment is a valid locale
         if (!in_array($locale, config('app.available_locales'))) {
-            // For Fortify auth routes (register, login, etc.) preserve session locale
-            // Otherwise default to English
+            // For Fortify auth routes (register, login, etc.) check form data first, then session
+            // This ensures validation messages are in the correct language
             if ($this->isFortifyRoute($request)) {
-                $locale = session('locale', config('app.locale'));
+                // Check if locale is sent in form data (from login/register forms)
+                $formLocale = $request->input('locale');
+                if ($formLocale && in_array($formLocale, config('app.available_locales'))) {
+                    $locale = $formLocale;
+                } else {
+                    $locale = session('locale', config('app.locale'));
+                }
             } else {
                 $locale = config('app.locale');
             }
