@@ -254,10 +254,14 @@ export default function Checkout({
                 // Only restore if auth user matches or is guest
                 const canRestore = !auth?.user || !parsed.userId || parsed.userId === auth.user.id;
 
-                // Only restore if data is less than 30 minutes old
-                const isRecent = parsed.timestamp && (Date.now() - parsed.timestamp) < 30 * 60 * 1000;
+                // Only restore if data is between 5 seconds and 30 minutes old
+                // (less than 5 seconds means we just saved it during this session - don't restore)
+                const dataAge = Date.now() - (parsed.timestamp || 0);
+                const isFromPreviousSession = dataAge > 5000 && dataAge < 30 * 60 * 1000;
 
-                if (canRestore && isRecent) {
+                console.log('Checkout restore check:', { dataAge, isFromPreviousSession, canRestore });
+
+                if (canRestore && isFromPreviousSession) {
                     console.log('Restoring saved checkout data');
 
                     // Restore form data
