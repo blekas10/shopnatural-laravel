@@ -39,6 +39,9 @@ class SocialAuthController extends Controller
         } catch (\Exception $e) {
             Log::error('Google OAuth callback failed', [
                 'error' => $e->getMessage(),
+                'exception_class' => get_class($e),
+                'trace' => $e->getTraceAsString(),
+                'request_all' => $request->all(),
             ]);
 
             return $this->redirectWithError(__('auth.google_auth_failed'));

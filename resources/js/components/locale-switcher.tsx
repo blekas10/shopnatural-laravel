@@ -1,8 +1,10 @@
 import { useTranslation } from '@/hooks/use-translation';
+import { Flag } from '@/components/country-selector';
 
-const flagEmojis: Record<string, string> = {
-    en: '🇱🇹',
-    lt: '🇬🇧',
+// Show flag for the OTHER language (what you'll switch to)
+const localeFlagCodes: Record<string, string> = {
+    en: 'LT', // When on English, show Lithuanian flag to switch to LT
+    lt: 'GB', // When on Lithuanian, show British flag to switch to EN
 };
 
 export default function LocaleSwitcher() {
@@ -14,13 +16,15 @@ export default function LocaleSwitcher() {
         switchLocale(availableLocales[nextIndex]);
     };
 
+    const flagCode = localeFlagCodes[locale] || 'GB';
+
     return (
         <button
             onClick={handleToggle}
-            className="flex items-center justify-center rounded-md p-2 text-2xl transition-all hover:bg-muted"
+            className="flex items-center justify-center rounded-md p-2 transition-all hover:bg-muted"
             aria-label="Switch language"
         >
-            {flagEmojis[locale] || '🌐'}
+            <Flag code={flagCode} className="w-6 h-4" />
         </button>
     );
 }

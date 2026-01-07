@@ -163,7 +163,7 @@ class OrderController extends Controller
      *
      * Accessible to:
      * - Authenticated users who own the order
-     * - Guests from the order confirmation page (session email matches)
+     * - Guest orders (user_id = null) by anyone with the order number
      */
     public function downloadInvoice(Request $request, string $orderNumber)
     {

@@ -113,7 +113,7 @@ Route::group([], function () {
         Route::get('orders/{orderNumber}/invoice/view', [OrderController::class, 'viewInvoice'])->name('en.orders.invoice.view');
     });
 
-    // Order confirmation & invoice download - accessible after checkout (uses session-based authorization)
+    // Order confirmation & invoice download - accessible with order number (no auth required)
     Route::get('order/confirmation/{orderNumber}', [OrderController::class, 'confirmation'])->name('en.order.confirmation');
     Route::get('orders/{orderNumber}/invoice/download', [OrderController::class, 'downloadInvoice'])->name('en.orders.invoice.download');
 });
@@ -153,7 +153,7 @@ Route::group(['prefix' => 'lt'], function () {
         Route::get('uzsakymai/{orderNumber}/saskaita/perziureti', [OrderController::class, 'viewInvoice'])->name('lt.orders.invoice.view');
     });
 
-    // Order confirmation & invoice download - accessible after checkout (uses session-based authorization)
+    // Order confirmation & invoice download - accessible with order number (no auth required)
     Route::get('uzsakymas/patvirtinimas/{orderNumber}', [OrderController::class, 'confirmation'])->name('lt.order.confirmation');
     Route::get('uzsakymai/{orderNumber}/saskaita/atsisiusti', [OrderController::class, 'downloadInvoice'])->name('lt.orders.invoice.download');
 

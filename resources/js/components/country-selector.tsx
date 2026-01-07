@@ -121,10 +121,10 @@ const countries: Country[] = [
 function Flag({ code, className }: { code: string; className?: string }) {
     const FlagComponent = flags[code as keyof typeof flags];
     if (!FlagComponent) {
-        return <span className={cn("inline-block bg-muted rounded", className)} />;
+        return <span className={cn("inline-block bg-muted", className)} />;
     }
     return (
-        <span className={cn("inline-block overflow-hidden rounded-sm", className)}>
+        <span className={cn("inline-block overflow-hidden", className)}>
             <FlagComponent title={code} />
         </span>
     );
