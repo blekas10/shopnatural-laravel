@@ -1034,6 +1034,7 @@
     "promo_code.usage_limit_reached": "Šis promo kodas pasiekė panaudojimo limitą",
     "promo_code.per_user_limit_reached": "Jūs jau panaudojote šį promo kodą",
     "promo_code.minimum_not_met": "Minimali užsakymo suma {amount} nepasiekta",
+    "promo_code.login_required": "Šis promo kodas skirtas tik registruotiems vartotojams. Prašome prisijungti arba susikurti paskyrą.",
     "Carrier Tracking": "Kurjerio sekimas",
     "Use this number to track with the delivery carrier": "Naudokite šį numerį siuntai sekti su pristatymo kurjeriu",
     "2-3 business days": "2-3 darbo dienos",

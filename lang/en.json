@@ -997,6 +997,7 @@
     "promo_code.usage_limit_reached": "This promo code has reached its usage limit",
     "promo_code.per_user_limit_reached": "You have already used this promo code",
     "promo_code.minimum_not_met": "Minimum order amount of {amount} not met",
+    "promo_code.login_required": "This promo code is only available for registered users. Please log in or create an account.",
     "Carrier Tracking": "Carrier Tracking",
     "Use this number to track with the delivery carrier": "Use this number to track with the delivery carrier",
     "2-3 business days": "2-3 business days",

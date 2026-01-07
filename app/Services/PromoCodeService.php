@@ -31,6 +31,14 @@ class PromoCodeService
             return null;
         }
 
+        // Check if this is a WELCOME code (requires logged-in user)
+        if (str_starts_with($promoCode->code, 'WELCOME') && !$userId) {
+            $this->lastError = __('promo_code.login_required');
+            $this->lastErrorKey = 'promo_code.login_required';
+
+            return null;
+        }
+
         // Check if active
         if (!$promoCode->is_active) {
             $this->lastError = __('promo_code.inactive');

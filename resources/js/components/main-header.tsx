@@ -313,7 +313,7 @@ export default function MainHeader({ className }: MainHeaderProps) {
                     <div className="container mx-auto flex items-center justify-between px-4 py-3 md:px-6 lg:px-8">
                         {/* Logo */}
                         <Link
-                            href="/"
+                            href={route('home')}
                             className="flex items-center gap-2 transition-opacity hover:opacity-80"
                         >
                             <img
@@ -652,7 +652,7 @@ export default function MainHeader({ className }: MainHeaderProps) {
                             <SheetHeader className="flex-shrink-0">
                                 <SheetTitle>
                                     <Link
-                                        href="/"
+                                        href={route('home')}
                                         className="flex items-center"
                                         onClick={() => setMobileMenuOpen(false)}
                                     >
