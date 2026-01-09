@@ -17,104 +17,49 @@ interface Country {
     nativeName: string;
 }
 
+// Countries we ship to (Baltic, PL/FI, EU, USA, Canada)
 const countries: Country[] = [
-    // Europe
+    // Baltic countries (€4 shipping, free for LT over €50)
     { code: 'LT', name: 'Lithuania', nativeName: 'Lietuva' },
     { code: 'LV', name: 'Latvia', nativeName: 'Latvija' },
     { code: 'EE', name: 'Estonia', nativeName: 'Eesti' },
+
+    // International - same price as Baltic (€4)
     { code: 'PL', name: 'Poland', nativeName: 'Polska' },
-    { code: 'DE', name: 'Germany', nativeName: 'Deutschland' },
-    { code: 'FR', name: 'France', nativeName: 'France' },
-    { code: 'ES', name: 'Spain', nativeName: 'España' },
-    { code: 'IT', name: 'Italy', nativeName: 'Italia' },
-    { code: 'GB', name: 'United Kingdom', nativeName: 'United Kingdom' },
-    { code: 'NL', name: 'Netherlands', nativeName: 'Nederland' },
-    { code: 'BE', name: 'Belgium', nativeName: 'België' },
-    { code: 'AT', name: 'Austria', nativeName: 'Österreich' },
-    { code: 'DK', name: 'Denmark', nativeName: 'Danmark' },
-    { code: 'SE', name: 'Sweden', nativeName: 'Sverige' },
-    { code: 'NO', name: 'Norway', nativeName: 'Norge' },
     { code: 'FI', name: 'Finland', nativeName: 'Suomi' },
-    { code: 'CZ', name: 'Czech Republic', nativeName: 'Česko' },
-    { code: 'SK', name: 'Slovakia', nativeName: 'Slovensko' },
-    { code: 'HU', name: 'Hungary', nativeName: 'Magyarország' },
-    { code: 'RO', name: 'Romania', nativeName: 'România' },
+
+    // EU countries (€20 shipping)
+    { code: 'AT', name: 'Austria', nativeName: 'Österreich' },
+    { code: 'BE', name: 'Belgium', nativeName: 'België' },
     { code: 'BG', name: 'Bulgaria', nativeName: 'България' },
     { code: 'HR', name: 'Croatia', nativeName: 'Hrvatska' },
-    { code: 'SI', name: 'Slovenia', nativeName: 'Slovenija' },
-    { code: 'PT', name: 'Portugal', nativeName: 'Portugal' },
+    { code: 'CY', name: 'Cyprus', nativeName: 'Κύπρος' },
+    { code: 'CZ', name: 'Czech Republic', nativeName: 'Česko' },
+    { code: 'DK', name: 'Denmark', nativeName: 'Danmark' },
+    { code: 'FR', name: 'France', nativeName: 'France' },
+    { code: 'DE', name: 'Germany', nativeName: 'Deutschland' },
     { code: 'GR', name: 'Greece', nativeName: 'Ελλάδα' },
+    { code: 'HU', name: 'Hungary', nativeName: 'Magyarország' },
     { code: 'IE', name: 'Ireland', nativeName: 'Éire' },
+    { code: 'IT', name: 'Italy', nativeName: 'Italia' },
     { code: 'LU', name: 'Luxembourg', nativeName: 'Luxembourg' },
     { code: 'MT', name: 'Malta', nativeName: 'Malta' },
-    { code: 'CY', name: 'Cyprus', nativeName: 'Κύπρος' },
-    { code: 'CH', name: 'Switzerland', nativeName: 'Schweiz' },
-    { code: 'IS', name: 'Iceland', nativeName: 'Ísland' },
-    { code: 'AL', name: 'Albania', nativeName: 'Shqipëri' },
-    { code: 'AD', name: 'Andorra', nativeName: 'Andorra' },
-    { code: 'BY', name: 'Belarus', nativeName: 'Беларусь' },
-    { code: 'BA', name: 'Bosnia and Herzegovina', nativeName: 'Bosna i Hercegovina' },
-    { code: 'XK', name: 'Kosovo', nativeName: 'Kosova' },
-    { code: 'MD', name: 'Moldova', nativeName: 'Moldova' },
-    { code: 'MC', name: 'Monaco', nativeName: 'Monaco' },
-    { code: 'ME', name: 'Montenegro', nativeName: 'Crna Gora' },
-    { code: 'MK', name: 'North Macedonia', nativeName: 'Македонија' },
-    { code: 'RS', name: 'Serbia', nativeName: 'Србија' },
-    { code: 'SM', name: 'San Marino', nativeName: 'San Marino' },
-    { code: 'UA', name: 'Ukraine', nativeName: 'Україна' },
-    { code: 'VA', name: 'Vatican City', nativeName: 'Città del Vaticano' },
-    { code: 'RU', name: 'Russia', nativeName: 'Россия' },
-    { code: 'TR', name: 'Turkey', nativeName: 'Türkiye' },
+    { code: 'NL', name: 'Netherlands', nativeName: 'Nederland' },
+    { code: 'PT', name: 'Portugal', nativeName: 'Portugal' },
+    { code: 'RO', name: 'Romania', nativeName: 'România' },
+    { code: 'SK', name: 'Slovakia', nativeName: 'Slovensko' },
+    { code: 'SI', name: 'Slovenia', nativeName: 'Slovenija' },
+    { code: 'ES', name: 'Spain', nativeName: 'España' },
+    { code: 'SE', name: 'Sweden', nativeName: 'Sverige' },
 
-    // Americas
+    // Non-EU European (€20 shipping)
+    { code: 'GB', name: 'United Kingdom', nativeName: 'United Kingdom' },
+    { code: 'NO', name: 'Norway', nativeName: 'Norge' },
+    { code: 'CH', name: 'Switzerland', nativeName: 'Schweiz' },
+
+    // North America (€20 shipping)
     { code: 'US', name: 'United States', nativeName: 'United States' },
     { code: 'CA', name: 'Canada', nativeName: 'Canada' },
-    { code: 'MX', name: 'Mexico', nativeName: 'México' },
-    { code: 'BR', name: 'Brazil', nativeName: 'Brasil' },
-    { code: 'AR', name: 'Argentina', nativeName: 'Argentina' },
-    { code: 'CL', name: 'Chile', nativeName: 'Chile' },
-    { code: 'CO', name: 'Colombia', nativeName: 'Colombia' },
-    { code: 'PE', name: 'Peru', nativeName: 'Perú' },
-    { code: 'VE', name: 'Venezuela', nativeName: 'Venezuela' },
-    { code: 'EC', name: 'Ecuador', nativeName: 'Ecuador' },
-    { code: 'BO', name: 'Bolivia', nativeName: 'Bolivia' },
-    { code: 'PY', name: 'Paraguay', nativeName: 'Paraguay' },
-    { code: 'UY', name: 'Uruguay', nativeName: 'Uruguay' },
-
-    // Asia
-    { code: 'CN', name: 'China', nativeName: '中国' },
-    { code: 'JP', name: 'Japan', nativeName: '日本' },
-    { code: 'KR', name: 'South Korea', nativeName: '대한민국' },
-    { code: 'IN', name: 'India', nativeName: 'भारत' },
-    { code: 'ID', name: 'Indonesia', nativeName: 'Indonesia' },
-    { code: 'TH', name: 'Thailand', nativeName: 'ประเทศไทย' },
-    { code: 'VN', name: 'Vietnam', nativeName: 'Việt Nam' },
-    { code: 'MY', name: 'Malaysia', nativeName: 'Malaysia' },
-    { code: 'SG', name: 'Singapore', nativeName: 'Singapore' },
-    { code: 'PH', name: 'Philippines', nativeName: 'Pilipinas' },
-    { code: 'PK', name: 'Pakistan', nativeName: 'پاکستان' },
-    { code: 'BD', name: 'Bangladesh', nativeName: 'বাংলাদেশ' },
-    { code: 'IL', name: 'Israel', nativeName: 'ישראל' },
-    { code: 'AE', name: 'United Arab Emirates', nativeName: 'الإمارات' },
-    { code: 'SA', name: 'Saudi Arabia', nativeName: 'السعودية' },
-    { code: 'KW', name: 'Kuwait', nativeName: 'الكويت' },
-    { code: 'QA', name: 'Qatar', nativeName: 'قطر' },
-    { code: 'OM', name: 'Oman', nativeName: 'عمان' },
-    { code: 'JO', name: 'Jordan', nativeName: 'الأردن' },
-    { code: 'LB', name: 'Lebanon', nativeName: 'لبنان' },
-
-    // Oceania
-    { code: 'AU', name: 'Australia', nativeName: 'Australia' },
-    { code: 'NZ', name: 'New Zealand', nativeName: 'New Zealand' },
-
-    // Africa
-    { code: 'ZA', name: 'South Africa', nativeName: 'South Africa' },
-    { code: 'EG', name: 'Egypt', nativeName: 'مصر' },
-    { code: 'NG', name: 'Nigeria', nativeName: 'Nigeria' },
-    { code: 'KE', name: 'Kenya', nativeName: 'Kenya' },
-    { code: 'MA', name: 'Morocco', nativeName: 'المغرب' },
-    { code: 'TN', name: 'Tunisia', nativeName: 'تونس' },
-    { code: 'GH', name: 'Ghana', nativeName: 'Ghana' },
 ].sort((a, b) => a.nativeName.localeCompare(b.nativeName));
 
 // Flag component wrapper for consistent styling

@@ -31,7 +31,7 @@ import type { SharedData } from '@/types';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { CheckoutValidator } from '@/utils/checkout-validation';
-import { getShippingMethods, calculateShippingCost, hasPickupPoints } from '@/utils/shipping-methods';
+import { getShippingMethods, calculateShippingCost, hasPickupPoints, isShippingAvailable } from '@/utils/shipping-methods';
 
 const CHECKOUT_DATA_KEY = 'shop-natural-checkout-data';
 
@@ -162,6 +162,13 @@ export default function Checkout({
         state?: string;
         postalCode?: string;
     }>({});
+
+    // Check if shipping is available to the selected country
+    const shippingAvailable = useMemo(() => {
+        const country = shippingAddress.country;
+        if (!country) return true; // Default to available until country selected
+        return isShippingAvailable(country);
+    }, [shippingAddress.country]);
 
     // Get shipping methods based on selected country and cart total
     // Free shipping for Lithuania when subtotal >= €50
@@ -901,12 +908,25 @@ export default function Checkout({
                                             <h2 className="mb-6 text-xl font-bold uppercase tracking-wide">
                                                 3. {t('checkout.delivery_method', 'Delivery Method')}
                                             </h2>
+
+                                            {/* Show error if shipping not available to selected country */}
+                                            {!shippingAvailable && (
+                                                <div className="mb-6 rounded-lg border-2 border-red-200 bg-red-50 p-4">
+                                                    <p className="font-semibold text-red-700">
+                                                        {t('checkout.shipping_not_available', 'Shipping not available')}
+                                                    </p>
+                                                    <p className="mt-1 text-sm text-red-600">
+                                                        {t('checkout.shipping_not_available_description', 'We currently do not ship to this country. Please select a different shipping address.')}
+                                                    </p>
+                                                </div>
+                                            )}
+
                                             <RadioGroup
                                                 value={selectedShippingMethod}
                                                 onValueChange={setSelectedShippingMethod}
                                             >
                                                 <div className="space-y-3">
-                                                    {shippingMethods.map((method) => {
+                                                    {shippingAvailable && shippingMethods.map((method) => {
                                                         const isSelected =
                                                             selectedShippingMethod ===
                                                             method.id;
@@ -983,7 +1003,8 @@ export default function Checkout({
                                                 <Button
                                                     type="button"
                                                     onClick={() => handleContinue(3)}
-                                                    className="bg-gold hover:bg-gold/90"
+                                                    className="bg-gold hover:bg-gold/90 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    disabled={!shippingAvailable || !selectedShippingMethod}
                                                 >
                                                     {t('checkout.continue', 'Continue')}
                                                     <ChevronRight className="ml-2 size-4" />

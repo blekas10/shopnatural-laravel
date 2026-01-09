@@ -16,9 +16,19 @@ class VenipakShipmentService
     private string $userId;
 
     // Shipping costs by type
-    public const SHIPPING_COST_DOMESTIC = 4.00;
-    public const SHIPPING_COST_INTERNATIONAL = 4.00;
-    public const SHIPPING_COST_GLOBAL = 20.00;
+    public const SHIPPING_COST_DOMESTIC = 4.00;       // Baltic: LT, LV, EE
+    public const SHIPPING_COST_INTERNATIONAL = 4.00;  // PL, FI
+    public const SHIPPING_COST_GLOBAL = 20.00;        // EU + North America
+
+    // Supported shipping countries
+    private const DOMESTIC_COUNTRIES = ['LT', 'LV', 'EE'];
+    private const INTERNATIONAL_COUNTRIES = ['PL', 'FI'];
+    private const EU_COUNTRIES = [
+        'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'FR', 'DE', 'GR',
+        'HU', 'IE', 'IT', 'LU', 'MT', 'NL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE',
+        'GB', 'NO', 'CH', // Non-EU European (same pricing)
+    ];
+    private const NORTH_AMERICA_COUNTRIES = ['US', 'CA'];
 
     public function __construct()
     {
@@ -192,18 +202,15 @@ XML;
      * Determine shipment type based on destination country
      * - Domestic: LT, LV, EE (Baltic countries - Venipak direct)
      * - International: PL, FI (requires <international> block - uses GLS)
-     * - Global: All others (requires <global> block - uses TNT/GLS)
+     * - Global: EU + US, CA (requires <global> block - uses TNT/GLS)
      */
     private function getShipmentType(string $countryCode): string
     {
-        $domesticCountries = ['LT', 'LV', 'EE'];
-        $internationalCountries = ['PL', 'FI'];
-
-        if (in_array($countryCode, $domesticCountries)) {
+        if (in_array($countryCode, self::DOMESTIC_COUNTRIES)) {
             return 'domestic';
         }
 
-        if (in_array($countryCode, $internationalCountries)) {
+        if (in_array($countryCode, self::INTERNATIONAL_COUNTRIES)) {
             return 'international';
         }
 
@@ -730,11 +737,29 @@ XML;
 
     /**
      * Check if shipping to this country is supported
-     * All countries allowed - domestic (LT/LV/EE/PL/FI) or global (others)
+     * Only Baltic, PL/FI, EU countries, USA and Canada are supported
      */
     public function isCountrySupported(string $country): bool
     {
-        return true;
+        $countryCode = $this->mapCountryCode($country);
+
+        return in_array($countryCode, self::DOMESTIC_COUNTRIES)
+            || in_array($countryCode, self::INTERNATIONAL_COUNTRIES)
+            || in_array($countryCode, self::EU_COUNTRIES)
+            || in_array($countryCode, self::NORTH_AMERICA_COUNTRIES);
+    }
+
+    /**
+     * Get all supported shipping countries
+     */
+    public function getSupportedCountries(): array
+    {
+        return array_merge(
+            self::DOMESTIC_COUNTRIES,
+            self::INTERNATIONAL_COUNTRIES,
+            self::EU_COUNTRIES,
+            self::NORTH_AMERICA_COUNTRIES
+        );
     }
 
     /**
