@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Notifications\WelcomeSocialNotification;
+use App\Notifications\WelcomeVerificationNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -76,13 +76,12 @@ class SocialAuthController extends Controller
             // Get locale for welcome email
             $locale = session('social_auth_locale', config('app.locale'));
 
-            // Create new user
+            // Create new user (needs email verification like regular registration)
             $user = User::create([
                 'name' => $googleUser->getName(),
                 'email' => $googleUser->getEmail(),
                 'google_id' => $googleUser->getId(),
                 'avatar' => $googleUser->getAvatar(),
-                'email_verified_at' => now(), // Google emails are verified
             ]);
 
             Log::info('Created new user via Google OAuth', [
@@ -93,8 +92,8 @@ class SocialAuthController extends Controller
             // Link any guest orders made with this email to the new user
             $user->linkGuestOrders();
 
-            // Send welcome email with promo code
-            $user->notify(new WelcomeSocialNotification($locale));
+            // Send welcome verification email (same as regular registration)
+            $user->notify(new WelcomeVerificationNotification($locale));
         }
 
         // Log the user in
