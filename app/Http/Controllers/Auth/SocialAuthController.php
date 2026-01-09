@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Notifications\WelcomeSocialNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -21,8 +22,9 @@ class SocialAuthController extends Controller
             session(['social_auth_redirect' => $request->get('redirect')]);
         }
 
-        // Store the current locale
-        session(['social_auth_locale' => app()->getLocale()]);
+        // Store the locale from request parameter (passed from frontend)
+        $locale = $request->get('locale', config('app.locale'));
+        session(['social_auth_locale' => $locale]);
 
         return Socialite::driver('google')
             ->with(['prompt' => 'select_account'])
@@ -71,6 +73,9 @@ class SocialAuthController extends Controller
                 $user->update(['avatar' => $googleUser->getAvatar()]);
             }
         } else {
+            // Get locale for welcome email
+            $locale = session('social_auth_locale', config('app.locale'));
+
             // Create new user
             $user = User::create([
                 'name' => $googleUser->getName(),
@@ -87,6 +92,9 @@ class SocialAuthController extends Controller
 
             // Link any guest orders made with this email to the new user
             $user->linkGuestOrders();
+
+            // Send welcome email with promo code
+            $user->notify(new WelcomeSocialNotification($locale));
         }
 
         // Log the user in

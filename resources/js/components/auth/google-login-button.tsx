@@ -7,15 +7,16 @@ interface GoogleLoginButtonProps {
 }
 
 export function GoogleLoginButton({ className, redirect }: GoogleLoginButtonProps) {
-    const { t } = useTranslation();
+    const { t, locale } = useTranslation();
 
     const handleGoogleLogin = () => {
-        // Build the URL with optional redirect parameter
-        let url = '/auth/google';
+        // Build the URL with locale and optional redirect parameter
+        const params = new URLSearchParams();
+        params.set('locale', locale);
         if (redirect) {
-            url += `?redirect=${encodeURIComponent(redirect)}`;
+            params.set('redirect', redirect);
         }
-        window.location.href = url;
+        window.location.href = `/auth/google?${params.toString()}`;
     };
 
     return (
