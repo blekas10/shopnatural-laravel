@@ -107,11 +107,11 @@ export default function Home({ products }: HomeProps) {
             />
 
             <div className="min-h-screen bg-background">
-            <MainHeader />
+                <MainHeader />
                 <HeroSection />
+                <ProductsSection products={products} />
                 <FeaturesSection />
                 <PromisesSection />
-                <ProductsSection products={products} />
                 <Footer />
             </div>
 

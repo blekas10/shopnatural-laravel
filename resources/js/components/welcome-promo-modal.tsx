@@ -5,9 +5,10 @@ import { motion } from 'framer-motion';
 import { Gift, Sparkles, Copy, Check, X } from 'lucide-react';
 import { useTranslation } from '@/hooks/use-translation';
 
-const STORAGE_KEY = 'shop_natural_promo_seen';
+const STORAGE_KEY = 'shop_natural_promo_last_shown';
 const PROMO_CODE = 'WELCOME2026';
 const DISCOUNT_PERCENT = 12;
+const SHOW_INTERVAL_MS = 30 * 60 * 1000; // 30 minutes
 
 interface WelcomePromoModalProps {
     onOpenRegister?: () => void;
@@ -19,19 +20,21 @@ export function WelcomePromoModal({ onOpenRegister }: WelcomePromoModalProps) {
     const [copied, setCopied] = useState(false);
 
     useEffect(() => {
-        // TODO: Re-enable localStorage check before production
-        // const hasSeenPromo = localStorage.getItem(STORAGE_KEY);
-        // if (!hasSeenPromo) {
-        // Small delay for better UX - let the page load first
-        const timer = setTimeout(() => {
-            setIsOpen(true);
-        }, 1500);
-        return () => clearTimeout(timer);
-        // }
+        // Check if enough time has passed since last shown (30 minutes)
+        const lastShown = localStorage.getItem(STORAGE_KEY);
+        const now = Date.now();
+
+        if (!lastShown || (now - parseInt(lastShown, 10)) > SHOW_INTERVAL_MS) {
+            // Small delay for better UX - let the page load first
+            const timer = setTimeout(() => {
+                setIsOpen(true);
+            }, 1500);
+            return () => clearTimeout(timer);
+        }
     }, []);
 
     const handleClose = () => {
-        localStorage.setItem(STORAGE_KEY, 'true');
+        localStorage.setItem(STORAGE_KEY, Date.now().toString());
         setIsOpen(false);
     };
 

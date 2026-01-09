@@ -1056,5 +1056,8 @@
     "promo_modal.copy": "Kopijuoti",
     "promo_modal.register_info": "Užsiregistruokite ir naudokite šį kodą apmokėjimo metu",
     "promo_modal.register_now": "Sukurti paskyrą ir sutaupyti",
-    "promo_modal.maybe_later": "Galbūt vėliau"
+    "promo_modal.maybe_later": "Galbūt vėliau",
+    "announcement.free_shipping": "Nemokamas pristatymas Lietuvoje užsakymams nuo 50€",
+    "announcement.welcome_discount": "Naudokite kodą WELCOME2026 ir gaukite 12% nuolaidą",
+    "announcement.eco_friendly": "100% natūrali ir ekologiška kosmetika"
 }

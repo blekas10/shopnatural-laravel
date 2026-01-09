@@ -1,6 +1,7 @@
 import { Link } from '@inertiajs/react';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/hooks/use-translation';
+import { Truck, Gift, Leaf } from 'lucide-react';
 
 interface HeroSectionProps {
     className?: string;
@@ -9,6 +10,21 @@ interface HeroSectionProps {
 export default function HeroSection({ className }: HeroSectionProps) {
     const { t, route } = useTranslation();
 
+    const announcements = [
+        {
+            icon: Truck,
+            text: t('announcement.free_shipping', 'Free shipping in Lithuania for orders over €50'),
+        },
+        {
+            icon: Gift,
+            text: t('announcement.welcome_discount', 'Use code WELCOME2026 for 12% off your first order'),
+        },
+        {
+            icon: Leaf,
+            text: t('announcement.eco_friendly', '100% natural & eco-friendly products'),
+        },
+    ];
+
     return (
         <section
             className={cn(
@@ -16,6 +32,21 @@ export default function HeroSection({ className }: HeroSectionProps) {
                 className
             )}
         >
+            {/* Announcement Banner */}
+            <div className="absolute left-[5px] right-[5px] top-0 z-20 overflow-hidden rounded-t-lg bg-[#2a2a2a] py-2">
+                <div className="animate-marquee flex whitespace-nowrap">
+                    {[...announcements, ...announcements].map((item, index) => (
+                        <div
+                            key={index}
+                            className="mx-8 inline-flex items-center text-sm text-white"
+                        >
+                            <item.icon className="mr-2 h-4 w-4 text-[#C2A363]" />
+                            <span>{item.text}</span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
             {/* Background image */}
             <div
                 className="absolute inset-[5px] top-0 z-0 rounded-b-lg bg-cover bg-center bg-no-repeat"

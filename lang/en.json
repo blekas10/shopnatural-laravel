@@ -1019,5 +1019,8 @@
     "promo_modal.copy": "Copy",
     "promo_modal.register_info": "Register an account to use this code at checkout",
     "promo_modal.register_now": "Create Account & Save",
-    "promo_modal.maybe_later": "Maybe later"
+    "promo_modal.maybe_later": "Maybe later",
+    "announcement.free_shipping": "Free shipping in Lithuania for orders over €50",
+    "announcement.welcome_discount": "Use code WELCOME2026 for 12% off your first order",
+    "announcement.eco_friendly": "100% natural & eco-friendly products"
 }
