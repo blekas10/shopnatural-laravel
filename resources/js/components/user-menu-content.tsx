@@ -1,7 +1,6 @@
 import { Link, router } from '@inertiajs/react';
-import { User, Package, Settings, LogOut, Check } from 'lucide-react';
+import { User, Package, Settings, LogOut, Languages } from 'lucide-react';
 import { useTranslation } from '@/hooks/use-translation';
-import { Flag } from '@/components/country-selector';
 
 interface UserMenuContentProps {
     user: {
@@ -10,9 +9,9 @@ interface UserMenuContentProps {
     };
 }
 
-const flagCodes: Record<string, string> = {
-    en: 'GB',
-    lt: 'LT',
+const flagEmojis: Record<string, string> = {
+    en: '🇬🇧',
+    lt: '🇱🇹',
 };
 
 const languageNames: Record<string, string> = {
@@ -26,6 +25,14 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
     const handleLogout = () => {
         router.post(route('logout'));
     };
+
+    const handleLanguageSwitch = () => {
+        const currentIndex = availableLocales.indexOf(locale);
+        const nextIndex = (currentIndex + 1) % availableLocales.length;
+        switchLocale(availableLocales[nextIndex]);
+    };
+
+    const nextLocale = availableLocales[(availableLocales.indexOf(locale) + 1) % availableLocales.length];
 
     return (
         <div className="py-2">
@@ -60,29 +67,18 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
                 </Link>
             </div>
 
-            {/* Language Selection */}
+            {/* Language Switcher */}
             <div className="border-t py-1">
-                <div className="px-4 py-2 text-xs font-medium text-gray-500 uppercase tracking-wide">
-                    {t('settings.language', 'Language')}
-                </div>
-                {availableLocales.map((loc) => {
-                    const isActive = loc === locale;
-                    return (
-                        <button
-                            key={loc}
-                            onClick={() => switchLocale(loc)}
-                            className={`flex w-full items-center gap-3 px-4 py-2 text-sm transition-colors ${
-                                isActive
-                                    ? 'bg-gold/10 text-gold font-medium'
-                                    : 'text-gray-700 hover:bg-gold/10 hover:text-gold'
-                            }`}
-                        >
-                            <Flag code={flagCodes[loc]} className="h-4 w-6" />
-                            <span className="flex-1 text-left">{languageNames[loc]}</span>
-                            {isActive && <Check className="size-4" />}
-                        </button>
-                    );
-                })}
+                <button
+                    onClick={handleLanguageSwitch}
+                    className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gold/10 hover:text-gold transition-colors"
+                >
+                    <Languages className="size-4" />
+                    <span className="flex items-center gap-2">
+                        <span>{flagEmojis[nextLocale]}</span>
+                        <span>{languageNames[nextLocale]}</span>
+                    </span>
+                </button>
             </div>
 
             {/* Logout */}

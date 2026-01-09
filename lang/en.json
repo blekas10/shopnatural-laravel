@@ -679,7 +679,6 @@
     "settings.password_updated": "Your password has been updated successfully!",
     "settings.resend_verification": "Resend verification email",
     "settings.verification_link_sent": "A new verification link has been sent to your email address.",
-    "settings.language": "Language",
     "validation.current_password": "The current password is incorrect.",
     "validation.confirmed": "The password confirmation does not match.",
     "validation.email": "The email field must be a valid email address.",
