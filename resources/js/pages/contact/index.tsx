@@ -2,7 +2,7 @@ import { Link, usePage } from '@inertiajs/react';
 import MainHeader from '@/components/main-header';
 import Footer from '@/components/footer';
 import { useTranslation } from '@/hooks/use-translation';
-import { ChevronRight, Phone, MapPin, Briefcase, Send, Loader2, CheckCircle2 } from 'lucide-react';
+import { ChevronRight, Phone, MapPin, Briefcase, Send, Loader2, CheckCircle2, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -160,6 +160,27 @@ export default function Contact() {
                     value: 'info@naturalmente.lt',
                     href: 'mailto:info@naturalmente.lt',
                     type: 'link' as const
+                }
+            ]
+        },
+        {
+            icon: Building2,
+            title: t('contact.company_details', 'Company Details'),
+            items: [
+                {
+                    label: t('contact.company_name', 'Company'),
+                    value: 'Natural Beauty Ds, UAB',
+                    type: 'text' as const
+                },
+                {
+                    label: t('contact.company_code', 'Company Code'),
+                    value: '302496441',
+                    type: 'text' as const
+                },
+                {
+                    label: t('contact.vat_code', 'VAT Code'),
+                    value: 'LT100005410619',
+                    type: 'text' as const
                 }
             ]
         }
@@ -394,7 +415,7 @@ export default function Contact() {
                     </div>
 
                     {/* Contact Cards */}
-                    <div className="grid gap-6 md:grid-cols-3">
+                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                         {contactInfo.map((section, index) => {
                             const Icon = section.icon;
                             return (
