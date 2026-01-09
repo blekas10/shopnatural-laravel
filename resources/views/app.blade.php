@@ -22,9 +22,9 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <meta name="verify-paysera" content="44b366b9787063b1e776e58588479c1e">
 
+        <link rel="icon" href="/favicon.ico" sizes="any">
         <link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png">
         <link rel="icon" href="/favicon-192x192.png" sizes="192x192" type="image/png">
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml">
         <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
         <link rel="preconnect" href="https://fonts.bunny.net">
