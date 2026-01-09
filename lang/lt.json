@@ -1048,5 +1048,13 @@
     "payment.stripe_name": "Debeto / Kredito kortelė",
     "payment.stripe_description": "Mokėkite saugiai kortele, Apple Pay arba Google Pay",
     "payment.paysera_name": "Paysera",
-    "payment.paysera_description": "Banko pavedimas arba kortelės per Paysera"
+    "payment.paysera_description": "Banko pavedimas arba kortelės per Paysera",
+    "promo_modal.title": "Sveiki atvykę!",
+    "promo_modal.subtitle": "Išskirtinė nuolaida naujiems nariams",
+    "promo_modal.discount_label": "pirmo užsakymo nuolaida",
+    "promo_modal.copied": "Nukopijuota!",
+    "promo_modal.copy": "Kopijuoti",
+    "promo_modal.register_info": "Užsiregistruokite ir naudokite šį kodą apmokėjimo metu",
+    "promo_modal.register_now": "Sukurti paskyrą ir sutaupyti",
+    "promo_modal.maybe_later": "Galbūt vėliau"
 }

@@ -52,6 +52,26 @@
         </div>
     </div>
 
+    {{-- Welcome Promo Code Section --}}
+    <div class="promo-box" style="margin-top: 24px; background: linear-gradient(135deg, #C2A363 0%, #D4B87A 100%); border-radius: 12px; padding: 24px; text-align: center;">
+        <div style="font-size: 14px; color: #ffffff; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">
+            🎁 {{ $locale === 'lt' ? 'Jūsų pasveikinimo dovana' : 'Your Welcome Gift' }}
+        </div>
+        <div style="font-size: 32px; font-weight: bold; color: #ffffff; margin-bottom: 8px;">
+            12% {{ $locale === 'lt' ? 'NUOLAIDA' : 'OFF' }}
+        </div>
+        <div style="background-color: #ffffff; border-radius: 8px; padding: 12px 20px; display: inline-block; margin: 12px 0;">
+            <span style="font-family: monospace; font-size: 20px; font-weight: bold; color: #2a2a2a; letter-spacing: 2px;">WELCOME2026</span>
+        </div>
+        <div style="font-size: 13px; color: rgba(255,255,255,0.9); margin-top: 8px;">
+            @if($locale === 'lt')
+                Naudokite šį kodą apmokėjimo metu ir sutaupykite pirmo užsakymo metu!
+            @else
+                Use this code at checkout to save on your first order!
+            @endif
+        </div>
+    </div>
+
     <div class="divider"></div>
 
     <p class="message text-muted text-small">

@@ -7,6 +7,7 @@ import FeaturesSection from '@/components/features-section';
 import ProductsSection from '@/components/products-section';
 import Footer from '@/components/footer';
 import { AuthModal } from '@/components/auth/auth-modal';
+import { WelcomePromoModal } from '@/components/welcome-promo-modal';
 import SEO from '@/components/seo';
 import { useTranslation } from '@/hooks/use-translation';
 import { createOrganizationSchema, createWebsiteSchema } from '@/lib/seo';
@@ -55,7 +56,12 @@ export default function Home({ products }: HomeProps) {
     })();
 
     const [authModalOpen, setAuthModalOpen] = useState(initialAuthState.open);
-    const [authView] = useState<'login' | 'register'>(initialAuthState.view);
+    const [authView, setAuthView] = useState<'login' | 'register'>(initialAuthState.view);
+
+    const openRegisterModal = () => {
+        setAuthView('register');
+        setAuthModalOpen(true);
+    };
 
     // SEO data
     const siteUrl = seo?.siteUrl || '';
@@ -114,6 +120,8 @@ export default function Home({ products }: HomeProps) {
                 onClose={() => setAuthModalOpen(false)}
                 initialView={authView}
             />
+
+            <WelcomePromoModal onOpenRegister={openRegisterModal} />
         </>
     );
 }

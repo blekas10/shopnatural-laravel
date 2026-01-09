@@ -1011,5 +1011,13 @@
     "payment.stripe_name": "Credit / Debit Card",
     "payment.stripe_description": "Pay securely with card, Apple Pay or Google Pay",
     "payment.paysera_name": "Paysera",
-    "payment.paysera_description": "Bank transfer or cards via Paysera"
+    "payment.paysera_description": "Bank transfer or cards via Paysera",
+    "promo_modal.title": "Welcome Gift!",
+    "promo_modal.subtitle": "Exclusive discount for new members",
+    "promo_modal.discount_label": "off your first order",
+    "promo_modal.copied": "Copied!",
+    "promo_modal.copy": "Copy",
+    "promo_modal.register_info": "Register an account to use this code at checkout",
+    "promo_modal.register_now": "Create Account & Save",
+    "promo_modal.maybe_later": "Maybe later"
 }
