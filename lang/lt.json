@@ -716,6 +716,7 @@
     "settings.password_updated": "Jūsų slaptažodis sėkmingai atnaujintas!",
     "settings.resend_verification": "Siųsti patvirtinimo laišką iš naujo",
     "settings.verification_link_sent": "Naujas patvirtinimo laiškas išsiųstas į jūsų el. pašto adresą.",
+    "settings.language": "Kalba",
     "validation.current_password": "Dabartinis slaptažodis neteisingas.",
     "validation.confirmed": "Slaptažodžio patvirtinimas nesutampa.",
     "validation.email": "El. pašto laukas turi būti galiojantis el. pašto adresas.",
