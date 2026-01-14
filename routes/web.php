@@ -83,7 +83,7 @@ Route::group([], function () {
     Route::get('/', [HomeController::class, 'index'])->name('en.home');
     Route::get('products', [ProductController::class, 'index'])->name('en.products.index');
     Route::get('products/{slug}', [ProductController::class, 'show'])->name('en.products.show');
-    Route::get('brands/{slug}', [BrandController::class, 'show'])->name('en.brands.show');
+    Route::get('{slug}-cosmetics', [BrandController::class, 'show'])->name('en.brands.show');
     Route::get('cart', fn() => Inertia::render('cart'))->name('en.cart');
     Route::get('wishlist', [WishlistController::class, 'index'])->name('en.wishlist');
     Route::get('contact', [ContactController::class, 'index'])->name('en.contact');
@@ -126,7 +126,7 @@ Route::group(['prefix' => 'lt'], function () {
     Route::get('/', [HomeController::class, 'index'])->name('lt.home');
     Route::get('produktai', [ProductController::class, 'index'])->name('lt.products.index');
     Route::get('produktai/{slug}', [ProductController::class, 'show'])->name('lt.products.show');
-    Route::get('prekes-zenklai/{slug}', [BrandController::class, 'show'])->name('lt.brands.show');
+    Route::get('kosmetika-{slug}', [BrandController::class, 'show'])->name('lt.brands.show');
     Route::get('krepselis', fn() => Inertia::render('cart'))->name('lt.cart');
     Route::get('pageidavimu-sarasas', [WishlistController::class, 'index'])->name('lt.wishlist');
     Route::get('kontaktai', [ContactController::class, 'index'])->name('lt.contact');
