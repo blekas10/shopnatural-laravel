@@ -69,11 +69,11 @@ export default function BrandForm({ brand, allBrands }: BrandFormProps) {
         e.preventDefault();
 
         if (isEditing && brand) {
-            put(update.url(brand.id), {
+            put(update(brand.id), {
                 preserveScroll: true,
             });
         } else {
-            post(store.url(), {
+            post(store(), {
                 preserveScroll: true,
             });
         }
@@ -94,7 +94,7 @@ export default function BrandForm({ brand, allBrands }: BrandFormProps) {
                 {/* Header */}
                 <div className="mb-8">
                     <Button variant="ghost" asChild className="mb-4">
-                        <Link href={index.url()}>
+                        <Link href={index()}>
                             <ArrowLeft className="size-4 mr-2" />
                             {t('common.back', 'Back')}
                         </Link>
@@ -327,7 +327,7 @@ export default function BrandForm({ brand, allBrands }: BrandFormProps) {
                     {/* Actions */}
                     <div className="flex justify-end gap-4">
                         <Button variant="outline" asChild>
-                            <Link href={index.url()}>
+                            <Link href={index()}>
                                 {t('common.cancel', 'Cancel')}
                             </Link>
                         </Button>

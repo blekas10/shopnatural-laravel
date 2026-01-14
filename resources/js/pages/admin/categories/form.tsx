@@ -67,11 +67,11 @@ export default function CategoryForm({ category, allCategories }: CategoryFormPr
         e.preventDefault();
 
         if (isEditing && category) {
-            put(update.url(category.id), {
+            put(update(category.id), {
                 preserveScroll: true,
             });
         } else {
-            post(store.url(), {
+            post(store(), {
                 preserveScroll: true,
             });
         }
@@ -92,7 +92,7 @@ export default function CategoryForm({ category, allCategories }: CategoryFormPr
                 {/* Header */}
                 <div className="mb-8">
                     <Button variant="ghost" asChild className="mb-4">
-                        <Link href={index.url()}>
+                        <Link href={index()}>
                             <ArrowLeft className="size-4 mr-2" />
                             {t('common.back', 'Back')}
                         </Link>
@@ -302,7 +302,7 @@ export default function CategoryForm({ category, allCategories }: CategoryFormPr
                     {/* Actions */}
                     <div className="flex justify-end gap-4">
                         <Button variant="outline" asChild>
-                            <Link href={index.url()}>
+                            <Link href={index()}>
                                 {t('common.cancel', 'Cancel')}
                             </Link>
                         </Button>
