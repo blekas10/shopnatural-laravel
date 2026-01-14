@@ -66,11 +66,13 @@ export default function HeroSection({ className }: HeroSectionProps) {
             <div className="container relative z-10 mx-auto flex flex-col items-center gap-8 px-4 text-center md:px-6 lg:items-start lg:px-8 lg:text-left">
                 <div className="space-y-4">
                     <h1 className="text-4xl font-medium uppercase leading-tight tracking-wide sm:text-5xl md:text-6xl lg:text-7xl xl:text-7xl">
-                        <span className="text-gold">{t('hero.title').split(',')[0]},</span>
+                        <span className="text-gold">{t('hero.title').split('|')[0]}</span>
                         <br />
-                        <span className="text-teal">{t('hero.title').split(',')[1]}</span>
+                        <span className="text-teal">{t('hero.title').split('|')[1]}</span>
                     </h1>
-
+                    <p className="max-w-md text-base font-light text-white/90 sm:text-lg md:text-xl">
+                        {t('hero.subtitle')}
+                    </p>
                 </div>
 
                 <Link
