@@ -99,6 +99,16 @@ class SitemapController extends Controller
                 'priority' => '0.8',
                 'changefreq' => 'weekly',
             ],
+            // Brands listing
+            [
+                'loc' => "{$this->baseUrl}/brands",
+                'alternates' => [
+                    ['hreflang' => 'en', 'href' => "{$this->baseUrl}/brands"],
+                    ['hreflang' => 'lt', 'href' => "{$this->baseUrl}/lt/prekiu-zenklai"],
+                ],
+                'priority' => '0.7',
+                'changefreq' => 'weekly',
+            ],
             // Shipping Policy
             [
                 'loc' => "{$this->baseUrl}/shipping-policy",
@@ -196,16 +206,15 @@ class SitemapController extends Controller
             ->get();
 
         return $brands->map(function ($brand) {
-            // SEO-optimized brand URLs: /{brand}-cosmetics (EN), /lt/kosmetika-{brand} (LT)
             return [
-                'loc' => "{$this->baseUrl}/{$brand->slug}-cosmetics",
+                'loc' => "{$this->baseUrl}/brands/{$brand->slug}",
                 'lastmod' => $brand->updated_at->toW3cString(),
                 'alternates' => [
-                    ['hreflang' => 'en', 'href' => "{$this->baseUrl}/{$brand->slug}-cosmetics"],
-                    ['hreflang' => 'lt', 'href' => "{$this->baseUrl}/lt/kosmetika-{$brand->slug}"],
+                    ['hreflang' => 'en', 'href' => "{$this->baseUrl}/brands/{$brand->slug}"],
+                    ['hreflang' => 'lt', 'href' => "{$this->baseUrl}/lt/prekiu-zenklai/{$brand->slug}"],
                 ],
-                'priority' => '0.7',
-                'changefreq' => 'weekly',
+                'priority' => '0.6',
+                'changefreq' => 'monthly',
             ];
         })->toArray();
     }

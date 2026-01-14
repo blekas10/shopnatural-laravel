@@ -7,7 +7,7 @@ const routeMap: Record<string, Record<string, string>> = {
     'home': { en: '', lt: '' },
     'products.index': { en: 'products', lt: 'produktai' },
     'products.show': { en: 'products', lt: 'produktai' },
-    'brands.show': { en: '', lt: 'kosmetika' }, // SEO optimized: /{slug}-cosmetics (EN), /lt/kosmetika-{slug} (LT)
+    'brands.show': { en: 'brands', lt: 'prekes-zenklai' },
     'cart': { en: 'cart', lt: 'krepselis' },
     'wishlist': { en: 'wishlist', lt: 'pageidavimu-sarasas' },
     'checkout': { en: 'checkout', lt: 'apmokejimas' },
@@ -125,18 +125,7 @@ export function route(name: string, params: Record<string, string | number | boo
 
     // Handle route parameters (like {slug}, {orderNumber}, {id}, {category}, {product}, {order}, {user}, {product_discount}, {promo_code})
     if (params.slug) {
-        // Special handling for brands.show - SEO optimized URLs
-        if (name === 'brands.show') {
-            if (locale === 'en') {
-                // EN: /{slug}-cosmetics
-                path += `/${params.slug}-cosmetics`;
-            } else {
-                // LT: /lt/kosmetika-{slug} (segment already added as 'kosmetika', so we use hyphen)
-                path += `-${params.slug}`;
-            }
-        } else {
-            path += `/${params.slug}`;
-        }
+        path += `/${params.slug}`;
     } else if (params.orderNumber) {
         path += `/${params.orderNumber}`;
     } else if (params.order) {

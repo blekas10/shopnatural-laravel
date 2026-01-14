@@ -1,11 +1,10 @@
-import { Link, usePage } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
 import MainHeader from '@/components/main-header';
 import Footer from '@/components/footer';
 import SEO from '@/components/seo';
 import { useTranslation } from '@/hooks/use-translation';
 import { Button } from '@/components/ui/button';
 import { ChevronRight } from 'lucide-react';
-import { type BreadcrumbItem } from '@/lib/seo';
 
 interface BrandChild {
     id: number;
@@ -24,58 +23,18 @@ interface Brand {
     children: BrandChild[];
 }
 
-interface PageProps {
-    seo: {
-        siteUrl: string;
-    };
-    locale: string;
-}
-
 interface BrandShowProps {
     brand: Brand;
 }
 
 export default function BrandShow({ brand }: BrandShowProps) {
-    const { t, route, locale } = useTranslation();
-    const { seo } = usePage<PageProps>().props;
-    const siteUrl = seo?.siteUrl || '';
-
-    // Dynamic SEO - optimized for Lithuanian search queries like "naturalmente kosmetika lietuvoje"
-    const metaTitle = t('brands.seo.title', '{brand} Cosmetics').replace('{brand}', brand.name);
-
-    const metaDescription = t('brands.seo.description', 'Shop {brand} natural and organic cosmetics. Premium quality {brand} products with free shipping over €50.')
-        .replace(/{brand}/g, brand.name);
-
-    const metaKeywords = t('brands.seo.keywords', '{brand} cosmetics, buy {brand}, {brand} natural products')
-        .replace(/{brand}/g, brand.name);
-
-    // Canonical and alternate URLs - SEO optimized slugs
-    // EN: /{brand}-cosmetics (e.g., /naturalmente-cosmetics)
-    // LT: /lt/kosmetika-{brand} (e.g., /lt/kosmetika-naturalmente)
-    const canonicalUrl = locale === 'lt'
-        ? `${siteUrl}/lt/kosmetika-${brand.slug}`
-        : `${siteUrl}/${brand.slug}-cosmetics`;
-
-    const alternateUrls = [
-        { locale: 'en', url: `${siteUrl}/${brand.slug}-cosmetics` },
-        { locale: 'lt', url: `${siteUrl}/lt/kosmetika-${brand.slug}` },
-    ];
-
-    // Breadcrumbs for structured data
-    const breadcrumbs: BreadcrumbItem[] = [
-        { name: t('nav.home', 'Home'), url: locale === 'lt' ? `${siteUrl}/lt` : siteUrl },
-        { name: brand.name, url: canonicalUrl },
-    ];
+    const { t, route } = useTranslation();
 
     return (
         <>
             <SEO
-                title={metaTitle}
-                description={brand.description || metaDescription}
-                keywords={metaKeywords}
-                canonical={canonicalUrl}
-                alternateUrls={alternateUrls}
-                breadcrumbs={breadcrumbs}
+                title={brand.name}
+                description={brand.description || `${brand.name} - ${t('brands.meta_description', 'Natural and organic beauty products')}`}
             />
 
             <div className="min-h-screen bg-background">
