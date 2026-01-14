@@ -884,7 +884,7 @@
     "users.cannot_remove_own_admin": "You cannot remove admin role from yourself",
     "users.role_updated": "Role updated successfully",
     "brands.meta_description": "Natural and organic beauty products",
-    "brands.shop_all": "Discover {brand} Products",
+    "brands.shop_all": "Discover Products",
     "brands.shop": "Discover",
     "brands.collections": "Collections",
     "brands.shop_collection": "Discover Collection",
