@@ -1,10 +1,11 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import MainHeader from '@/components/main-header';
 import Footer from '@/components/footer';
 import SEO from '@/components/seo';
 import { useTranslation } from '@/hooks/use-translation';
 import { Button } from '@/components/ui/button';
 import { ChevronRight } from 'lucide-react';
+import { type BreadcrumbItem } from '@/lib/seo';
 
 interface BrandChild {
     id: number;
@@ -23,18 +24,52 @@ interface Brand {
     children: BrandChild[];
 }
 
+interface PageProps {
+    seo: {
+        siteUrl: string;
+    };
+    locale: string;
+}
+
 interface BrandShowProps {
     brand: Brand;
 }
 
 export default function BrandShow({ brand }: BrandShowProps) {
-    const { t, route } = useTranslation();
+    const { t, route, locale } = useTranslation();
+    const { seo } = usePage<PageProps>().props;
+    const siteUrl = seo?.siteUrl || '';
+
+    // Dynamic SEO with translations - uses same key, different values per language file
+    const metaTitle = t('brands.seo.title', '{brand} Cosmetics').replace(/{brand}/g, brand.name);
+    const metaDescription = t('brands.seo.description', 'Shop {brand} natural cosmetics.').replace(/{brand}/g, brand.name);
+    const metaKeywords = t('brands.seo.keywords', '{brand} cosmetics').replace(/{brand}/g, brand.name);
+
+    // Canonical and alternate URLs
+    const canonicalUrl = locale === 'lt'
+        ? `${siteUrl}/lt/prekes-zenklai/${brand.slug}`
+        : `${siteUrl}/brands/${brand.slug}`;
+
+    const alternateUrls = [
+        { locale: 'en', url: `${siteUrl}/brands/${brand.slug}` },
+        { locale: 'lt', url: `${siteUrl}/lt/prekes-zenklai/${brand.slug}` },
+    ];
+
+    // Breadcrumbs for structured data
+    const breadcrumbs: BreadcrumbItem[] = [
+        { name: t('nav.home', 'Home'), url: locale === 'lt' ? `${siteUrl}/lt` : siteUrl },
+        { name: brand.name, url: canonicalUrl },
+    ];
 
     return (
         <>
             <SEO
-                title={brand.name}
-                description={brand.description || `${brand.name} - ${t('brands.meta_description', 'Natural and organic beauty products')}`}
+                title={metaTitle}
+                description={brand.description || metaDescription}
+                keywords={metaKeywords}
+                canonical={canonicalUrl}
+                alternateUrls={alternateUrls}
+                breadcrumbs={breadcrumbs}
             />
 
             <div className="min-h-screen bg-background">
