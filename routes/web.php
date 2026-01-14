@@ -46,6 +46,9 @@ Route::get('paysera/accept', [PayseraController::class, 'accept'])->name('payser
 Route::get('paysera/cancel', [PayseraController::class, 'cancel'])->name('paysera.cancel');
 Route::any('paysera/callback', [PayseraController::class, 'callback'])->name('paysera.callback');
 
+// SEO - Sitemap (accessible without locale prefix)
+Route::get('sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
+
 // API routes for Venipak (accessible without locale prefix)
 Route::prefix('api')->group(function () {
     Route::get('venipak/pickup-points', [VenipakController::class, 'getPickupPoints'])->name('api.venipak.pickup-points');

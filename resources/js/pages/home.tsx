@@ -101,6 +101,7 @@ export default function Home({ products }: HomeProps) {
             <SEO
                 title={t('home.meta_title', 'Natural & Eco-Friendly Cosmetics')}
                 description={t('home.meta_description', 'Shop Natural offers eco-friendly, natural cosmetics and beauty products. Family-run business committed to sustainability.')}
+                keywords={t('home.meta_keywords', 'natural cosmetics Lithuania, eco-friendly beauty, organic skincare, cruelty-free products')}
                 canonical={locale === 'lt' ? `${siteUrl}/lt` : siteUrl}
                 alternateUrls={alternateUrls}
                 additionalSchemas={[organizationSchema, websiteSchema]}

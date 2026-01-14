@@ -232,6 +232,7 @@ export default function Contact() {
             <SEO
                 title={t('contact.meta_title', 'Contact Us')}
                 description={t('contact.meta_description', 'Get in touch with Shop Natural. Visit us in Kaunas, call us, or send us a message. We are here to help with your natural cosmetics needs.')}
+                keywords={t('contact.meta_keywords', 'contact Shop Natural, natural cosmetics Kaunas, eco beauty shop Lithuania')}
                 canonical={canonicalUrl}
                 alternateUrls={alternateUrls}
                 breadcrumbs={breadcrumbs}

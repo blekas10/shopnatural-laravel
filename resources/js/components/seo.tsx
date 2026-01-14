@@ -63,8 +63,8 @@ export default function SEO({
     const defaultImage = seo?.defaultImage || `${siteUrl}/images/og-image.jpg`;
     const twitterHandle = seo?.twitterHandle;
 
-    // Build full title with site name
-    const fullTitle = `${title} | ${siteName}`;
+    // Use title as-is - Inertia's title callback in app.tsx adds the site name suffix
+    const fullTitle = title;
 
     // Use provided image or default
     const ogImage = image || defaultImage;

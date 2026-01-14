@@ -76,6 +76,7 @@ export default function About() {
             <SEO
                 title={t('about.meta_title', 'About Us')}
                 description={t('about.meta_description', 'Learn about Shop Natural - a family-run business dedicated to eco-friendly, natural products. Committed to sustainability and cruelty-free practices.')}
+                keywords={t('about.meta_keywords', 'natural cosmetics, eco-friendly beauty, cruelty-free, sustainable skincare, family business Lithuania')}
                 canonical={canonicalUrl}
                 alternateUrls={alternateUrls}
                 breadcrumbs={breadcrumbs}

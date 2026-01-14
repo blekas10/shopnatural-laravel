@@ -71,6 +71,7 @@ export default function ShippingPolicy() {
             <SEO
                 title={t('shipping_policy.meta_title', 'Shipping Policy')}
                 description={t('shipping_policy.meta_description', 'Shop Natural shipping information. Fast delivery to Lithuania (1-3 days) and EU (3-10 days). Affordable shipping rates.')}
+                keywords={t('shipping_policy.meta_keywords', 'shipping Lithuania, delivery EU, free shipping cosmetics, fast delivery')}
                 canonical={canonicalUrl}
                 alternateUrls={alternateUrls}
                 breadcrumbs={breadcrumbs}

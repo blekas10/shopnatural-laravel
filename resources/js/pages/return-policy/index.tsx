@@ -68,6 +68,7 @@ export default function ReturnPolicy() {
             <SEO
                 title={t('return_policy.meta_title', 'Return Policy')}
                 description={t('return_policy.meta_description', 'Shop Natural return policy. 14-day return period under EU law. Easy returns and refunds within 5-7 business days.')}
+                keywords={t('return_policy.meta_keywords', 'return policy, 14 day returns, EU consumer rights, refund cosmetics')}
                 canonical={canonicalUrl}
                 alternateUrls={alternateUrls}
                 breadcrumbs={breadcrumbs}
