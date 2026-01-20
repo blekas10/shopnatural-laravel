@@ -176,7 +176,7 @@ Route::group(['prefix' => 'lt'], function () {
         Route::get('dashboard', [DashboardController::class, 'index'])->name('lt.dashboard');
 
         // Admin routes
-        Route::prefix('admin')->group(function () {
+        Route::prefix('admin')->middleware('admin')->group(function () {
             Route::get('products', [AdminProductController::class, 'index'])->name('lt.admin.products.index');
             Route::get('products/create', [AdminProductController::class, 'create'])->name('lt.admin.products.create');
             Route::post('products', [AdminProductController::class, 'store'])->name('lt.admin.products.store');
@@ -253,7 +253,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Admin routes
-    Route::prefix('admin')->group(function () {
+    Route::prefix('admin')->middleware('admin')->group(function () {
         Route::get('products', [AdminProductController::class, 'index'])->name('admin.products.index');
         Route::get('products/create', [AdminProductController::class, 'create'])->name('admin.products.create');
         Route::post('products', [AdminProductController::class, 'store'])->name('admin.products.store');
