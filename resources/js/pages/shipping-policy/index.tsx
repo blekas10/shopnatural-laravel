@@ -2,9 +2,10 @@ import { Link, usePage } from '@inertiajs/react';
 import MainHeader from '@/components/main-header';
 import Footer from '@/components/footer';
 import { useTranslation } from '@/hooks/use-translation';
-import { ChevronRight, Truck, Clock, DollarSign, Globe, AlertCircle } from 'lucide-react';
+import { ChevronRight, Truck, Clock, DollarSign, Globe, AlertCircle, MapPin, Package } from 'lucide-react';
 import SEO from '@/components/seo';
 import { generateCanonicalUrl, type BreadcrumbItem } from '@/lib/seo';
+import { VenipakLogo, FedExLogo } from '@/components/payment-logos';
 
 interface PageProps {
     seo: {
@@ -18,30 +19,67 @@ export default function ShippingPolicy() {
     const { t, route } = useTranslation();
     const { seo } = usePage<PageProps>().props;
 
-    const sections = [
+    const shippingRegions = [
         {
-            icon: Truck,
-            title: t('shipping_policy.methods_title', 'Delivery Methods'),
-            content: t('shipping_policy.methods_content', 'We offer convenient delivery through trusted courier services and parcel locker networks. Choose the option that works best for you at checkout.')
-        },
-        {
-            icon: Clock,
-            title: t('shipping_policy.times_title', 'Delivery Times'),
-            items: [
-                t('shipping_policy.times_lithuania', 'Lithuania: 1-3 business days'),
-                t('shipping_policy.times_europe', 'European Union: 3-10 business days')
+            logo: 'venipak',
+            region: t('shipping_policy.region_baltic', 'Baltic Countries (Lithuania, Latvia, Estonia)'),
+            methods: [
+                {
+                    name: t('shipping_policy.venipak_courier', 'Venipak Courier'),
+                    description: t('shipping_policy.venipak_courier_desc', 'Delivery to your door'),
+                    price: '€4',
+                    time: t('shipping_policy.time_1_5_days', '1-5 business days'),
+                    note: t('shipping_policy.lt_free_shipping', 'Free shipping in Lithuania for orders over €50')
+                },
+                {
+                    name: t('shipping_policy.venipak_pickup', 'Venipak Pickup Location'),
+                    description: t('shipping_policy.venipak_pickup_desc', 'Pick up from convenient Venipak location'),
+                    price: '€4',
+                    time: t('shipping_policy.time_1_5_days', '1-5 business days'),
+                    note: t('shipping_policy.lt_free_shipping', 'Free shipping in Lithuania for orders over €50')
+                }
             ]
         },
         {
-            icon: DollarSign,
-            title: t('shipping_policy.costs_title', 'Shipping Costs'),
-            content: t('shipping_policy.costs_content', 'Shipping costs are calculated at checkout based on your location, package size, and delivery method. We strive to keep shipping fees as low as possible.')
+            logo: 'venipak',
+            region: t('shipping_policy.region_international', 'International (Poland, Finland)'),
+            methods: [
+                {
+                    name: t('shipping_policy.venipak_courier', 'Venipak Courier'),
+                    description: t('shipping_policy.venipak_courier_desc', 'Delivery to your door'),
+                    price: '€4',
+                    time: t('shipping_policy.time_1_5_days', '1-5 business days'),
+                }
+            ]
         },
         {
-            icon: Globe,
-            title: t('shipping_policy.international_title', 'International Shipping'),
-            content: t('shipping_policy.international_content', 'We ship to all European Union countries. Please note that international orders may be subject to customs duties and import taxes, which are the responsibility of the customer.')
+            logo: 'fedex',
+            region: t('shipping_policy.region_eu', 'European Union'),
+            countries: t('shipping_policy.eu_countries', 'Austria, Belgium, Bulgaria, Croatia, Cyprus, Czech Republic, Denmark, France, Germany, Greece, Hungary, Ireland, Italy, Luxembourg, Malta, Netherlands, Portugal, Romania, Slovakia, Slovenia, Spain, Sweden, United Kingdom, Norway, Switzerland'),
+            methods: [
+                {
+                    name: t('shipping_policy.fedex_international', 'FedEx International'),
+                    description: t('shipping_policy.fedex_international_desc', 'International delivery to your door'),
+                    price: '€20',
+                    time: t('shipping_policy.time_2_10_days', '2-10 business days'),
+                }
+            ]
         },
+        {
+            logo: 'fedex',
+            region: t('shipping_policy.region_north_america', 'North America (USA, Canada)'),
+            methods: [
+                {
+                    name: t('shipping_policy.fedex_international', 'FedEx International'),
+                    description: t('shipping_policy.fedex_international_desc', 'International delivery to your door'),
+                    price: '€20',
+                    time: t('shipping_policy.time_5_14_days', '5-14 business days'),
+                }
+            ]
+        }
+    ];
+
+    const sections = [
         {
             icon: AlertCircle,
             title: t('shipping_policy.issues_title', 'Delivery Issues'),
@@ -101,6 +139,79 @@ export default function ShippingPolicy() {
                         <p className="mt-4 text-base leading-relaxed text-muted-foreground md:text-lg">
                             {t('shipping_policy.intro', 'We are committed to delivering your natural products quickly and safely. Please review our shipping information below.')}
                         </p>
+                    </div>
+
+                    {/* Shipping Regions */}
+                    <div className="mb-8 md:mb-12">
+                        <h2 className="mb-6 text-xl font-bold uppercase tracking-wide text-foreground md:text-2xl">
+                            {t('shipping_policy.regions_title', 'Shipping Methods & Rates by Region')}
+                        </h2>
+                        <div className="space-y-6">
+                            {shippingRegions.map((region, index) => (
+                                <div
+                                    key={index}
+                                    className="rounded-2xl border-2 border-border bg-background p-6 md:p-8"
+                                >
+                                    {/* Region Header with Logo */}
+                                    <div className="mb-6 flex items-center gap-4">
+                                        <div className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-white border-2 border-border">
+                                            {region.logo === 'venipak' ? (
+                                                <VenipakLogo className="h-5" />
+                                            ) : (
+                                                <FedExLogo className="h-4" />
+                                            )}
+                                        </div>
+                                        <div className="flex-1">
+                                            <h3 className="text-lg font-bold uppercase tracking-wide text-foreground md:text-xl">
+                                                {region.region}
+                                            </h3>
+                                            {region.countries && (
+                                                <p className="mt-1 text-sm text-muted-foreground">
+                                                    {region.countries}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Shipping Methods */}
+                                    <div className="space-y-4">
+                                        {region.methods.map((method, methodIndex) => (
+                                            <div
+                                                key={methodIndex}
+                                                className="rounded-xl border-2 border-border bg-muted/30 p-4"
+                                            >
+                                                <div className="flex items-start justify-between gap-4">
+                                                    <div className="flex-1">
+                                                        <div className="flex items-center gap-2">
+                                                            <Package className="size-5 text-gold" />
+                                                            <h4 className="font-bold uppercase tracking-wide text-foreground">
+                                                                {method.name}
+                                                            </h4>
+                                                        </div>
+                                                        <p className="mt-2 text-sm text-muted-foreground">
+                                                            {method.description}
+                                                        </p>
+                                                        {method.note && (
+                                                            <p className="mt-2 text-sm font-medium text-gold">
+                                                                {method.note}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <p className="text-xl font-bold text-gold">
+                                                            {method.price}
+                                                        </p>
+                                                        <p className="mt-1 text-sm text-muted-foreground">
+                                                            {method.time}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
 
                     {/* Policy Sections */}
