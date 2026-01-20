@@ -48,7 +48,8 @@ export interface User {
     avatar?: string;
     email_verified_at: string | null;
     two_factor_enabled?: boolean;
-    roles?: Role[];
+    role: 'admin' | 'user'; // User role field
+    roles?: Role[]; // Legacy field, keep for backward compatibility
     created_at: string;
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...

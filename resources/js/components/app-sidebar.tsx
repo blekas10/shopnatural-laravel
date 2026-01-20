@@ -21,7 +21,7 @@ export function AppSidebar() {
     const { t, route } = useTranslation();
 
     // Check if user has admin role
-    const isAdmin = auth?.user?.roles?.some((role) => role.name === 'admin') ?? false;
+    const isAdmin = auth?.user?.role === 'admin';
 
     const simpleUserNavItems: NavItem[] = [
         {
