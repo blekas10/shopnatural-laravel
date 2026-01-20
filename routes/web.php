@@ -65,6 +65,9 @@ Route::prefix('api')->group(function () {
 
     // Promo code validation
     Route::post('promo-code/validate', [\App\Http\Controllers\Api\PromoCodeController::class, 'validate'])->name('api.promo-code.validate');
+
+    // Newsletter subscription
+    Route::post('newsletter/subscribe', [\App\Http\Controllers\Api\NewsletterController::class, 'subscribe'])->name('api.newsletter.subscribe');
 });
 
 // Cart routes (accessible without locale prefix)

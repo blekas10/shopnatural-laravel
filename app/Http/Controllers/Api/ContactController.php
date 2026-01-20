@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Mail\ContactFormMail;
+use App\Models\ContactMessage;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 
@@ -36,6 +38,18 @@ class ContactController extends Controller
         $validated = $validator->validated();
 
         try {
+            // Get locale from request or session
+            $locale = $request->input('locale', app()->getLocale());
+
+            // Store in database
+            ContactMessage::create([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'subject' => $validated['subject'],
+                'message' => $validated['message'],
+                'locale' => $locale,
+            ]);
+
             // Send the email
             Mail::to('info@naturalmente.lt')->send(new ContactFormMail(
                 $validated['name'],
@@ -49,7 +63,7 @@ class ContactController extends Controller
                 'success' => true
             ]);
         } catch (\Exception $e) {
-            \Log::error('Contact form email failed: ' . $e->getMessage());
+            Log::error('Contact form email failed: ' . $e->getMessage());
 
             return response()->json([
                 'message' => 'Failed to send message. Please try again later.',
