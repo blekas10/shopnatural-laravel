@@ -48,8 +48,7 @@ export interface User {
     avatar?: string;
     email_verified_at: string | null;
     two_factor_enabled?: boolean;
-    role: 'admin' | 'user'; // User role field
-    roles?: Role[]; // Legacy field, keep for backward compatibility
+    roles?: Role[]; // Spatie roles - use hasRole() or roles.some(r => r.name === 'admin')
     created_at: string;
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
