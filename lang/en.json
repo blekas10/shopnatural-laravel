@@ -595,6 +595,8 @@
     "shipping.venipak_pickup": "Venipak Pickup Location",
     "shipping.venipak_pickup_description": "Pick up from Venipak location",
     "shipping.venipak_pickup_days": "Available next day",
+    "shipping.fedex_courier": "FedEx International",
+    "shipping.fedex_courier_description": "International delivery to your door",
     "shipping.courier": "Courier Shipping",
     "shipping.courier_description": "International delivery",
     "shipping.courier_days_world": "7-14 business days",

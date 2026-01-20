@@ -116,23 +116,23 @@ export function getShippingMethods(countryCode: string, t: TranslationFunction, 
             },
         ];
     } else if (isEU) {
-        // EU countries: Only courier at €20
+        // EU countries: FedEx courier at €20
         return [
             {
-                id: 'venipak-courier',
-                name: t('shipping.venipak_courier', 'Venipak Courier'),
-                description: t('shipping.venipak_courier_description', 'Delivery to your door'),
+                id: 'fedex-courier',
+                name: t('shipping.fedex_courier', 'FedEx International'),
+                description: t('shipping.fedex_courier_description', 'International delivery to your door'),
                 price: 20,
                 estimatedDays: t('shipping.delivery_days_eu', '2-10 business days'),
             },
         ];
     } else if (isNorthAmerica) {
-        // USA and Canada: Courier at €20
+        // USA and Canada: FedEx courier at €20
         return [
             {
-                id: 'courier-shipping',
-                name: t('shipping.courier', 'Courier Shipping'),
-                description: t('shipping.courier_description', 'International delivery'),
+                id: 'fedex-courier',
+                name: t('shipping.fedex_courier', 'FedEx International'),
+                description: t('shipping.fedex_courier_description', 'International delivery to your door'),
                 price: 20,
                 estimatedDays: t('shipping.delivery_days_north_america', '5-14 business days'),
             },

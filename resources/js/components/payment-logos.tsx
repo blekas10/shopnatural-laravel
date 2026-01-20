@@ -14,6 +14,16 @@ export function VenipakLogo({ className }: LogoProps) {
     );
 }
 
+export function FedExLogo({ className }: LogoProps) {
+    return (
+        <img
+            src="/images/logos/fedex.svg"
+            alt="FedEx"
+            className={cn('h-4 w-auto', className)}
+        />
+    );
+}
+
 export function StripeLogo({ className }: LogoProps) {
     return (
         <img

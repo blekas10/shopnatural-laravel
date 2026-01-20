@@ -18,7 +18,7 @@ import { AddressForm } from '@/components/address-form';
 import { PaymentForm } from '@/components/payment-form';
 import { CountrySelector } from '@/components/country-selector';
 import { VenipakPickupSelector, VenipakPickupPoint } from '@/components/venipak-pickup-selector';
-import { VenipakLogo } from '@/components/payment-logos';
+import { VenipakLogo, FedExLogo } from '@/components/payment-logos';
 import { PhoneInputField, isValidPhoneNumber } from '@/components/ui/phone-input';
 import type {
     CheckoutFormData,
@@ -953,6 +953,12 @@ export default function Checkout({
                                                                             {method.id.startsWith('venipak') && (
                                                                                 <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-white border border-border">
                                                                                     <VenipakLogo className="h-4" />
+                                                                                </div>
+                                                                            )}
+                                                                            {/* FedEx logo for fedex methods */}
+                                                                            {method.id.startsWith('fedex') && (
+                                                                                <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-white border border-border">
+                                                                                    <FedExLogo className="h-4" />
                                                                                 </div>
                                                                             )}
                                                                             <div>

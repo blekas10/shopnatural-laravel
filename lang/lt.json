@@ -612,6 +612,8 @@
     "shipping.venipak_pickup": "Venipak atsiėmimo vieta",
     "shipping.venipak_pickup_description": "Atsiimkite Venipak atsiėmimo punkte",
     "shipping.venipak_pickup_days": "Galima kitą dieną",
+    "shipping.fedex_courier": "FedEx tarptautinis",
+    "shipping.fedex_courier_description": "Tarptautinis pristatymas į namus",
     "shipping.courier": "Kurjerių siunta",
     "shipping.courier_description": "Tarptautinis pristatymas",
     "shipping.courier_days_world": "7-14 darbo dienų",
