@@ -911,7 +911,7 @@ export default function Checkout({
 
                                             {/* Show error if shipping not available to selected country */}
                                             {!shippingAvailable && (
-                                                <div className="mb-6 rounded-lg border-2 border-red-200 bg-red-50 p-4">
+                                                <div className="mb-6 rounded-xl border-2 border-red-200 bg-red-50 p-4">
                                                     <p className="font-semibold text-red-700">
                                                         {t('checkout.shipping_not_available', 'Shipping not available')}
                                                     </p>
@@ -936,7 +936,7 @@ export default function Checkout({
                                                                 key={method.id}
                                                                 htmlFor={`shipping-${method.id}`}
                                                                 className={cn(
-                                                                    'flex cursor-pointer items-start gap-4 rounded-lg border-2 p-4 transition-all',
+                                                                    'flex cursor-pointer items-start gap-4 rounded-xl border-2 p-4 transition-all',
                                                                     isSelected
                                                                         ? 'border-gold bg-gold/5'
                                                                         : 'border-border bg-background hover:border-gold/40',
@@ -1028,12 +1028,12 @@ export default function Checkout({
                                             </h2>
 
                                             {/* Promo Code Section */}
-                                            <div className="mb-6 rounded-lg border-2 border-border bg-muted/30 p-4">
+                                            <div className="mb-6 rounded-xl border-2 border-border bg-muted/30 p-4">
                                                 <Label className="mb-2 block text-sm font-medium">
                                                     {t('checkout.promo_code', 'Promo Code')}
                                                 </Label>
                                                 {appliedPromoCode ? (
-                                                    <div className="flex items-center justify-between rounded-lg bg-green-50 dark:bg-green-900/20 p-3 border border-green-200 dark:border-green-800">
+                                                    <div className="flex items-center justify-between rounded-xl bg-green-50 dark:bg-green-900/20 p-3 border border-green-200 dark:border-green-800">
                                                         <div className="flex items-center gap-2">
                                                             <Check className="size-5 text-green-600" />
                                                             <span className="font-mono font-medium text-green-700 dark:text-green-400">
@@ -1104,7 +1104,7 @@ export default function Checkout({
 
                                             {/* Terms and Conditions */}
                                             <div className={cn(
-                                                "mt-6 flex items-start space-x-3 rounded-lg border-2 p-4 transition-colors",
+                                                "mt-6 flex items-start space-x-3 rounded-xl border-2 p-4 transition-colors",
                                                 !agreeToTerms ? "border-border bg-background" : "border-gold bg-gold/5"
                                             )}>
                                                 <Checkbox
