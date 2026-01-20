@@ -334,8 +334,8 @@ class Order extends Model
             // Increment the last number
             $nextNumber = (int) $lastOrder->order_number + 1;
         } else {
-            // Start from 6002
-            $nextNumber = 6002;
+            // Start from 6057
+            $nextNumber = 6057;
         }
 
         return (string) $nextNumber;
@@ -368,8 +368,8 @@ class Order extends Model
             // Increment the last number
             $nextNumber = (int) $matches[1] + 1;
         } else {
-            // Start from 1362 (continuing from IN001361)
-            $nextNumber = 1362;
+            // Start from 1364 (continuing from IN001363)
+            $nextNumber = 1364;
         }
 
         return 'IN' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
