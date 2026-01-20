@@ -16,16 +16,24 @@ class LoginResponse implements LoginResponseContract
         // Get locale from request (sent by login form)
         $locale = $request->input('locale', 'en');
 
-        // Build locale-aware dashboard URL
-        $dashboardPath = $locale === 'en' ? '/dashboard' : '/' . $locale . '/dashboard';
+        // Redirect based on user role
+        $user = auth()->user();
+
+        if ($user->role === 'admin') {
+            // Redirect admins to admin panel
+            $redirectPath = $locale === 'en' ? '/admin/products' : '/' . $locale . '/admin/products';
+        } else {
+            // Redirect regular users to dashboard
+            $redirectPath = $locale === 'en' ? '/dashboard' : '/' . $locale . '/dashboard';
+        }
 
         // Use Inertia::location() to force a full page reload after login
         // This ensures the CSRF token is refreshed after session regeneration
         // Check for Inertia request via X-Inertia header (not wantsJson)
         if ($request->hasHeader('X-Inertia')) {
-            return Inertia::location($dashboardPath);
+            return Inertia::location($redirectPath);
         }
 
-        return redirect()->intended($dashboardPath);
+        return redirect()->intended($redirectPath);
     }
 }
