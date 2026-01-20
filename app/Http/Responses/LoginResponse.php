@@ -16,10 +16,10 @@ class LoginResponse implements LoginResponseContract
         // Get locale from request (sent by login form)
         $locale = $request->input('locale', 'en');
 
-        // Redirect based on user role
+        // Redirect based on user role (Spatie)
         $user = auth()->user();
 
-        if ($user->role === 'admin') {
+        if ($user->hasRole('admin')) {
             // Redirect admins to admin panel
             $redirectPath = $locale === 'en' ? '/admin/products' : '/' . $locale . '/admin/products';
         } else {

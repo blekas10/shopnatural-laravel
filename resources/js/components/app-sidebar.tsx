@@ -20,8 +20,8 @@ export function AppSidebar() {
     const { auth } = usePage<{ auth: { user: UserType } }>().props;
     const { t, route } = useTranslation();
 
-    // Check if user has admin role
-    const isAdmin = auth?.user?.role === 'admin';
+    // Check if user has admin role (Spatie)
+    const isAdmin = auth?.user?.roles?.some((role) => role.name === 'admin') ?? false;
 
     const simpleUserNavItems: NavItem[] = [
         {

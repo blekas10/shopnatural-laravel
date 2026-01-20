@@ -20,8 +20,8 @@ class EnsureUserIsAdmin
             return redirect()->route('login');
         }
 
-        // Check if user has admin role
-        if (auth()->user()->role !== 'admin') {
+        // Check if user has admin role (Spatie)
+        if (!auth()->user()->hasRole('admin')) {
             abort(403, 'Unauthorized access. Admin privileges required.');
         }
 
