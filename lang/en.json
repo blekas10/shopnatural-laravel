@@ -1049,5 +1049,8 @@
     "announcement.eco_friendly": "100% natural & eco-friendly products",
     "home.meta_title": "Natural & Eco-Friendly Cosmetics",
     "home.meta_description": "Shop Natural — premium eco-friendly cosmetics in Lithuania. 100% natural ingredients, cruelty-free, sustainable packaging. Free shipping over €50.",
-    "home.meta_keywords": "natural cosmetics Lithuania, eco-friendly beauty, organic skincare, cruelty-free products, sustainable beauty, buy cosmetics online"
+    "home.meta_keywords": "natural cosmetics Lithuania, eco-friendly beauty, organic skincare, cruelty-free products, sustainable beauty, buy cosmetics online",
+    "pagination.showing": "Showing {from}-{to} of {total} products",
+    "pagination.previous": "Previous",
+    "pagination.next": "Next"
 }

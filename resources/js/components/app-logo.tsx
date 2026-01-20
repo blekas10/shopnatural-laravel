@@ -5,7 +5,7 @@ export default function AppLogo() {
                 <img
                     src="/images/shop-natural-logo.png"
                     alt="Shop Natural"
-                    className="h-8 w-auto"
+                    className="h-10 md:h-8 w-auto"
                 />
             </div>
         </>

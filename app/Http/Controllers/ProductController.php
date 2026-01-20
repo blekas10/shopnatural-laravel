@@ -10,6 +10,7 @@ use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
 use App\Services\ProductService;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -20,12 +21,43 @@ class ProductController extends Controller
     ) {}
 
     /**
-     * Display product listing page
+     * Parse comma-separated IDs to array of integers
      */
-    public function index(): Response
+    private function parseCommaSeparatedIds(mixed $input): array
     {
-        // Get all active products for client-side filtering
-        $products = $this->productService->getAllActiveProducts();
+        if (empty($input)) {
+            return [];
+        }
+
+        if (is_array($input)) {
+            return array_map('intval', $input);
+        }
+
+        return array_map('intval', array_filter(explode(',', (string) $input), fn($val) => $val !== ''));
+    }
+
+    /**
+     * Display product listing page with server-side pagination
+     */
+    public function index(Request $request): Response
+    {
+        // Get price range for filter
+        $priceRange = $this->productService->getPriceRange();
+
+        // Extract filter parameters
+        $filters = [
+            'search' => $request->input('search'),
+            'categories' => $this->parseCommaSeparatedIds($request->input('categories')),
+            'brands' => $this->parseCommaSeparatedIds($request->input('brands')),
+            'minPrice' => $request->input('minPrice') ? (float) $request->input('minPrice') : null,
+            'maxPrice' => $request->input('maxPrice') ? (float) $request->input('maxPrice') : null,
+            'onSale' => $request->boolean('onSale'),
+            'inStock' => $request->boolean('inStock'),
+            'sort' => $request->input('sort', 'featured'),
+        ];
+
+        // Get paginated products
+        $products = $this->productService->getFilteredPaginatedProducts($filters, 24);
 
         // Get all active brands with product counts (hierarchical)
         $brands = Brand::where('is_active', true)
@@ -56,9 +88,30 @@ class ProductController extends Controller
             ->get();
 
         return Inertia::render('products/index', [
-            'allProducts' => ProductResource::collection($products)->resolve(),
+            'products' => ProductResource::collection($products)->resolve(),
+            'pagination' => [
+                'current_page' => $products->currentPage(),
+                'last_page' => $products->lastPage(),
+                'per_page' => $products->perPage(),
+                'total' => $products->total(),
+                'from' => $products->firstItem(),
+                'to' => $products->lastItem(),
+            ],
+            'priceExtent' => [$priceRange['min'], $priceRange['max']],
             'brands' => BrandResource::collection($brands)->resolve(),
             'categories' => CategoryResource::collection($categories)->resolve(),
+            'appliedFilters' => [
+                'categoryIds' => $filters['categories'],
+                'brandIds' => $filters['brands'],
+                'priceRange' => [
+                    (float) ($filters['minPrice'] ?? $priceRange['min']),
+                    (float) ($filters['maxPrice'] ?? $priceRange['max']),
+                ],
+                'sort' => $filters['sort'],
+                'search' => $filters['search'] ?? '',
+                'onSale' => $filters['onSale'],
+                'inStock' => $filters['inStock'],
+            ],
         ]);
     }
 

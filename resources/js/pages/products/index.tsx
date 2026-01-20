@@ -1,9 +1,11 @@
-import { Link, usePage } from '@inertiajs/react';
+import { Link, usePage, router } from '@inertiajs/react';
 import MainHeader from '@/components/main-header';
 import Footer from '@/components/footer';
 import SEO from '@/components/seo';
 import { useTranslation } from '@/hooks/use-translation';
 import { ProductCard } from '@/components/product-card';
+import { ProductCardSkeleton } from '@/components/product-card-skeleton';
+import { Pagination } from '@/components/pagination';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from '@/components/ui/sheet';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -16,13 +18,7 @@ import { cn } from '@/lib/utils';
 import { generateCanonicalUrl, createCollectionSchema } from '@/lib/seo';
 import type { ProductListItem, Brand, Category } from '@/types/product';
 
-interface ProductsIndexProps {
-    allProducts: ProductListItem[];
-    brands: Brand[];
-    categories: Category[];
-}
-
-interface Filters {
+interface FilterState {
     categoryIds: number[];
     brandIds: number[];
     priceRange: [number, number];
@@ -30,6 +26,24 @@ interface Filters {
     search: string;
     onSale: boolean;
     inStock: boolean;
+}
+
+interface PaginationData {
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+    from: number;
+    to: number;
+}
+
+interface ProductsIndexProps {
+    products: ProductListItem[];
+    pagination: PaginationData;
+    appliedFilters: FilterState;
+    brands: Brand[];
+    categories: Category[];
+    priceExtent: [number, number];
 }
 
 interface PageProps {
@@ -40,103 +54,126 @@ interface PageProps {
     locale: string;
 }
 
-export default function ProductsIndex({ allProducts, brands, categories }: ProductsIndexProps) {
+export default function ProductsIndex({ products, pagination, appliedFilters, brands, categories, priceExtent }: ProductsIndexProps) {
     const { t, route } = useTranslation();
     const { seo, locale } = usePage<PageProps>().props;
 
-    // Calculate price range from products
-    const priceExtent = useMemo(() => {
-        if (allProducts.length === 0) return [0, 1000];
-        const prices = allProducts.map(p => p.price);
-        const min = Math.floor(Math.min(...prices));
-        const max = Math.ceil(Math.max(...prices));
-        return [min, max];
-    }, [allProducts]);
-
-    const [filters, setFilters] = useState<Filters>(() => {
-        // Initialize filters from URL params
-        const urlParams = new URLSearchParams(window.location.search);
-
-        const categoryIds = urlParams.get('categories')?.split(',').map(Number).filter(n => !isNaN(n)) || [];
-        const brandIds = urlParams.get('brands')?.split(',').map(Number).filter(n => !isNaN(n)) || [];
-        const search = urlParams.get('search') || '';
-        const sort = urlParams.get('sort') || 'featured';
-        const minPrice = urlParams.get('minPrice');
-        const maxPrice = urlParams.get('maxPrice');
-        const onSale = urlParams.get('onSale') === 'true';
-        const inStock = urlParams.get('inStock') === 'true';
-
-        const priceRange: [number, number] = [
-            minPrice ? parseFloat(minPrice) : priceExtent[0],
-            maxPrice ? parseFloat(maxPrice) : priceExtent[1],
-        ];
-
-        return {
-            categoryIds,
-            brandIds,
-            priceRange,
-            sort,
-            search,
-            onSale,
-            inStock,
-        };
-    });
+    // Local filter state (synced with appliedFilters from server)
+    const [filters, setFilters] = useState<FilterState>(appliedFilters);
 
     // Debounced search state
-    const [searchInput, setSearchInput] = useState(filters.search);
+    const [searchInput, setSearchInput] = useState(appliedFilters.search);
 
-    // Debounce search input
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setFilters(prev => ({ ...prev, search: searchInput }));
-        }, 300);
-        return () => clearTimeout(timer);
-    }, [searchInput]);
+    // Loading state for page transitions
+    const [isLoading, setIsLoading] = useState(false);
 
     const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
     const [expandedBrands, setExpandedBrands] = useState<number[]>([]);
     const [expandedCategories, setExpandedCategories] = useState<number[]>([]);
 
-    // Update URL when filters change
-    const updateURL = useCallback((newFilters: Filters) => {
-        const params = new URLSearchParams();
+    // Track Inertia navigation events for loading state
+    useEffect(() => {
+        const handleStart = () => setIsLoading(true);
+        const handleFinish = () => setIsLoading(false);
+
+        const removeStart = router.on('start', handleStart);
+        const removeFinish = router.on('finish', handleFinish);
+
+        return () => {
+            removeStart();
+            removeFinish();
+        };
+    }, []);
+
+    // Debounce search input
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (searchInput !== filters.search) {
+                updateFilters({ ...filters, search: searchInput });
+            }
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [searchInput]);
+
+    // Update filters on server via Inertia (reset to page 1)
+    const updateFilters = useCallback((newFilters: FilterState) => {
+        const params: Record<string, string> = {};
 
         if (newFilters.categoryIds.length > 0) {
-            params.set('categories', newFilters.categoryIds.join(','));
+            params.categories = newFilters.categoryIds.join(',');
         }
         if (newFilters.brandIds.length > 0) {
-            params.set('brands', newFilters.brandIds.join(','));
+            params.brands = newFilters.brandIds.join(',');
         }
         if (newFilters.search) {
-            params.set('search', newFilters.search);
+            params.search = newFilters.search;
         }
         if (newFilters.sort !== 'featured') {
-            params.set('sort', newFilters.sort);
+            params.sort = newFilters.sort;
         }
         if (newFilters.priceRange[0] !== priceExtent[0]) {
-            params.set('minPrice', newFilters.priceRange[0].toString());
+            params.minPrice = newFilters.priceRange[0].toString();
         }
         if (newFilters.priceRange[1] !== priceExtent[1]) {
-            params.set('maxPrice', newFilters.priceRange[1].toString());
+            params.maxPrice = newFilters.priceRange[1].toString();
         }
         if (newFilters.onSale) {
-            params.set('onSale', 'true');
+            params.onSale = 'true';
         }
         if (newFilters.inStock) {
-            params.set('inStock', 'true');
+            params.inStock = 'true';
         }
 
-        const queryString = params.toString();
-        const newUrl = queryString ? `?${queryString}` : window.location.pathname;
+        // Always reset to page 1 on filter change
+        params.page = '1';
 
-        // Update URL without page reload
-        window.history.replaceState({}, '', newUrl);
-    }, [priceExtent]);
+        router.get(route('products.index'), params, {
+            preserveState: true,
+            preserveScroll: true,
+            only: ['products', 'pagination', 'appliedFilters'],
+        });
 
-    // Update URL when filters change
-    useEffect(() => {
-        updateURL(filters);
-    }, [filters, updateURL]);
+        setFilters(newFilters);
+    }, [priceExtent, route]);
+
+    // Handle page change
+    const handlePageChange = useCallback((page: number) => {
+        const params: Record<string, string> = {
+            page: page.toString(),
+        };
+
+        // Include current filters in params
+        if (appliedFilters.categoryIds.length > 0) {
+            params.categories = appliedFilters.categoryIds.join(',');
+        }
+        if (appliedFilters.brandIds.length > 0) {
+            params.brands = appliedFilters.brandIds.join(',');
+        }
+        if (appliedFilters.search) {
+            params.search = appliedFilters.search;
+        }
+        if (appliedFilters.sort !== 'featured') {
+            params.sort = appliedFilters.sort;
+        }
+        if (appliedFilters.priceRange[0] !== priceExtent[0]) {
+            params.minPrice = appliedFilters.priceRange[0].toString();
+        }
+        if (appliedFilters.priceRange[1] !== priceExtent[1]) {
+            params.maxPrice = appliedFilters.priceRange[1].toString();
+        }
+        if (appliedFilters.onSale) {
+            params.onSale = 'true';
+        }
+        if (appliedFilters.inStock) {
+            params.inStock = 'true';
+        }
+
+        router.get(route('products.index'), params, {
+            preserveState: true,
+            preserveScroll: false, // Scroll to top on page change
+            only: ['products', 'pagination'],
+        });
+    }, [appliedFilters, priceExtent, route]);
 
 
     // Helper to find a brand by ID in hierarchical structure
@@ -219,85 +256,6 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
         return result;
     }, [brands]);
 
-    // Client-side filtering logic
-    const filteredProducts = useMemo(() => {
-        let filtered = [...allProducts];
-
-        // Filter by search (name or SKU - stored in slug or title)
-        if (filters.search) {
-            const searchLower = filters.search.toLowerCase();
-            filtered = filtered.filter(p => {
-                const nameMatch = p.name.toLowerCase().includes(searchLower);
-                const titleMatch = p.title?.toLowerCase().includes(searchLower);
-                const slugMatch = p.slug.toLowerCase().includes(searchLower);
-                return nameMatch || titleMatch || slugMatch;
-            });
-        }
-
-        // Filter by categories (include children and grandchildren)
-        // Use AND logic: product must match ALL selected category groups
-        if (filters.categoryIds.length > 0) {
-            filtered = filtered.filter(p => {
-                // For each selected category, check if product is in that category or its descendants
-                return filters.categoryIds.every(selectedCategoryId => {
-                    const categoryIdsWithDescendants = getAllDescendantIds(selectedCategoryId);
-                    return p.categoryIds.some(productCategoryId =>
-                        categoryIdsWithDescendants.includes(productCategoryId)
-                    );
-                });
-            });
-        }
-
-        // Filter by brands (include children and grandchildren)
-        // Use AND logic: product must match ALL selected brand groups
-        if (filters.brandIds.length > 0) {
-            filtered = filtered.filter(p => {
-                if (!p.brandId) return false;
-                const productBrandId = p.brandId;
-                // For each selected brand, check if product brand is in that brand or its descendants
-                return filters.brandIds.every(selectedBrandId => {
-                    const brandIdsWithDescendants = getAllBrandDescendantIds(selectedBrandId);
-                    return brandIdsWithDescendants.includes(productBrandId);
-                });
-            });
-        }
-
-        // Filter by price range
-        filtered = filtered.filter(p =>
-            p.price >= filters.priceRange[0] && p.price <= filters.priceRange[1]
-        );
-
-        // Filter by on sale
-        if (filters.onSale) {
-            filtered = filtered.filter(p => p.isOnSale);
-        }
-
-        // Filter by in stock
-        if (filters.inStock) {
-            filtered = filtered.filter(p => p.inStock);
-        }
-
-        // Sort
-        switch (filters.sort) {
-            case 'price_asc':
-                filtered.sort((a, b) => a.price - b.price);
-                break;
-            case 'price_desc':
-                filtered.sort((a, b) => b.price - a.price);
-                break;
-            case 'name':
-                filtered.sort((a, b) => a.name.localeCompare(b.name));
-                break;
-            case 'newest':
-                // Keep original order (already sorted by newest in backend)
-                break;
-            default: // featured
-                // Keep original order (already sorted by featured in backend)
-                break;
-        }
-
-        return filtered;
-    }, [allProducts, filters, getAllDescendantIds, getAllBrandDescendantIds]);
 
     // Get active filter count
     const activeFilterCount = useMemo(() => {
@@ -314,7 +272,7 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
     // Clear all filters
     const clearFilters = () => {
         setSearchInput('');
-        setFilters({
+        const newFilters: FilterState = {
             categoryIds: [],
             brandIds: [],
             priceRange: priceExtent as [number, number],
@@ -322,27 +280,30 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
             search: '',
             onSale: false,
             inStock: false,
-        });
+        };
+        updateFilters(newFilters);
     };
 
     // Toggle category
     const toggleCategory = (categoryId: number) => {
-        setFilters(prev => ({
-            ...prev,
-            categoryIds: prev.categoryIds.includes(categoryId)
-                ? prev.categoryIds.filter(id => id !== categoryId)
-                : [...prev.categoryIds, categoryId],
-        }));
+        const newFilters = {
+            ...filters,
+            categoryIds: filters.categoryIds.includes(categoryId)
+                ? filters.categoryIds.filter(id => id !== categoryId)
+                : [...filters.categoryIds, categoryId],
+        };
+        updateFilters(newFilters);
     };
 
     // Toggle brand
     const toggleBrand = (brandId: number) => {
-        setFilters(prev => ({
-            ...prev,
-            brandIds: prev.brandIds.includes(brandId)
-                ? prev.brandIds.filter(id => id !== brandId)
-                : [...prev.brandIds, brandId],
-        }));
+        const newFilters = {
+            ...filters,
+            brandIds: filters.brandIds.includes(brandId)
+                ? filters.brandIds.filter(id => id !== brandId)
+                : [...filters.brandIds, brandId],
+        };
+        updateFilters(newFilters);
     };
 
     // Toggle brand expansion
@@ -530,6 +491,7 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
                     step={1}
                     value={filters.priceRange}
                     onValueChange={(value) => setFilters(prev => ({ ...prev, priceRange: value as [number, number] }))}
+                    onValueCommit={(value) => updateFilters({ ...filters, priceRange: value as [number, number] })}
                     className="w-full [&_[role=slider]]:bg-gold [&_[role=slider]]:border-gold [&_[role=slider]]:size-5 [&>span]:bg-gold/20 [&>span>span]:bg-gold"
                 />
                 <div className="flex items-center justify-between gap-2">
@@ -557,7 +519,7 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
         t('products.title', 'Products'),
         t('products.meta_description', 'Browse our collection of natural, eco-friendly cosmetics and beauty products.'),
         canonicalUrl,
-        filteredProducts.slice(0, 10).map(p => ({
+        products.slice(0, 10).map(p => ({
             name: p.name,
             url: `${siteUrl}/${locale === 'lt' ? 'lt/produktai' : 'products'}/${p.slug}`,
         }))
@@ -614,7 +576,7 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
                                             <button
                                                 onClick={() => {
                                                     setSearchInput('');
-                                                    setFilters(prev => ({ ...prev, search: '' }));
+                                                    updateFilters({ ...filters, search: '' });
                                                 }}
                                                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                                             >
@@ -633,7 +595,7 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
                                         <label className="flex items-center gap-3 cursor-pointer group">
                                             <Checkbox
                                                 checked={filters.onSale}
-                                                onCheckedChange={(checked) => setFilters(prev => ({ ...prev, onSale: checked === true }))}
+                                                onCheckedChange={(checked) => updateFilters({ ...filters, onSale: checked === true })}
                                                 className="border-2 data-[state=checked]:bg-gold data-[state=checked]:border-gold"
                                             />
                                             <span className={cn(
@@ -646,7 +608,7 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
                                         <label className="flex items-center gap-3 cursor-pointer group">
                                             <Checkbox
                                                 checked={filters.inStock}
-                                                onCheckedChange={(checked) => setFilters(prev => ({ ...prev, inStock: checked === true }))}
+                                                onCheckedChange={(checked) => updateFilters({ ...filters, inStock: checked === true })}
                                                 className="border-2 data-[state=checked]:bg-gold data-[state=checked]:border-gold"
                                             />
                                             <span className={cn(
@@ -736,7 +698,7 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
                                             <div className="flex items-center gap-2 rounded-full border-2 border-gold bg-gold/10 px-3 py-1 text-sm font-medium text-gold">
                                                 €{filters.priceRange[0].toFixed(2)} - €{filters.priceRange[1].toFixed(2)}
                                                 <button
-                                                    onClick={() => setFilters(prev => ({ ...prev, priceRange: priceExtent as [number, number] }))}
+                                                    onClick={() => updateFilters({ ...filters, priceRange: priceExtent as [number, number] })}
                                                     className="ml-1 rounded-full hover:bg-gold/20 p-0.5 transition-colors"
                                                 >
                                                     <X className="size-3.5 stroke-[2.5]" />
@@ -750,12 +712,12 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
                             {/* Sort and Results Count */}
                             <div className="mb-6 flex items-center justify-between gap-4">
                                 <div className="text-sm text-muted-foreground">
-                                    {filteredProducts.length} {filteredProducts.length === 1 ? t('products.product', 'product') : t('products.products', 'products')}
+                                    {pagination.total} {pagination.total === 1 ? t('products.product', 'product') : t('products.products', 'products')}
                                 </div>
 
                                 <Select
                                     value={filters.sort}
-                                    onValueChange={(value) => setFilters(prev => ({ ...prev, sort: value }))}
+                                    onValueChange={(value) => updateFilters({ ...filters, sort: value })}
                                 >
                                     <SelectTrigger className="w-[180px]">
                                         <SelectValue placeholder={t('products.sort_by', 'Sort by')} />
@@ -771,17 +733,35 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
                             </div>
 
                             {/* Products Grid */}
-                            {filteredProducts.length > 0 ? (
+                            {isLoading ? (
                                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 items-stretch">
-                                    {filteredProducts.map((product, index) => (
-                                        <ProductCard
-                                            key={product.id}
-                                            product={product}
-                                            href={route('products.show', { slug: product.slug })}
-                                            index={index}
-                                        />
+                                    {Array.from({ length: pagination.per_page }).map((_, index) => (
+                                        <ProductCardSkeleton key={index} />
                                     ))}
                                 </div>
+                            ) : products.length > 0 ? (
+                                <>
+                                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 items-stretch">
+                                        {products.map((product, index) => (
+                                            <ProductCard
+                                                key={product.id}
+                                                product={product}
+                                                href={route('products.show', { slug: product.slug })}
+                                                index={index}
+                                            />
+                                        ))}
+                                    </div>
+
+                                    {/* Pagination */}
+                                    <Pagination
+                                        currentPage={pagination.current_page}
+                                        lastPage={pagination.last_page}
+                                        from={pagination.from}
+                                        to={pagination.to}
+                                        total={pagination.total}
+                                        onPageChange={handlePageChange}
+                                    />
+                                </>
                             ) : (
                                 <div className="flex flex-col items-center justify-center py-16 text-center">
                                     <div className="rounded-2xl border-2 border-dashed border-border p-12">
@@ -847,7 +827,7 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
                                         <button
                                             onClick={() => {
                                                 setSearchInput('');
-                                                setFilters(prev => ({ ...prev, search: '' }));
+                                                updateFilters({ ...filters, search: '' });
                                             }}
                                             className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                                         >
@@ -866,7 +846,7 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
                                     <label className="flex items-center gap-3 cursor-pointer group">
                                         <Checkbox
                                             checked={filters.onSale}
-                                            onCheckedChange={(checked) => setFilters(prev => ({ ...prev, onSale: checked === true }))}
+                                            onCheckedChange={(checked) => updateFilters({ ...filters, onSale: checked === true })}
                                             className="border-2 data-[state=checked]:bg-gold data-[state=checked]:border-gold"
                                         />
                                         <span className={cn(
@@ -879,7 +859,7 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
                                     <label className="flex items-center gap-3 cursor-pointer group">
                                         <Checkbox
                                             checked={filters.inStock}
-                                            onCheckedChange={(checked) => setFilters(prev => ({ ...prev, inStock: checked === true }))}
+                                            onCheckedChange={(checked) => updateFilters({ ...filters, inStock: checked === true })}
                                             className="border-2 data-[state=checked]:bg-gold data-[state=checked]:border-gold"
                                         />
                                         <span className={cn(
@@ -911,7 +891,7 @@ export default function ProductsIndex({ allProducts, brands, categories }: Produ
                                 onClick={() => setMobileFiltersOpen(false)}
                                 className="flex-1 border-2 border-gold bg-gold text-sm font-bold uppercase text-foreground transition-all duration-300 hover:bg-background hover:text-gold"
                             >
-                                {t('products.show_products', 'Show {count} Products').replace('{count}', filteredProducts.length.toString())}
+                                {t('products.show_products', 'Show {count} Products').replace('{count}', pagination.total.toString())}
                             </Button>
                         </SheetFooter>
                     </SheetContent>

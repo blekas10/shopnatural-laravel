@@ -1086,5 +1086,8 @@
     "announcement.eco_friendly": "100% gamtos jėga jūsų grožiui",
     "home.meta_title": "Natūrali ir Ekologiška Kosmetika",
     "home.meta_description": "Shop Natural — aukščiausios kokybės ekologiška kosmetika Lietuvoje. 100% natūralūs ingredientai, neišbandyta ant gyvūnų, tvari pakuotė. Nemokamas pristatymas nuo 50€.",
-    "home.meta_keywords": "natūrali kosmetika Lietuva, ekologiška kosmetika, organinė odos priežiūra, neišbandyta ant gyvūnų, tvari kosmetika, pirkti kosmetiką internetu"
+    "home.meta_keywords": "natūrali kosmetika Lietuva, ekologiška kosmetika, organinė odos priežiūra, neišbandyta ant gyvūnų, tvari kosmetika, pirkti kosmetiką internetu",
+    "pagination.showing": "Rodomi {from}-{to} iš {total} produktų",
+    "pagination.previous": "Atgal",
+    "pagination.next": "Pirmyn"
 }

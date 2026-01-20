@@ -202,7 +202,7 @@ export default function Profile({ mustVerifyEmail, status }: ProfileProps) {
                                     )}
 
                                     {mustVerifyEmail && auth.user.email_verified_at === null && (
-                                        <div className="flex items-center gap-3">
+                                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
                                             <p className="text-sm text-amber-600">
                                                 {t('settings.email_unverified', 'Your email address is unverified.')}
                                             </p>
@@ -216,6 +216,7 @@ export default function Profile({ mustVerifyEmail, status }: ProfileProps) {
                                                     });
                                                 }}
                                                 disabled={profileForm.processing}
+                                                className="w-full sm:w-auto"
                                             >
                                                 {t('settings.resend_verification', 'Resend verification email')}
                                             </Button>
