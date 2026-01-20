@@ -75,13 +75,13 @@ export default function Footer({ className }: FooterProps) {
             if (response.ok && data.success) {
                 setIsSuccess(true);
                 setEmail('');
-                toast.success(data.message || t('footer.newsletter.success', 'Thank you for subscribing!'));
+                toast.success(t('footer.newsletter.success', 'Thank you for subscribing! You will receive our latest updates.'));
 
                 // Reset success message after 5 seconds
                 setTimeout(() => setIsSuccess(false), 5000);
             } else {
-                setError(data.message || t('footer.newsletter.error', 'Failed to subscribe. Please try again.'));
-                toast.error(data.message || t('footer.newsletter.error', 'Failed to subscribe. Please try again.'));
+                setError(t('footer.newsletter.error', 'Failed to subscribe. Please try again.'));
+                toast.error(t('footer.newsletter.error', 'Failed to subscribe. Please try again.'));
             }
         } catch {
             setError(t('footer.newsletter.error', 'Failed to subscribe. Please try again.'));
