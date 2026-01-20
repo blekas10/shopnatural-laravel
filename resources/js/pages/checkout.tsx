@@ -43,9 +43,11 @@ function SubmitButton() {
         <Button
             type="submit"
             disabled={pending}
-            className="h-14 rounded-lg bg-gold text-base font-bold uppercase tracking-wide text-white transition-all hover:bg-gold/90 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-lg bg-gold text-base font-bold uppercase tracking-wide text-white transition-all hover:bg-gold/90 disabled:cursor-not-allowed disabled:opacity-50"
         >
-            
+            {pending
+                ? t('checkout.processing', 'Processing...')
+                : t('checkout.place_order', 'Place Order')}
         </Button>
     );
 }
