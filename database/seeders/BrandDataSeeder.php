@@ -62,8 +62,8 @@ class BrandDataSeeder extends Seeder
                         'name' => ['en' => 'Base Oil', 'lt' => 'Baziniai aliejai'],
                         'slug' => 'naturalmente-base-oil',
                         'description' => [
-                            'en' => "Naturalmente's base oils nourish and protect hair and skin with rich hydration and essential nutrients. Sustainably sourced, they align with the brand's eco-conscious philosophy. Their natural properties enhance vitality while remaining gentle and suitable for all types.",
-                            'lt' => "Naturalmente baziniai aliejai maitina ir saugo plaukus bei odą, suteikdami gausią drėgmę.",
+                            'en' => "Naturalmente's base oils nourish and protect hair and skin, providing hydration and essential nutrients. Sustainably sourced and gentle, they enhance vitality for all hair and skin types.",
+                            'lt' => "Maitinantys Naturalmente baziniai aliejai padeda apsaugoti odą ir plaukus bei palaikyti jų drėgmės balansą.",
                         ],
                         'logo' => '/images/brands/collections/naturalmente/base-oil.png',
                     ],
@@ -71,8 +71,8 @@ class BrandDataSeeder extends Seeder
                         'name' => ['en' => 'Botanic Skincare', 'lt' => 'Botanic Skincare'],
                         'slug' => 'naturalmente-botanic-skincare',
                         'description' => [
-                            'en' => 'Natural and sustainable cosmetics from Botanic Skincare, made with pure plant-based ingredients and free from harmful chemicals, caring for both your skin and the environment. Innovative formulas designed for those who value authentic beauty and seek exceptional results, crafted responsibly with sustainably sourced ingredients and recyclable packaging.',
-                            'lt' => 'Natūrali ir tvari kosmetika iš Botanic Skincare, pagaminta iš grynų augalinių sudedamųjų dalių ir be kenksmingų cheminių medžiagų, rūpinantis jūsų oda ir aplinka. Inovatyvios formulės, sukurtos tiems, kurie vertina autentišką grožį ir siekia išskirtinių rezultatų.',
+                            'en' => 'Gentle, plant-based skincare combining efficacy and sustainability. Free from harmful chemicals, the products care for your skin and the environment while delivering authentic, effective results.',
+                            'lt' => 'Švelni, augaliniais ingredientais paremta odos priežiūra, derinanti veiksmingumą ir tvarumą.',
                         ],
                         'logo' => '/images/brands/collections/naturalmente/botanic-skincare.png',
                     ],
@@ -80,8 +80,8 @@ class BrandDataSeeder extends Seeder
                         'name' => ['en' => 'Color Plant Flower', 'lt' => 'Color Plant Flower'],
                         'slug' => 'naturalmente-color-plant-flower',
                         'description' => [
-                            'en' => 'Naturalmente Color Plant Line provides a natural, ammonia-free hair coloring solution crafted from plant-based ingredients, designed to enhance and nourish hair while being gentle on both your scalp and the environment. Its eco-friendly formulas deliver beautiful, authentic tones inspired by nature, ensuring vibrant results without harsh chemicals.',
-                            'lt' => 'Natūrali, be amoniako sukurta plaukų dažymo priemonė, pagaminta iš augalinės kilmės ingredientų.',
+                            'en' => 'Plant-based products that extend the life of colored hair. The products soften hair, enhance shine, and maintain color vibrancy.',
+                            'lt' => 'Augalinės kilmės produktai, kurie prailgina dažymo rezultatus, minkština plaukus, suteikia jiems blizgesio ir palaiko spalvos žvilgesį.',
                         ],
                         'logo' => '/images/brands/collections/naturalmente/color-plant-flower.png',
                     ],
@@ -89,8 +89,8 @@ class BrandDataSeeder extends Seeder
                         'name' => ['en' => 'Curly Hair', 'lt' => 'Curly Hair'],
                         'slug' => 'naturalmente-curly-hair',
                         'description' => [
-                            'en' => 'Naturalmente Curly Hair Line enhances and cares for natural curls by providing hydration, definition, and frizz control. Made with plant-based ingredients and free from harsh chemicals.',
-                            'lt' => 'Naturalmente Curly Hair linija puoselėja ir rūpinasi natūraliomis garbanomis, suteikdama drėgmę, apibrėžimą ir pūkavimosi kontrolę. Pagaminta iš augalinių sudedamųjų dalių ir be agresyvių cheminių medžiagų.',
+                            'en' => "Naturalmente's line for natural curls. Hydrates, defines curls, and controls frizz. Made with plant-based ingredients, free from harsh chemicals.",
+                            'lt' => 'Naturalmente linija natūralioms garbanoms. Drėkina, išryškina garbanas ir kontroliuoja pasišiaušimą. Pagaminta iš augalinių ingredientų, be agresyvių cheminių medžiagų.',
                         ],
                         'logo' => '/images/brands/collections/naturalmente/curly-hair.jpg',
                     ],
@@ -98,7 +98,7 @@ class BrandDataSeeder extends Seeder
                         'name' => ['en' => 'Essential Oils', 'lt' => 'Esencijos'],
                         'slug' => 'naturalmente-essential-oils',
                         'description' => [
-                            'en' => 'Naturalmente Essential Oils are crafted from pure, natural extracts to provide therapeutic benefits for both hair and scalp. Free from synthetic additives, they enhance the haircare experience with their calming and aromatic properties.',
+                            'en' => "Naturalmente's pure, plant-based oils provide therapeutic benefits for hair and skin. Free from synthetic additives, they nourish, strengthen, and enhance your haircare routine.",
                             'lt' => 'Naturalmente augalų esencijos gaminamos iš grynų, natūralių ekstraktų ir pasižymi terapinėmis savybėmis.',
                         ],
                         'logo' => '/images/brands/collections/naturalmente/essential-oils.png',
@@ -116,8 +116,8 @@ class BrandDataSeeder extends Seeder
                         'name' => ['en' => 'In Bloom', 'lt' => 'In Bloom'],
                         'slug' => 'naturalmente-in-bloom',
                         'description' => [
-                            'en' => 'Naturalmente InBloom Line celebrates the power of botanicals, offering hair and body care products infused with floral and plant-based extracts.',
-                            'lt' => 'Plaukų ir kūno priežiūros priemonės, praturtintos gėlių ir augaliniais ekstraktais.',
+                            'en' => "Naturalmente's InBloom line celebrates the power of botanicals, offering hair and scalp care products infused with floral and plant-based extracts.",
+                            'lt' => 'Plaukų priežiūros priemonės, praturtintos gėlių ir augaliniais ekstraktais. Švelniai puoselėja galvos odą, drėkina ir suteikia plaukams natūralumą.',
                         ],
                         'logo' => '/images/brands/collections/naturalmente/in-bloom.jpg',
                     ],
@@ -134,8 +134,8 @@ class BrandDataSeeder extends Seeder
                         'name' => ['en' => 'Revitalizing', 'lt' => 'Revitalizing'],
                         'slug' => 'naturalmente-revitalizing',
                         'description' => [
-                            'en' => 'Naturalmente Revitalizing Treatment is formulated to restore energy and vitality to tired or damaged hair, using nourishing plant-based ingredients.',
-                            'lt' => 'Naturalmente Revitalizing procedūra sukurta atkurti energiją ir gyvybingumą pavargusius ar pažeistus plaukus, naudojant maitinančias augalines sudedamąsias dalis.',
+                            'en' => "Naturalmente's line for weak and thinning hair. Its nourishing plant-based formula strengthens hair, reduces shedding, and restores a healthy, vibrant shine.",
+                            'lt' => 'Naturalmente linija, skirta silpniems ir slenkantiems plaukams. Maitinančių augalinių ingredientų formulė stiprina plaukus, mažina slinkimą ir suteikia sveiką, gyvybingą spindesį.',
                         ],
                         'logo' => '/images/brands/collections/naturalmente/revitalizing.jpg',
                     ],
@@ -152,8 +152,8 @@ class BrandDataSeeder extends Seeder
                         'name' => ['en' => 'The Suite', 'lt' => 'The Suite'],
                         'slug' => 'naturalmente-the-suite',
                         'description' => [
-                            'en' => 'The Suite by Naturalmente is a premium hair and scalp care collection featuring concentrated treatments and specialized formulas. Designed for intensive care, these products deliver salon-quality results with pure botanical ingredients for healthy, revitalized hair.',
-                            'lt' => 'The Suite by Naturalmente – tai aukščiausios klasės plaukų ir galvos odos priežiūros kolekcija su koncentruotomis priemonėmis ir specializuotomis formulėmis. Sukurta intensyviai priežiūrai, šie produktai suteikia salono kokybės rezultatus su grynais augaliniais ingredientais.',
+                            'en' => "Naturalmente's premium hair and scalp care collection with concentrated treatments and specialized formulas, delivering intensive, salon-quality results with plant-based ingredients.",
+                            'lt' => 'Aukščiausios klasės plaukų ir galvos odos priežiūros kolekcija, sukurta intensyviai priežiūrai ir salono kokybės rezultatams, naudojant grynus augalinius ingredientus.',
                         ],
                         'logo' => '/images/brands/collections/naturalmente/the-suite.png',
                     ],
@@ -165,8 +165,8 @@ class BrandDataSeeder extends Seeder
                 'name' => ['en' => 'MY.ORGANICS', 'lt' => 'MY.ORGANICS'],
                 'slug' => 'my-organics',
                 'description' => [
-                    'en' => "At MY.ORGANICS we want to spread the philosophy of possibility, an example of how dreams should not remain secret wishes but must become the chance to turn obstacles into new goals.",
-                    'lt' => "MY.ORGANICS siekiame skleisti galimybių filosofiją – parodyti, kad svajonės neturi likti slaptais troškimais.",
+                    'en' => "Cosmetics that unlock the possibilities of natural care. Each product is crafted from plant-based ingredients, nourishing hair and skin while adding softness, shine, and vitality, all with respect for your health and the environment.",
+                    'lt' => "Kosmetika, kuri atveria natūralios priežiūros galimybes. Kiekvienas produktas sukurtas iš augalinių ingredientų, puoselėja plaukus ir odą, suteikia švelnumo, spindesio ir gyvybingumo, kartu gerbiant jūsų sveikatą ir aplinką.",
                 ],
                 'logo' => '/images/brands/my-organics-hero.jpg',
                 'children' => [
@@ -174,7 +174,7 @@ class BrandDataSeeder extends Seeder
                         'name' => ['en' => 'Basic Line', 'lt' => 'Basic Line'],
                         'slug' => 'my-organics-basic-line',
                         'description' => [
-                            'en' => 'Natural, pH-balanced haircare for daily use with key ingredients like sweet fennel, rosemary, and argan oil. Products hydrate, strengthen, and revitalize hair across various needs while promoting shine and softness for all hair types.',
+                            'en' => 'Natural, pH-balanced haircare for daily use. Enriched with fennel, rosemary, and argan oil, it hydrates, strengthens, and revitalizes hair while enhancing shine.',
                             'lt' => 'Natūrali, pH subalansuota plaukų priežiūra kasdieniam naudojimui su pagrindinėmis sudedamosiomis dalimis: saldžiuoju pankoliu, rozmarinu ir arganų aliejumi. Produktai drėkina, stiprina ir atgaivina plaukus.',
                         ],
                         'logo' => '/images/brands/collections/my-organics/basic-line.jpg',
@@ -183,7 +183,7 @@ class BrandDataSeeder extends Seeder
                         'name' => ['en' => 'Goji', 'lt' => 'Goji'],
                         'slug' => 'my-organics-goji',
                         'description' => [
-                            'en' => 'Features goji berry extract for regeneration and protection. The lineup includes Supreme Shampoo, Miracle Mask, Sublime Oil, Angel Potion, and Revival Leave-In Mist designed to hydrate, restore, and smooth hair with antioxidant-rich benefits.',
+                            'en' => 'Enriched with goji berry extract for hair regeneration and protection. This lineup hydrates, restores, and strengthens hair, leaving it healthy, shiny, and resilient.',
                             'lt' => 'Goji uogų ekstraktas regeneracijai ir apsaugai. Asortimentą sudaro Supreme šampūnas, Miracle kaukė, Sublime aliejus, Angel eliksyras ir Revival nenuplaunamas purškiklis, skirti drėkinti, atkurti ir lyginti plaukus.',
                         ],
                         'logo' => '/images/brands/collections/my-organics/goji.jpg',
@@ -192,8 +192,8 @@ class BrandDataSeeder extends Seeder
                         'name' => ['en' => 'Keratin', 'lt' => 'Keratin'],
                         'slug' => 'my-organics-keratin',
                         'description' => [
-                            'en' => 'Professional-grade line enriched with keratin to restore elasticity, repair damage, and reduce frizz. Includes Pro-Keratin Shampoo and Conditioner providing deep nourishment and long-lasting protection for sleek, manageable hair.',
-                            'lt' => 'Profesionali linija, praturtinta keratinu elastingumui atkurti, pažeidimams taisyti ir pūkavimui mažinti. Apima Pro-Keratin šampūną ir kondicionierių, teikiančius gilų maitinimą ir ilgalaikę apsaugą.',
+                            'en' => 'Professional-grade haircare enriched with keratin to restore elasticity, repair damage, and reduce frizz. Deeply nourishes and protects hair, leaving it sleek, strong, and manageable.',
+                            'lt' => 'Profesionali linija, praturtinta keratinu, skirta atkurti plaukų elastingumą, regeneruoti pažeistus plaukus ir sumažinti pasišiaušimą, suteikiant plaukams sveiką spindesį ir švelnumą.',
                         ],
                         'logo' => '/images/brands/collections/my-organics/keratin.jpg',
                     ],
@@ -201,8 +201,8 @@ class BrandDataSeeder extends Seeder
                         'name' => ['en' => 'MY.CURLING', 'lt' => 'MY.CURLING'],
                         'slug' => 'my-organics-curling',
                         'description' => [
-                            'en' => 'Tailored for curls using baobab, mallow, and flaxseed extracts. Products combat frizz, boost elasticity, and deliver hydration for soft, bouncy, manageable curls.',
-                            'lt' => 'Sukurta garbanoms su baobabo, dedešvos ir linų sėmenų ekstraktais. Produktai kovoja su pūkavimu, didina elastingumą ir suteikia drėgmę minkštoms, šokinėjančioms garbanoms.',
+                            'en' => 'Line for natural curls, enriched with baobab, mallow, and flaxseed extracts. Provides moisture, increases elasticity, and reduces frizz, nurturing soft, vibrant curls.',
+                            'lt' => 'Linija natūralioms garbanoms, praturtinta baobabo, dedešvos ir linų sėmenų ekstraktais. Suteikia drėgmės, didina elastingumą ir mažina pasišiaušimą, puoselėdama minkštas, gyvybingas garbanas.',
                         ],
                         'logo' => '/images/brands/collections/my-organics/curling.jpg',
                     ],
@@ -210,7 +210,7 @@ class BrandDataSeeder extends Seeder
                         'name' => ['en' => 'MY.LUXE', 'lt' => 'MY.LUXE'],
                         'slug' => 'my-organics-luxe',
                         'description' => [
-                            'en' => 'Premium offering infused with pure gold and neroli. Includes shampoo, conditioner, mask, and leave-in cream providing salon-quality results with enhanced shine and softness.',
+                            'en' => 'Premium line infused with pure gold and neroli. Includes shampoo, conditioner, mask, and leave-in cream providing salon-quality results with enhanced shine.',
                             'lt' => 'Aukščiausios klasės linija su grynu auksu ir neroliu. Apima šampūną, kondicionierių, kaukę ir nenuplaunamą kremą, teikiančius salono kokybės rezultatus su padidėjusiu blizgesiu.',
                         ],
                         'logo' => '/images/brands/collections/my-organics/luxe.jpg',
@@ -228,8 +228,8 @@ class BrandDataSeeder extends Seeder
                         'name' => ['en' => 'Styling', 'lt' => 'Styling'],
                         'slug' => 'my-organics-styling',
                         'description' => [
-                            'en' => 'Versatile range including modeling fluid, smoothing fluid, volumizing gel, and hairsprays with botanical extracts and citrus essential oils for professional results.',
-                            'lt' => 'Universalus asortimentas, įskaitant modeliavimo skystį, lyginimo skystį, apimties gelį ir plaukų lakus su augaliniais ekstraktais ir citrusų eteriniais aliejais.',
+                            'en' => 'Versatile styling range with botanical extracts and citrus essential oils. Provides volume, definition, and professional results.',
+                            'lt' => 'Universalus plaukų formavimo asortimentas su augaliniais ekstraktais ir citrusų eteriniais aliejais. Suteikia apimtį, apibrėžimą ir profesionalius rezultatus.',
                         ],
                         'logo' => '/images/brands/collections/my-organics/styling.webp',
                     ],
@@ -237,8 +237,8 @@ class BrandDataSeeder extends Seeder
                         'name' => ['en' => 'MY.SCALP', 'lt' => 'MY.SCALP'],
                         'slug' => 'my-organics-scalp',
                         'description' => [
-                            'en' => 'Addresses scalp health through enzymatic treatments, growth-stimulating sprays, and calming refreshers using neem, orange, and peony extracts.',
-                            'lt' => 'Sprendžia galvos odos sveikatą fermentiniais gydymais, augimą skatinančiais purškikliais ir raminančiais gaivinamaisiais su nimbamedžio, apelsinų ir bijūnų ekstraktais.',
+                            'en' => 'Line enriched with botanical extracts to strengthen scalp, stimulate hair growth, and provide freshness and comfort.',
+                            'lt' => 'Augaliniais ekstraktais praturtinta linija, skirta stiprinti galvos odą, skatinti plaukų augimą ir suteikti gaivumo bei komforto pojūtį.',
                         ],
                         'logo' => '/images/brands/collections/my-organics/scalp.png',
                     ],
@@ -259,8 +259,8 @@ class BrandDataSeeder extends Seeder
                         'name' => ['en' => 'Hair', 'lt' => 'Plaukai'],
                         'slug' => 'essere-hair-care',
                         'description' => [
-                            'en' => 'Essere provides shampoos, conditioners, and hair masks enriched with natural ingredients to cleanse, hydrate, and repair hair. The shampoos gently remove impurities, while conditioners and masks restore softness and shine to dull or damaged hair. Free from silicones and harsh chemicals.',
-                            'lt' => 'Essere siūlo šampūnus, kondicionierius ir plaukų kaukes, praturtintas natūraliomis sudedamosiomis dalimis valymui, drėkinimui ir atstatymui. Šampūnai švelniai pašalina nešvarumus, o kondicionieriai ir kaukės atkuria minkštumą ir blizgesį.',
+                            'en' => 'Shampoos, conditioners, and hair masks enriched with natural ingredients to cleanse, hydrate, and repair hair. The shampoos gently remove impurities, while conditioners and masks restore hair structure, softness, and natural shine.',
+                            'lt' => 'Essere siūlo šampūnus, kondicionierius ir plaukų kaukes, praturtintas natūraliomis sudedamosiomis dalimis, skirtas plaukų valymui, drėkinimui ir atkūrimui. Šampūnai švelniai pašalina nešvarumus, o kondicionieriai ir kaukės atkuria plaukų struktūrą, minkštumą ir natūralų spindesį.',
                         ],
                         'logo' => '/images/brands/collections/essere/hair.jpg',
                     ],
@@ -268,8 +268,8 @@ class BrandDataSeeder extends Seeder
                         'name' => ['en' => 'Body', 'lt' => 'Kūnas'],
                         'slug' => 'essere-body-care',
                         'description' => [
-                            'en' => 'Body care range includes nourishing lotions, shower gels, and hand creams for soft and hydrated skin. Lotions deeply moisturize, shower gels cleanse gently without disrupting skin balance, and hand creams protect and soothe even the driest hands.',
-                            'lt' => 'Kūno priežiūros asortimentą sudaro maitinamieji losjonai, dušo geliai ir rankų kremai minkštai, drėkinamai odai. Losjonai giliai drėkina, dušo geliai švelniai valo nepažeisdami odos pusiausvyros.',
+                            'en' => 'Nourishing lotions, shower gels, and hand creams for soft, hydrated skin. Lotions deeply moisturize, shower gels cleanse gently, and hand creams protect and soothe even the driest skin.',
+                            'lt' => 'Maitinamieji losjonai, dušo geliai ir rankų kremai, skirti minkštai ir drėkinamai odos priežiūrai. Losjonai giliai drėkina, o dušo geliai švelniai valo, palaikydami odos pusiausvyrą.',
                         ],
                         'logo' => '/images/brands/collections/essere/body.png',
                     ],
@@ -277,8 +277,8 @@ class BrandDataSeeder extends Seeder
                         'name' => ['en' => 'Face', 'lt' => 'Veidas'],
                         'slug' => 'essere-face-care',
                         'description' => [
-                            'en' => 'Face care products include cleansing masks and moisturizers designed to refresh and hydrate skin. Masks remove impurities leaving skin smooth and revitalized, while moisturizers provide lasting hydration and radiance. With natural and gentle formulations, this line is perfect for achieving a clear and healthy complexion.',
-                            'lt' => 'Veido priežiūros produktai apima valomąsias kaukes ir drėkiklius, skirtus gaivinti ir drėkinti odą. Kaukės pašalina nešvarumus, palikdamos odą lygią ir atgaivintą, o drėkikliai suteikia ilgalaikę drėgmę ir spindesį.',
+                            'en' => 'Specialized face care products designed to refresh and hydrate skin. Masks gently remove impurities, while moisturizers ensure long-lasting hydration and natural radiance.',
+                            'lt' => 'Specializuoti veido priežiūros produktai, skirti odos gaivinimui ir drėkinimui. Kaukės švelniai šalina nešvarumus, o drėkinamosios priemonės užtikrina ilgalaikę drėgmę ir natūralų spindesį.',
                         ],
                         'logo' => '/images/brands/collections/essere/face.png',
                     ],
@@ -290,8 +290,8 @@ class BrandDataSeeder extends Seeder
                 'name' => ['en' => 'Gentleman', 'lt' => 'Gentleman'],
                 'slug' => 'gentleman',
                 'description' => [
-                    'en' => 'Gentleman represents the union of elegance and sustainability. Dedicated to modern men who value style, self-care, and eco-conscious living, the brand combines refined grooming products with respect for the planet. By using natural, organic ingredients, Naturalmente Gentleman redefines grooming as a sophisticated yet sustainable ritual.',
-                    'lt' => 'Gentleman – tai elegancijos ir tvarumo dermė. Šis prekės ženklas skirtas šiuolaikiniam vyrui, kuris vertina stilių, savęs priežiūrą ir sąmoningą gyvenimo būdą.',
+                    'en' => 'A line that blends elegance with an eco-conscious approach. Designed for the modern man who values style, self-care, and a mindful lifestyle, offering high-quality products for everyday comfort and a premium experience.',
+                    'lt' => 'Linija, kuri derina eleganciją su atsakingu požiūriu į aplinką. Skirta šiuolaikiniam vyrui, kuris vertina stilių, savęs priežiūrą ir sąmoningą gyvenimo būdą, siūlanti aukštos kokybės produktus kasdieniam komfortui ir išskirtinei patirčiai.',
                 ],
                 'logo' => '/images/brands/gentleman-hero.jpeg',
                 'children' => [
@@ -299,8 +299,8 @@ class BrandDataSeeder extends Seeder
                         'name' => ['en' => 'Shaving', 'lt' => 'Skutimasis'],
                         'slug' => 'gentleman-shaving',
                         'description' => [
-                            'en' => 'The Gentleman Shaving Line offers shaving essentials with organic, plant-based ingredients, blending vintage charm with modern style.',
-                            'lt' => 'Gentleman skutimosi linija siūlo skutimosi reikmenis su ekologiškais, augaliniais ingredientais, derinančiais vintažinį žavesį su moderniu stiliumi.',
+                            'en' => 'Gentleman line with plant-based ingredients for comfortable shaving and a neat, stylish appearance.',
+                            'lt' => 'Gentleman linija su augaliniais ingredientais, skirta komfortiškam skutimuisi ir tvarkingam, stilingam įvaizdžiui.',
                         ],
                         'logo' => '/images/brands/gentleman-hero.jpeg',
                     ],
