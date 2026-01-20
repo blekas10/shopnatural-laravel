@@ -111,7 +111,17 @@ class SocialAuthController extends Controller
             return redirect($redirectUrl);
         }
 
-        // Default redirect to dashboard
+        // Redirect based on user role
+        // Admins go to admin panel, regular users go to dashboard
+        if ($user->role === 'admin') {
+            // English routes are at root level, Lithuanian at /lt
+            if ($locale === 'lt') {
+                return redirect('/lt/admin/products');
+            }
+            return redirect('/admin/products');
+        }
+
+        // Default redirect to dashboard for regular users
         // English routes are at root level, Lithuanian at /lt
         if ($locale === 'lt') {
             return redirect('/lt/dashboard');
