@@ -52,11 +52,12 @@ interface PageProps {
         siteUrl: string;
     };
     locale: string;
+    availableLocales: string[];
 }
 
 export default function ProductsIndex({ products, pagination, appliedFilters, brands, categories, priceExtent }: ProductsIndexProps) {
     const { t, route } = useTranslation();
-    const { seo, locale } = usePage<PageProps>().props;
+    const { seo, locale, availableLocales } = usePage<PageProps>().props;
 
     // Local filter state (synced with appliedFilters from server)
     const [filters, setFilters] = useState<FilterState>(appliedFilters);
