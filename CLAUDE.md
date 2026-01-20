@@ -125,6 +125,31 @@ Before marking any task complete:
 
 ---
 
+## Git Workflow Rules (CRITICAL)
+
+### NEVER push without explicit permission
+
+1. **ALWAYS ask before committing**: "Should I commit these changes?"
+2. **ALWAYS ask before pushing**: "Should I push to remote?"
+3. **NEVER assume permission carries over**: Each push needs explicit approval
+4. **Batch related changes**: If working on multiple related fixes, ask if user wants them combined or separate commits
+
+### Commit Message Rules
+
+- Use conventional commits format: `feat:`, `fix:`, `refactor:`, etc.
+- First line: concise summary (50 chars max)
+- Body: detailed explanation with bullet points
+- Always include `Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>`
+
+### When to Commit
+
+- After completing a feature
+- After fixing a bug
+- After user explicitly requests it
+- **NEVER automatically after every small change**
+
+---
+
 ## Bilingual Requirements (CRITICAL)
 
 **This is a bilingual website supporting English (en) and Lithuanian (lt).**
@@ -250,3 +275,13 @@ const submit = (e: FormEvent) => {
   form.post(route('route.name'));
 };
 ```
+
+---
+
+## Communication Rules
+
+1. **No assumptions**: Always ask if something is unclear
+2. **Batch questions**: Ask all clarifying questions at once, not one by one
+3. **Report progress**: After completing each major step
+4. **Be concise**: User is busy, get to the point
+5. **No unnecessary apologies**: Acknowledge mistakes once, then move on and fix them
