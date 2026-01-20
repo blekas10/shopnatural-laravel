@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/input';
 import { ChevronRight, ChevronDown, Filter, X, Search } from 'lucide-react';
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { cn } from '@/lib/utils';
-import { generateCanonicalUrl, createCollectionSchema } from '@/lib/seo';
+import { generateCanonicalUrl, generateAlternateUrls, createCollectionSchema } from '@/lib/seo';
 import type { ProductListItem, Brand, Category } from '@/types/product';
 
 interface FilterState {
@@ -513,6 +513,7 @@ export default function ProductsIndex({ products, pagination, appliedFilters, br
     const siteUrl = seo?.siteUrl || '';
     const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
     const canonicalUrl = generateCanonicalUrl(siteUrl, currentPath);
+    const alternateUrls = generateAlternateUrls(siteUrl, currentPath, availableLocales, locale);
 
     // Collection schema for product listing
     const collectionSchema = createCollectionSchema(
@@ -531,6 +532,7 @@ export default function ProductsIndex({ products, pagination, appliedFilters, br
                 title={t('products.meta_title', 'Products')}
                 description={t('products.meta_description', 'Browse our collection of natural, eco-friendly cosmetics and beauty products.')}
                 canonical={canonicalUrl}
+                alternateUrls={alternateUrls}
                 additionalSchemas={[collectionSchema]}
             />
 

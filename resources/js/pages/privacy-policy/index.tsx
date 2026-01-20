@@ -40,7 +40,6 @@ export default function PrivacyPolicy() {
             <SEO
                 title={t('privacy_policy.meta_title', 'Privacy Policy')}
                 description={t('privacy_policy.meta_description', 'Learn how Shop Natural collects, uses, and protects your personal information. GDPR compliant privacy practices.')}
-                keywords={t('privacy_policy.meta_keywords', 'privacy policy, GDPR, data protection, personal data, cookies policy')}
                 canonical={canonicalUrl}
                 alternateUrls={alternateUrls}
                 breadcrumbs={breadcrumbs}

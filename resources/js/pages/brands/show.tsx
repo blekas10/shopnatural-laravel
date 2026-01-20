@@ -66,7 +66,6 @@ export default function BrandShow({ brand }: BrandShowProps) {
             <SEO
                 title={metaTitle}
                 description={brand.description || metaDescription}
-                keywords={metaKeywords}
                 canonical={canonicalUrl}
                 alternateUrls={alternateUrls}
                 breadcrumbs={breadcrumbs}

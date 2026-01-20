@@ -18,7 +18,6 @@ interface SEOProps {
     // Basic SEO
     title: string;
     description?: string;
-    keywords?: string;
     image?: string;
 
     // Control
@@ -45,7 +44,6 @@ interface SEOProps {
 export default function SEO({
     title,
     description,
-    keywords,
     image,
     noindex = false,
     nofollow = false,
@@ -103,7 +101,6 @@ export default function SEO({
 
             {/* Basic Meta Tags */}
             {description && <meta name="description" content={description} />}
-            {keywords && <meta name="keywords" content={keywords} />}
             <meta name="robots" content={robotsContent} />
 
             {/* Canonical URL */}

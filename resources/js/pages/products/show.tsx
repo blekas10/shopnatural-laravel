@@ -270,7 +270,6 @@ export default function ProductShow({ product, relatedProducts }: ProductShowPro
             <SEO
                 title={product.metaTitle}
                 description={product.metaDescription || truncateDescription(product.shortDescription || product.description, 160)}
-                keywords={product.focusKeyphrase || undefined}
                 image={product.image}
                 canonical={canonicalUrl}
                 alternateUrls={alternateUrls}

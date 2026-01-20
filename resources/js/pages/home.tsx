@@ -10,7 +10,7 @@ import { AuthModal } from '@/components/auth/auth-modal';
 import { WelcomePromoModal } from '@/components/welcome-promo-modal';
 import SEO from '@/components/seo';
 import { useTranslation } from '@/hooks/use-translation';
-import { createOrganizationSchema, createWebsiteSchema } from '@/lib/seo';
+import { createOrganizationSchema, createLocalBusinessSchema, createWebsiteSchema } from '@/lib/seo';
 
 interface Product {
     id: number;
@@ -83,6 +83,34 @@ export default function Home({ products }: HomeProps) {
         },
     });
 
+    // LocalBusiness schema for homepage (for local SEO)
+    const localBusinessSchema = createLocalBusinessSchema({
+        name: siteName,
+        url: siteUrl,
+        logo: `${siteUrl}/images/logo.svg`,
+        description: t('home.meta_description', 'Shop Natural offers eco-friendly, natural cosmetics and beauty products. Family-run business committed to sustainability.'),
+        email: 'info@naturalmente.lt',
+        phone: '+37060117017',
+        address: {
+            streetAddress: 'Vaidoto g. 1',
+            addressLocality: 'Kaunas',
+            postalCode: '45387',
+            addressCountry: 'LT',
+        },
+        geo: {
+            latitude: 54.89864,
+            longitude: 23.90354,
+        },
+        openingHours: [
+            'Monday 09:00 17:00',
+            'Tuesday 09:00 17:00',
+            'Wednesday 09:00 17:00',
+            'Thursday 09:00 17:00',
+            'Friday 09:00 17:00',
+        ],
+        priceRange: '€€',
+    });
+
     // Website schema with search
     const websiteSchema = createWebsiteSchema(
         siteName,
@@ -101,10 +129,9 @@ export default function Home({ products }: HomeProps) {
             <SEO
                 title={t('home.meta_title', 'Natural & Eco-Friendly Cosmetics')}
                 description={t('home.meta_description', 'Shop Natural offers eco-friendly, natural cosmetics and beauty products. Family-run business committed to sustainability.')}
-                keywords={t('home.meta_keywords', 'natural cosmetics Lithuania, eco-friendly beauty, organic skincare, cruelty-free products')}
                 canonical={locale === 'lt' ? `${siteUrl}/lt` : siteUrl}
                 alternateUrls={alternateUrls}
-                additionalSchemas={[organizationSchema, websiteSchema]}
+                additionalSchemas={[organizationSchema, localBusinessSchema, websiteSchema]}
             />
 
             <div className="min-h-screen bg-background">

@@ -139,6 +139,72 @@ export function createOrganizationSchema(org: OrganizationData): object {
 }
 
 /**
+ * Generate LocalBusiness schema for JSON-LD structured data
+ */
+export function createLocalBusinessSchema(business: {
+    name: string;
+    url: string;
+    logo: string;
+    description?: string;
+    email?: string;
+    phone?: string;
+    address?: {
+        streetAddress?: string;
+        addressLocality?: string;
+        postalCode?: string;
+        addressCountry?: string;
+    };
+    geo?: {
+        latitude: number;
+        longitude: number;
+    };
+    openingHours?: string[];
+    priceRange?: string;
+}): object {
+    const schema: Record<string, unknown> = {
+        '@context': 'https://schema.org',
+        '@type': 'LocalBusiness',
+        '@id': `${business.url}#localbusiness`,
+        name: business.name,
+        url: business.url,
+        logo: business.logo,
+        description: business.description,
+        telephone: business.phone,
+        email: business.email,
+    };
+
+    if (business.address) {
+        schema.address = {
+            '@type': 'PostalAddress',
+            ...business.address,
+        };
+    }
+
+    if (business.geo) {
+        schema.geo = {
+            '@type': 'GeoCoordinates',
+            latitude: business.geo.latitude,
+            longitude: business.geo.longitude,
+        };
+    }
+
+    if (business.openingHours && business.openingHours.length > 0) {
+        schema.openingHoursSpecification = business.openingHours.map(hours => ({
+            '@type': 'OpeningHoursSpecification',
+            dayOfWeek: hours.split(' ')[0],
+            opens: hours.split(' ')[1],
+            closes: hours.split(' ')[2],
+        }));
+    }
+
+    if (business.priceRange) {
+        schema.priceRange = business.priceRange;
+    }
+
+    return schema;
+}
+
+/**
  * Generate WebSite schema for JSON-LD structured data
  */
 export function createWebsiteSchema(
