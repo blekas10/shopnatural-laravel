@@ -72,27 +72,27 @@ export function Pagination({ currentPage, lastPage, from, to, total, onPageChang
             </div>
 
             {/* Pagination buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
+            <div className="flex items-center justify-center gap-2">
                 {/* Previous button */}
                 <Button
                     variant="outline"
                     size="sm"
                     onClick={() => onPageChange(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className="w-full sm:w-auto border-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="border-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    <ChevronLeft className="size-4 mr-1" />
-                    {t('pagination.previous', 'Previous')}
+                    <ChevronLeft className="size-4 sm:mr-1" />
+                    <span className="hidden sm:inline">{t('pagination.previous', 'Previous')}</span>
                 </Button>
 
                 {/* Page numbers */}
-                <div className="flex items-center gap-1 w-full sm:w-auto justify-center flex-wrap">
+                <div className="flex items-center gap-1 justify-center flex-wrap">
                     {pageNumbers.map((page, index) => {
                         if (page === 'ellipsis') {
                             return (
                                 <span
                                     key={`ellipsis-${index}`}
-                                    className="px-2 text-muted-foreground"
+                                    className="px-1 sm:px-2 text-muted-foreground"
                                 >
                                     ...
                                 </span>
@@ -108,7 +108,7 @@ export function Pagination({ currentPage, lastPage, from, to, total, onPageChang
                                 size="sm"
                                 onClick={() => onPageChange(page)}
                                 className={cn(
-                                    'min-w-[40px] border-2',
+                                    'min-w-[36px] sm:min-w-[40px] h-9 border-2',
                                     isActive
                                         ? 'bg-gold border-gold text-white hover:bg-gold/90 hover:border-gold/90'
                                         : 'border-border hover:border-gold/40'
@@ -126,10 +126,10 @@ export function Pagination({ currentPage, lastPage, from, to, total, onPageChang
                     size="sm"
                     onClick={() => onPageChange(currentPage + 1)}
                     disabled={currentPage === lastPage}
-                    className="w-full sm:w-auto border-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="border-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    {t('pagination.next', 'Next')}
-                    <ChevronRight className="size-4 ml-1" />
+                    <span className="hidden sm:inline">{t('pagination.next', 'Next')}</span>
+                    <ChevronRight className="size-4 sm:ml-1" />
                 </Button>
             </div>
         </div>
