@@ -1145,7 +1145,7 @@ export default function Checkout({
                                                     variant="outline"
                                                     className="border-2"
                                                 >
-                                                    <ArrowLeft className="mr-2 size-4" />
+                                                    
                                                     {t('checkout.back', 'Back')}
                                                 </Button>
                                                 <SubmitButton />
