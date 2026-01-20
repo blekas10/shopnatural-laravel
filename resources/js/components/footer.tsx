@@ -155,7 +155,7 @@ export default function Footer({ className }: FooterProps) {
                         <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-gold">
                             {t('footer.newsletter.title')}
                         </h3>
-                        <form onSubmit={handleSubscribe}>
+                        <form onSubmit={handleSubscribe} noValidate>
                             <div className="flex flex-col gap-2 sm:flex-row lg:flex-col lg:items-end">
                                 <input
                                     type="email"
