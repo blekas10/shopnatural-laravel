@@ -17,7 +17,7 @@ export function VenipakLogo({ className }: LogoProps) {
 export function FedExLogo({ className }: LogoProps) {
     return (
         <img
-            src="/images/logos/fedex.svg"
+            src="/images/logos/fedex.png"
             alt="FedEx"
             className={cn('h-4 w-auto', className)}
         />
