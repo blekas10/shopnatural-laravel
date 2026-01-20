@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Gift } from 'lucide-react';
+import { Gift, X } from 'lucide-react';
 import { useTranslation } from '@/hooks/use-translation';
 
 const STORAGE_KEY = 'shop_natural_promo_seen';
@@ -28,6 +28,11 @@ export function WelcomePromoModal({ onOpenRegister }: WelcomePromoModalProps) {
         }
     }, []);
 
+    const handleClose = () => {
+        localStorage.setItem(STORAGE_KEY, 'true');
+        setIsVisible(false);
+    };
+
     const handleRegister = () => {
         localStorage.setItem(STORAGE_KEY, 'true');
         setIsVisible(false);
@@ -54,8 +59,17 @@ export function WelcomePromoModal({ onOpenRegister }: WelcomePromoModalProps) {
                         {/* Decorative gold accent bar */}
                         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#C2A363] via-[#D4B87A] to-[#C2A363]" />
 
+                        {/* Close button */}
+                        <button
+                            onClick={handleClose}
+                            className="absolute top-2 right-2 z-10 p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-700 transition-colors"
+                            aria-label="Close"
+                        >
+                            <X className="w-4 h-4" />
+                        </button>
+
                         {/* Content */}
-                        <div className="p-5">
+                        <div className="p-5 pr-10">
                             {/* Header with icon and discount */}
                             <div className="flex items-start gap-3 mb-3">
                                 {/* Gift icon with subtle animation */}
