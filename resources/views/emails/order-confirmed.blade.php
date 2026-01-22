@@ -94,30 +94,72 @@
     </table>
 
     <!-- Totals -->
-    <div style="background-color: #f8f8f8; padding: 16px; border-radius: 8px;">
-        <div style="display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px; color: #374151;">
-            <span>{{ $locale === 'lt' ? 'Tarpinė suma' : 'Subtotal' }}</span>
-            <span>€{{ number_format($order->subtotal, 2) }}</span>
-        </div>
-        <div style="display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px; color: #374151;">
-            <span>{{ $locale === 'lt' ? 'Pristatymas' : 'Shipping' }}</span>
-            <span>€{{ number_format($order->shipping_cost, 2) }}</span>
-        </div>
-        @if($order->discount > 0)
-        <div style="display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px; color: #e74c3c;">
-            <span>{{ $locale === 'lt' ? 'Nuolaida' : 'Discount' }}</span>
-            <span>-€{{ number_format($order->discount, 2) }}</span>
-        </div>
+    @php
+        // Calculate values with fallbacks for old orders
+        $subtotalExclVat = $order->subtotal_excl_vat ?? ($order->subtotal / 1.21);
+        $vatAmount = $order->vat_amount ?? ($order->subtotal - $subtotalExclVat);
+        $shippingCost = $order->shipping_cost ?? 0;
+        $promoDiscount = $order->discount ?? 0;
+    @endphp
+    <table style="width: 100%; background-color: #f8f8f8; border-radius: 8px; border-collapse: collapse;">
+        <tr>
+            <td style="padding: 12px 16px; font-size: 14px; color: #374151; border-bottom: 1px solid #e5e5e5;">
+                {{ $locale === 'lt' ? 'Tarpinė suma' : 'Subtotal' }}
+            </td>
+            <td style="padding: 12px 16px; font-size: 14px; color: #374151; text-align: right; border-bottom: 1px solid #e5e5e5;">
+                €{{ number_format($order->subtotal, 2) }}
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 12px 16px; font-size: 14px; color: #374151; border-bottom: 1px solid #e5e5e5;">
+                {{ $locale === 'lt' ? 'Pristatymas' : 'Shipping' }}
+            </td>
+            <td style="padding: 12px 16px; font-size: 14px; color: #374151; text-align: right; border-bottom: 1px solid #e5e5e5;">
+                @if($shippingCost > 0)
+                    €{{ number_format($shippingCost, 2) }}
+                @else
+                    {{ $locale === 'lt' ? 'Nemokamas' : 'Free' }}
+                @endif
+            </td>
+        </tr>
+        @if($promoDiscount > 0)
+        <tr>
+            <td style="padding: 12px 16px; font-size: 14px; color: #C2A363; border-bottom: 1px solid #e5e5e5;">
+                {{ $locale === 'lt' ? 'Nuolaida' : 'Discount' }}
+                @if($order->promoCode)
+                    ({{ $order->promoCode->code }})
+                @endif
+            </td>
+            <td style="padding: 12px 16px; font-size: 14px; color: #C2A363; text-align: right; border-bottom: 1px solid #e5e5e5;">
+                -€{{ number_format($promoDiscount, 2) }}
+            </td>
+        </tr>
         @endif
-        <div style="display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px; color: #374151;">
-            <span>{{ $locale === 'lt' ? 'PVM (21%)' : 'VAT (21%)' }}</span>
-            <span>€{{ number_format($order->tax, 2) }}</span>
-        </div>
-        <div style="display: flex; justify-content: space-between; padding: 12px 0 6px 0; margin-top: 8px; border-top: 2px solid #C2A363; font-size: 18px; font-weight: 700; color: #C2A363;">
-            <span>{{ $locale === 'lt' ? 'IŠ VISO' : 'TOTAL' }}</span>
-            <span>€{{ number_format($order->total, 2) }}</span>
-        </div>
-    </div>
+        <tr>
+            <td style="padding: 12px 16px; font-size: 13px; color: #6B7280; border-bottom: 1px solid #e5e5e5;">
+                {{ $locale === 'lt' ? 'Kaina be PVM' : 'Price excl. VAT' }}
+            </td>
+            <td style="padding: 12px 16px; font-size: 13px; color: #6B7280; text-align: right; border-bottom: 1px solid #e5e5e5;">
+                €{{ number_format($subtotalExclVat, 2) }}
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 12px 16px; font-size: 14px; color: #374151; border-bottom: 1px solid #e5e5e5;">
+                {{ $locale === 'lt' ? 'PVM (21%)' : 'VAT (21%)' }}
+            </td>
+            <td style="padding: 12px 16px; font-size: 14px; color: #374151; text-align: right; border-bottom: 1px solid #e5e5e5;">
+                €{{ number_format($vatAmount, 2) }}
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 16px; font-size: 18px; font-weight: 700; color: #C2A363; border-top: 2px solid #C2A363;">
+                {{ $locale === 'lt' ? 'IŠ VISO' : 'TOTAL' }}
+            </td>
+            <td style="padding: 16px; font-size: 18px; font-weight: 700; color: #C2A363; text-align: right; border-top: 2px solid #C2A363;">
+                €{{ number_format($order->total, 2) }}
+            </td>
+        </tr>
+    </table>
 
     <div class="button-container">
         <a href="{{ config('app.url') }}" class="button">
