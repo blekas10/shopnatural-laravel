@@ -15,7 +15,9 @@ class Order extends Model
     protected $fillable = [
         'order_number',
         'invoice_number',
+        'invoice_path',
         'user_id',
+        'session_id',
         'status',
         'payment_status',
         'payment_method',
@@ -319,7 +321,7 @@ class Order extends Model
 
     /**
      * Generate unique sequential order number (format: 6002, 6003, etc.)
-     * Only called when payment is confirmed.
+     * Called at checkout creation to assign order number immediately.
      */
     public static function generateOrderNumber(): string
     {
@@ -342,7 +344,10 @@ class Order extends Model
     }
 
     /**
-     * Assign order number when payment is confirmed
+     * Assign order number manually (legacy method - order numbers now assigned at checkout creation)
+     *
+     * @deprecated This method is kept for backward compatibility but is no longer used.
+     *             Order numbers are now assigned automatically at checkout creation.
      */
     public function assignOrderNumber(): void
     {

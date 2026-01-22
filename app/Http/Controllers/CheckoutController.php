@@ -12,7 +12,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -23,8 +22,8 @@ class CheckoutController extends Controller
      */
     public function index(): Response
     {
-        // Get cart items from request (passed from frontend)
-        // In a real app, you'd fetch from authenticated user's cart
+        // Create or retrieve draft order for tracking
+        $draftOrder = $this->getOrCreateDraftOrder();
 
         $shippingMethods = [
             [
@@ -66,7 +65,76 @@ class CheckoutController extends Controller
         return Inertia::render('checkout', [
             'shippingMethods' => $shippingMethods,
             'paymentMethods' => $paymentMethods,
+            'draftOrderId' => $draftOrder->id,
+            'draftOrderNumber' => $draftOrder->order_number,
         ]);
+    }
+
+    /**
+     * Get existing draft order or create a new one
+     */
+    protected function getOrCreateDraftOrder(): Order
+    {
+        $userId = auth()->id();
+        $sessionId = Session::getId();
+
+        // Try to find existing draft order for this user/session
+        $draftOrder = Order::where('status', 'draft')
+            ->where(function ($query) use ($userId, $sessionId) {
+                if ($userId) {
+                    $query->where('user_id', $userId);
+                } else {
+                    $query->where('session_id', $sessionId);
+                }
+            })
+            ->first();
+
+        if ($draftOrder) {
+            Log::info('Checkout: Found existing draft order', [
+                'order_id' => $draftOrder->id,
+                'order_number' => $draftOrder->order_number,
+            ]);
+            return $draftOrder;
+        }
+
+        // Create new draft order with empty defaults for required address fields
+        $draftOrder = Order::create([
+            'order_number' => Order::generateOrderNumber(),
+            'user_id' => $userId,
+            'session_id' => $sessionId,
+            'status' => 'draft',
+            'payment_status' => 'pending',
+            'locale' => app()->getLocale(),
+            // Set defaults for required numeric fields
+            'subtotal' => 0,
+            'total' => 0,
+            'currency' => 'EUR',
+            // Set empty defaults for required address fields
+            'shipping_first_name' => '',
+            'shipping_last_name' => '',
+            'shipping_street_address' => '',
+            'shipping_city' => '',
+            'shipping_postal_code' => '',
+            'shipping_country' => '',
+            'shipping_phone' => '',
+            'billing_first_name' => '',
+            'billing_last_name' => '',
+            'billing_street_address' => '',
+            'billing_city' => '',
+            'billing_postal_code' => '',
+            'billing_country' => '',
+            'billing_phone' => '',
+            'customer_email' => '',
+        ]);
+
+        Log::info('Checkout: Created new draft order', [
+            'order_id' => $draftOrder->id,
+            'order_number' => $draftOrder->order_number,
+            'user_id' => $userId,
+            'session_id' => $sessionId,
+        ]);
+
+        return $draftOrder;
     }
 
     /**
@@ -82,6 +150,7 @@ class CheckoutController extends Controller
         ]);
 
         $validated = $request->validate([
+            'draftOrderId' => 'required|integer|exists:orders,id',
             'contact.fullName' => 'required|string',
             'contact.email' => 'required|email:rfc',
             'contact.phone' => 'nullable|string',
@@ -154,15 +223,25 @@ class CheckoutController extends Controller
         DB::beginTransaction();
 
         try {
+            // Find the draft order
+            $order = Order::where('id', $validated['draftOrderId'])
+                ->where('status', 'draft')
+                ->first();
+
+            if (!$order) {
+                return back()->withErrors([
+                    'error' => __('checkout.invalid_order'),
+                ]);
+            }
+
             // Split contact full name into first and last name
             $contactName = explode(' ', $validated['contact']['fullName'], 2);
             $billingAddress = $validated['billingSameAsShipping']
                 ? $validated['shippingAddress']
                 : $validated['billingAddress'];
 
-            // Create the order with pending status (order_number assigned after payment)
-            $order = Order::create([
-                'order_number' => null, // Assigned when payment is confirmed
+            // Update the draft order to pending status with all details
+            $order->update([
                 'user_id' => auth()->id(), // null for guests
                 'status' => 'pending',
                 'payment_status' => 'pending',
@@ -208,11 +287,15 @@ class CheckoutController extends Controller
                 'locale' => app()->getLocale(),
             ]);
 
-            Log::info('Checkout: Order created', [
+            Log::info('Checkout: Draft order updated to pending', [
                 'order_id' => $order->id,
+                'order_number' => $order->order_number,
                 'customer_email' => $order->customer_email,
                 'total' => $order->total,
             ]);
+
+            // Delete any existing order items (in case of re-submission)
+            $order->items()->delete();
 
             // Create order items with historical product data
             foreach ($validated['items'] as $item) {

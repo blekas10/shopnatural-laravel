@@ -79,6 +79,8 @@ export default function Checkout({
             description: 'Fast and secure PayPal checkout',
         },
     ],
+    draftOrderId,
+    draftOrderNumber,
 }: CheckoutPageProps) {
     const { items, totalPrice } = useCart();
     const { t, route } = useTranslation();
@@ -500,6 +502,12 @@ export default function Checkout({
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        // Ensure draft order exists
+        if (!draftOrderId) {
+            toast.error(t('checkout.error', 'An error occurred. Please refresh the page.'));
+            return;
+        }
+
         // Validate payment
         if (!validatePayment()) {
             return;
@@ -536,6 +544,7 @@ export default function Checkout({
         }
 
         const checkoutData: CheckoutFormData = {
+            draftOrderId,
             contact,
             shippingAddress,
             billingAddress: billingSameAsShipping

@@ -61,6 +61,7 @@ export interface OrderSummaryData {
 }
 
 export interface CheckoutFormData {
+    draftOrderId: number;
     contact: ContactInformation;
     shippingAddress: ShippingAddress;
     billingAddress?: ShippingAddress;
@@ -141,6 +142,8 @@ export interface Order {
 
 export interface CheckoutPageProps {
     paymentMethods: PaymentMethod[];
+    draftOrderId: number;
+    draftOrderNumber: string;
     cartItems?: CartItem[];
     originalSubtotal?: number;
     productDiscount?: number;

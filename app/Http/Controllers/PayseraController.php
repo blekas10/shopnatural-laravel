@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Services\InvoiceService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use WebToPay;
@@ -52,14 +53,18 @@ class PayseraController extends Controller
                     'payment_intent_id' => $response['requestid'] ?? null,
                 ]);
 
-                // Assign order number and invoice number for paid orders
-                $order->assignOrderNumber();
+                // Assign invoice number for paid orders (order number already assigned at checkout)
                 $order->assignInvoiceNumber();
+
+                // Generate and store invoice PDFs for both locales
+                $invoiceService = app(InvoiceService::class);
+                $invoiceService->generateBothLocales($order);
 
                 Log::info('Paysera payment successful', [
                     'order_id' => $order->id,
                     'order_number' => $order->order_number,
                     'invoice_number' => $order->invoice_number,
+                    'invoice_path' => $order->invoice_path,
                 ]);
 
                 // Send confirmation emails

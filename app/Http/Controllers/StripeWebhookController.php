@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Services\InvoiceService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -105,14 +106,18 @@ class StripeWebhookController extends Controller
 
         $order->update($updateData);
 
-        // Assign order number and invoice number for paid orders
-        $order->assignOrderNumber();
+        // Assign invoice number for paid orders (order number already assigned at checkout)
         $order->assignInvoiceNumber();
+
+        // Generate and store invoice PDFs for both locales
+        $invoiceService = app(InvoiceService::class);
+        $invoiceService->generateBothLocales($order);
 
         Log::info('Stripe webhook: Order updated', [
             'order_id' => $order->id,
             'order_number' => $order->order_number,
             'invoice_number' => $order->invoice_number,
+            'invoice_path' => $order->invoice_path,
             'payment_intent_id' => $session->payment_intent ?? null,
         ]);
 

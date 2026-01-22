@@ -60,6 +60,14 @@ return [
             'report' => false,
         ],
 
+        // Backup storage - stored outside of normal app storage
+        'backups' => [
+            'driver' => 'local',
+            'root' => storage_path('backups'),
+            'throw' => false,
+            'report' => false,
+        ],
+
     ],
 
     /*
