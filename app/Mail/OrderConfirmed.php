@@ -4,8 +4,6 @@ namespace App\Mail;
 
 use App\Models\Order;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
@@ -13,9 +11,9 @@ use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
-class OrderConfirmed extends Mailable implements ShouldQueue
+class OrderConfirmed extends Mailable
 {
-    use Queueable, SerializesModels;
+    use SerializesModels;
 
     /**
      * Create a new message instance.

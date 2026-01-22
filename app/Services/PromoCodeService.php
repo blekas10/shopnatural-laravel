@@ -31,12 +31,23 @@ class PromoCodeService
             return null;
         }
 
-        // Check if this is a WELCOME code (requires logged-in user)
-        if (str_starts_with($promoCode->code, 'WELCOME') && !$userId) {
-            $this->lastError = __('promo_code.login_required');
-            $this->lastErrorKey = 'promo_code.login_required';
+        // Check if this is a WELCOME code (requires logged-in user with verified email)
+        if (str_starts_with($promoCode->code, 'WELCOME')) {
+            if (!$userId) {
+                $this->lastError = __('promo_code.login_required');
+                $this->lastErrorKey = 'promo_code.login_required';
 
-            return null;
+                return null;
+            }
+
+            // WELCOME codes require verified email
+            $user = \App\Models\User::find($userId);
+            if (!$user || !$user->hasVerifiedEmail()) {
+                $this->lastError = __('promo_code.email_verification_required');
+                $this->lastErrorKey = 'promo_code.email_verification_required';
+
+                return null;
+            }
         }
 
         // Check if active

@@ -84,9 +84,13 @@ class SocialAuthController extends Controller
                 'avatar' => $googleUser->getAvatar(),
             ]);
 
+            // Assign the 'simple' role to the new user (same as regular registration)
+            $user->assignRole('simple');
+
             Log::info('Created new user via Google OAuth', [
                 'user_id' => $user->id,
                 'email' => $user->email,
+                'role' => 'simple',
             ]);
 
             // Link any guest orders made with this email to the new user
