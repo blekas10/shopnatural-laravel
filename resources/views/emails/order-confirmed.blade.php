@@ -95,9 +95,9 @@
 
     <!-- Totals -->
     @php
-        // Calculate values with fallbacks for old orders
-        $subtotalExclVat = $order->subtotal_excl_vat ?? ($order->subtotal / 1.21);
-        $vatAmount = $order->vat_amount ?? ($order->subtotal - $subtotalExclVat);
+        // Calculate values with fallbacks for old orders (VAT is 21% of total)
+        $vatAmount = $order->vat_amount ?? ($order->subtotal * 0.21);
+        $subtotalExclVat = $order->subtotal_excl_vat ?? ($order->subtotal - $vatAmount);
         $shippingCost = $order->shipping_cost ?? 0;
         $promoDiscount = $order->discount ?? 0;
     @endphp

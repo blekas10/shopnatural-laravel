@@ -339,8 +339,8 @@
             $originalSubtotal = $order->original_subtotal ?? $order->subtotal;
             $productDiscount = $order->product_discount ?? 0;
             $subtotal = $order->subtotal;
-            $subtotalExclVat = $order->subtotal_excl_vat ?? ($subtotal / 1.21);
-            $vatAmount = $order->vat_amount ?? ($subtotal - $subtotalExclVat);
+            $vatAmount = $order->vat_amount ?? ($subtotal * 0.21);
+            $subtotalExclVat = $order->subtotal_excl_vat ?? ($subtotal - $vatAmount);
             $promoCodeDiscount = $order->discount ?? 0;
             $promoCode = $order->promoCode?->code ?? null;
         @endphp
