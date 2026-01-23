@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { useTranslation } from '@/hooks/use-translation';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import CookieConsentBanner from '@/components/cookie-consent-banner';
 
 interface FooterProps {
     className?: string;
@@ -92,6 +93,7 @@ export default function Footer({ className }: FooterProps) {
     };
 
     return (
+        <>
         <footer className={cn('w-full border-t border-border bg-background', className)}>
             <div className="container mx-auto px-4 py-12 md:px-6 md:py-16 lg:px-8">
                 <div className="grid gap-12 lg:grid-cols-24 lg:gap-8">
@@ -238,5 +240,7 @@ export default function Footer({ className }: FooterProps) {
                 </div>
             </div>
         </footer>
+        <CookieConsentBanner />
+        </>
     );
 }

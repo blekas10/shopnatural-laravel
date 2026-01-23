@@ -47,13 +47,12 @@ export function ProductCard({ product, href, index = 0, className }: ProductCard
 
     return (
         <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-50px' }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{
-                duration: 0.5,
+                duration: 0.4,
                 ease: 'easeOut',
-                delay: index * 0.1,
+                delay: Math.min(index * 0.08, 0.8), // Cap delay at 0.8s for large lists
             }}
             className={cn('group cursor-pointer h-full', className)}
         >

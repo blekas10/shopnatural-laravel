@@ -2,26 +2,10 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/hooks/use-translation';
 
 const COOKIE_NAME = 'shop_natural_cookie_consent';
 const COOKIE_EXPIRY_DAYS = 365;
-
-const translations = {
-    en: {
-        message: 'We use cookies to enhance your experience.',
-        accept: 'Accept',
-        decline: 'Decline',
-        learnMore: 'Privacy Policy',
-        privacyLink: '/privacy-policy',
-    },
-    lt: {
-        message: 'Naudojame slapukus jūsų patirčiai gerinti.',
-        accept: 'Sutinku',
-        decline: 'Nesutinku',
-        learnMore: 'Privatumo politika',
-        privacyLink: '/lt/privatumo-politika',
-    },
-};
 
 function setCookie(name: string, value: string, days: number) {
     const expires = new Date(Date.now() + days * 864e5).toUTCString();
@@ -29,6 +13,7 @@ function setCookie(name: string, value: string, days: number) {
 }
 
 function getCookie(name: string): string | null {
+    if (typeof document === 'undefined') return null;
     const value = `; ${document.cookie}`;
     const parts = value.split(`; ${name}=`);
     if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
@@ -36,19 +21,13 @@ function getCookie(name: string): string | null {
 }
 
 export default function CookieConsentBanner() {
+    const { t, route } = useTranslation();
     const [isVisible, setIsVisible] = useState(false);
-    const [locale, setLocale] = useState('en');
 
     useEffect(() => {
         // Check if consent already given
         const consent = getCookie(COOKIE_NAME);
         if (consent) return;
-
-        // Detect locale from URL
-        if (typeof window !== 'undefined') {
-            const path = window.location.pathname;
-            setLocale(path.startsWith('/lt') ? 'lt' : 'en');
-        }
 
         // Show banner after 3 seconds
         const timer = setTimeout(() => {
@@ -86,8 +65,6 @@ export default function CookieConsentBanner() {
         setIsVisible(false);
     };
 
-    const t = translations[locale as keyof typeof translations] || translations.en;
-
     if (!isVisible) return null;
 
     return (
@@ -110,12 +87,12 @@ export default function CookieConsentBanner() {
                 {/* Content */}
                 <div className="pr-6">
                     <p className="text-sm leading-relaxed text-foreground">
-                        {t.message}{' '}
+                        {t('cookie_banner.message', 'We use cookies to enhance your experience.')}{' '}
                         <a
-                            href={t.privacyLink}
+                            href={route('privacy-policy')}
                             className="font-medium text-gold underline underline-offset-2 hover:text-gold/80"
                         >
-                            {t.learnMore}
+                            {t('cookie_banner.learn_more', 'Privacy Policy')}
                         </a>
                     </p>
                 </div>
@@ -128,14 +105,14 @@ export default function CookieConsentBanner() {
                         onClick={handleDecline}
                         className="flex-1 text-xs"
                     >
-                        {t.decline}
+                        {t('cookie_banner.decline', 'Decline')}
                     </Button>
                     <Button
                         size="sm"
                         onClick={handleAccept}
                         className="flex-1 bg-gold text-xs text-white hover:bg-gold/90"
                     >
-                        {t.accept}
+                        {t('cookie_banner.accept', 'Accept')}
                     </Button>
                 </div>
             </div>

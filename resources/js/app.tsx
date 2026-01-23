@@ -8,7 +8,6 @@ import { Toaster } from 'sonner';
 import { CartProvider } from './contexts/cart-context';
 import { WishlistProvider } from './contexts/wishlist-context';
 import { initializeTheme } from './hooks/use-appearance';
-import CookieConsentBanner from './components/cookie-consent-banner';
 import axios from 'axios';
 
 // Configure axios to send CSRF token with all requests
@@ -53,7 +52,6 @@ createInertiaApp({
                             expand={false}
                             duration={4000}
                         />
-                        <CookieConsentBanner />
                     </WishlistProvider>
                 </CartProvider>
             </StrictMode>,
