@@ -141,18 +141,20 @@ class Product extends Model
 
     /**
      * Scope: Only active products
+     * Note: Uses table prefix to avoid ambiguity when joined with product_variants
      */
     public function scopeActive($query)
     {
-        return $query->where('is_active', true);
+        return $query->where('products.is_active', true);
     }
 
     /**
      * Scope: Only featured products
+     * Note: Uses table prefix to avoid ambiguity when joined with product_variants
      */
     public function scopeFeatured($query)
     {
-        return $query->where('is_featured', true);
+        return $query->where('products.is_featured', true);
     }
 
     /**
