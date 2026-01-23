@@ -91,10 +91,12 @@ export interface CheckoutFormData {
 }
 
 export type OrderStatus =
+    | 'draft'
     | 'pending'
     | 'confirmed'
     | 'processing'
     | 'shipped'
+    | 'delivered'
     | 'completed'
     | 'cancelled';
 

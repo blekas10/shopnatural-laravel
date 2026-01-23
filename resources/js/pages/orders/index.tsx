@@ -4,15 +4,18 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { OrderStatusBadge } from '@/components/order-status-badge';
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
+import { type BreadcrumbItem, type CartItem } from '@/types';
 import type { Order, OrderStatus } from '@/types/checkout';
-import { Link } from '@inertiajs/react';
+import { Link, router } from '@inertiajs/react';
 import SEO from '@/components/seo';
-import { Package, Filter, ChevronDown } from 'lucide-react';
+import { Package, Filter, ChevronDown, ShoppingCart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { useTranslation } from '@/hooks/use-translation';
 import { usePage } from '@inertiajs/react';
+import { useCartContext } from '@/contexts/cart-context';
+import { toast } from 'sonner';
+import axios from 'axios';
 
 interface PageProps {
     locale: string;
@@ -38,8 +41,10 @@ const cardVariants = {
 export default function OrdersIndex({ orders: ordersData }: OrdersIndexProps) {
     const { t, route } = useTranslation();
     const { locale } = usePage<PageProps>().props;
+    const { restoreCart } = useCartContext();
     const [activeFilter, setActiveFilter] = useState<OrderStatus | 'all'>('all');
     const [expandedOrders, setExpandedOrders] = useState<Set<number>>(new Set());
+    const [restoringOrderId, setRestoringOrderId] = useState<number | null>(null);
 
     // Normalize orders data - handle both array and ResourceCollection format
     const orders = Array.isArray(ordersData) ? ordersData : (ordersData as { data: Order[] }).data;
@@ -56,6 +61,45 @@ export default function OrdersIndex({ orders: ordersData }: OrdersIndexProps) {
         });
     };
 
+    const handleContinueCheckout = async (orderId: number) => {
+        setRestoringOrderId(orderId);
+        try {
+            const response = await axios.post('/cart/restore-from-order', {
+                order_id: orderId,
+            });
+
+            if (response.data.success) {
+                // Transform the API response items to CartItem format
+                const cartItems: CartItem[] = response.data.items.map((item: {
+                    id: string;
+                    productId: number;
+                    variantId: number | null;
+                    quantity: number;
+                    product: { id: number; name: string; slug: string; price: number; image: string | null } | null;
+                    variant: { id: number; size: string; price: number; sku: string } | null;
+                }) => ({
+                    id: item.id,
+                    productId: item.productId,
+                    variantId: item.variantId,
+                    quantity: item.quantity,
+                    product: item.product,
+                    variant: item.variant,
+                }));
+
+                // Restore cart with items from draft order
+                restoreCart(cartItems);
+                toast.success(t('orders.cart_restored', 'Cart restored successfully'));
+                // Navigate to checkout
+                router.visit(route('checkout'));
+            }
+        } catch (error) {
+            console.error('Failed to restore cart from draft order:', error);
+            toast.error(t('orders.restore_failed', 'Failed to restore cart'));
+        } finally {
+            setRestoringOrderId(null);
+        }
+    };
+
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: t('sidebar.dashboard', 'Dashboard'),
@@ -69,6 +113,7 @@ export default function OrdersIndex({ orders: ordersData }: OrdersIndexProps) {
 
     const statusFilters: { label: string; value: OrderStatus | 'all' }[] = [
         { label: t('orders.filter.all', 'All Orders'), value: 'all' },
+        { label: t('orders.status.draft', 'Draft'), value: 'draft' },
         { label: t('orders.status.confirmed', 'Confirmed'), value: 'confirmed' },
         { label: t('orders.status.processing', 'Processing'), value: 'processing' },
         { label: t('orders.status.shipped', 'Shipped'), value: 'shipped' },
@@ -281,17 +326,38 @@ export default function OrdersIndex({ orders: ordersData }: OrdersIndexProps) {
 
                                     {/* Order Actions */}
                                     <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-end md:mt-6">
-                                        <Link
-                                            href={route('orders.show', { orderNumber: order.orderNumber })}
-                                            className="w-full sm:w-auto"
-                                        >
+                                        {order.status === 'draft' ? (
                                             <Button
                                                 variant="default"
                                                 className="h-11 w-full bg-gold font-bold uppercase tracking-wide text-white hover:bg-gold/90 sm:w-auto md:px-8"
+                                                onClick={() => handleContinueCheckout(order.id)}
+                                                disabled={restoringOrderId === order.id}
                                             >
-                                                {t('orders.view_order', 'View Order')}
+                                                {restoringOrderId === order.id ? (
+                                                    <>
+                                                        <span className="mr-2 size-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                                                        {t('orders.restoring', 'Restoring...')}
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <ShoppingCart className="mr-2 size-4" />
+                                                        {t('orders.continue_checkout', 'Continue Checkout')}
+                                                    </>
+                                                )}
                                             </Button>
-                                        </Link>
+                                        ) : (
+                                            <Link
+                                                href={route('orders.show', { orderNumber: order.orderNumber })}
+                                                className="w-full sm:w-auto"
+                                            >
+                                                <Button
+                                                    variant="default"
+                                                    className="h-11 w-full bg-gold font-bold uppercase tracking-wide text-white hover:bg-gold/90 sm:w-auto md:px-8"
+                                                >
+                                                    {t('orders.view_order', 'View Order')}
+                                                </Button>
+                                            </Link>
+                                        )}
                                     </div>
                                 </div>
                             </motion.div>

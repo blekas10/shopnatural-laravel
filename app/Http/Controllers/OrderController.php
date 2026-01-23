@@ -22,7 +22,7 @@ class OrderController extends Controller
         $orders = Order::query()
             ->where('user_id', auth()->id())
             ->with(['items.product.primaryImage', 'items.variant.image'])
-            ->orderBy('id', 'asc')
+            ->orderBy('id', 'desc')
             ->paginate(15);
 
         return Inertia::render('orders/index', [

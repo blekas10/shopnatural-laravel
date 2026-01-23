@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Cart;
 use App\Models\CartItem;
+use App\Models\Order;
 use App\Models\ProductVariant;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 
@@ -176,6 +178,73 @@ class CartController extends Controller
         $cart->items()->delete();
 
         return response()->json(['success' => true]);
+    }
+
+    /**
+     * Restore cart from a draft order
+     * Allows users to continue abandoned checkouts
+     */
+    public function restoreFromDraftOrder(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'order_id' => 'required|integer|exists:orders,id',
+        ]);
+
+        // Find the draft order belonging to this user
+        $order = Order::where('id', $validated['order_id'])
+            ->where('status', 'draft')
+            ->where('user_id', auth()->id())
+            ->with(['items.product.primaryImage', 'items.variant'])
+            ->first();
+
+        if (!$order) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Draft order not found or does not belong to you.',
+            ], 404);
+        }
+
+        // Build cart items from order items
+        $cartItems = $order->items->map(function ($item) {
+            return [
+                'id' => "{$item->product_id}-{$item->product_variant_id}",
+                'productId' => $item->product_id,
+                'variantId' => $item->product_variant_id,
+                'quantity' => $item->quantity,
+                'name' => $item->product_name,
+                'price' => (float) $item->unit_price,
+                'image' => $item->product?->primaryImage?->url,
+                'size' => $item->variant_size,
+                'sku' => $item->product_sku,
+                // Include full product and variant data for cart context
+                'product' => $item->product ? [
+                    'id' => $item->product->id,
+                    'name' => $item->product->name,
+                    'slug' => $item->product->slug,
+                    'price' => (float) $item->unit_price,
+                    'image' => $item->product->primaryImage?->url,
+                ] : null,
+                'variant' => $item->variant ? [
+                    'id' => $item->variant->id,
+                    'size' => $item->variant->size,
+                    'price' => (float) $item->unit_price,
+                    'sku' => $item->variant->sku,
+                ] : null,
+            ];
+        });
+
+        \Log::info('Cart: Restored cart from draft order', [
+            'order_id' => $order->id,
+            'order_number' => $order->order_number,
+            'items_count' => $cartItems->count(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'items' => $cartItems,
+            'orderNumber' => $order->order_number,
+            'orderId' => $order->id,
+        ]);
     }
 
     /**

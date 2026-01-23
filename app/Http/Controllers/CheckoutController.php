@@ -25,6 +25,11 @@ class CheckoutController extends Controller
         // Create or retrieve draft order for tracking
         $draftOrder = $this->getOrCreateDraftOrder();
 
+        // For logged-in users, sync cart items to draft order
+        if (auth()->check()) {
+            $this->syncCartToDraftOrder($draftOrder);
+        }
+
         $shippingMethods = [
             [
                 'id' => 'pickup',
@@ -135,6 +140,64 @@ class CheckoutController extends Controller
         ]);
 
         return $draftOrder;
+    }
+
+    /**
+     * Sync cart items to draft order for logged-in users
+     * This allows resuming abandoned checkouts
+     */
+    protected function syncCartToDraftOrder(Order $draftOrder): void
+    {
+        // Get active cart for this user
+        $cart = Cart::where('user_id', auth()->id())
+            ->where('status', 'active')
+            ->with(['items.product.primaryImage', 'items.variant'])
+            ->first();
+
+        if (!$cart || $cart->items->isEmpty()) {
+            return;
+        }
+
+        // Clear existing draft order items (in case of re-sync)
+        $draftOrder->items()->delete();
+
+        // Copy cart items to order items
+        foreach ($cart->items as $cartItem) {
+            $product = $cartItem->product;
+            $variant = $cartItem->variant;
+
+            if (!$product || !$variant) {
+                continue;
+            }
+
+            OrderItem::create([
+                'order_id' => $draftOrder->id,
+                'product_id' => $cartItem->product_id,
+                'product_variant_id' => $cartItem->product_variant_id,
+                'quantity' => $cartItem->quantity,
+                'unit_price' => $cartItem->price,
+                'product_name' => $product->getTranslation('name', app()->getLocale()),
+                'product_sku' => $variant->sku ?? $product->sku,
+                'variant_size' => $variant->size,
+                // Calculate totals
+                'subtotal' => $cartItem->price * $cartItem->quantity,
+                'total' => $cartItem->price * $cartItem->quantity,
+                'tax' => 0,
+            ]);
+        }
+
+        // Update draft order totals
+        $subtotal = $draftOrder->items()->sum('total');
+        $draftOrder->update([
+            'subtotal' => $subtotal,
+            'total' => $subtotal, // Will be recalculated on checkout submit with shipping
+        ]);
+
+        Log::info('Checkout: Synced cart items to draft order', [
+            'order_id' => $draftOrder->id,
+            'items_count' => $cart->items->count(),
+            'subtotal' => $subtotal,
+        ]);
     }
 
     /**

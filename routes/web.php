@@ -77,6 +77,9 @@ Route::post('cart/remove', [CartController::class, 'removeByProduct'])->name('ca
 Route::patch('cart/items/{item}', [CartController::class, 'updateItem'])->name('cart.update');
 Route::delete('cart/items/{item}', [CartController::class, 'removeItem'])->name('cart.remove');
 Route::delete('cart/clear', [CartController::class, 'clear'])->name('cart.clear');
+Route::post('cart/restore-from-order', [CartController::class, 'restoreFromDraftOrder'])
+    ->middleware('auth')
+    ->name('cart.restore-from-order');
 
 // Locale switching route
 Route::post('locale', [\App\Http\Controllers\LocaleController::class, 'switch'])->name('locale.switch');

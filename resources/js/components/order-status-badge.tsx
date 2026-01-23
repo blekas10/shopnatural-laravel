@@ -15,7 +15,11 @@ interface OrderStatusBadgeProps {
     className?: string;
 }
 
-const statusConfig = {
+const statusConfig: Record<string, { icon: typeof Clock; className: string }> = {
+    draft: {
+        icon: Clock,
+        className: 'bg-gray-100 text-gray-600 border-gray-300 dark:bg-gray-800 dark:text-gray-300',
+    },
     pending: {
         icon: Clock,
         className: 'bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-950 dark:text-yellow-200',
@@ -32,6 +36,10 @@ const statusConfig = {
         icon: Truck,
         className: 'bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-950 dark:text-purple-200',
     },
+    delivered: {
+        icon: PackageCheck,
+        className: 'bg-green-100 text-green-800 border-green-300 dark:bg-green-950 dark:text-green-200',
+    },
     completed: {
         icon: PackageCheck,
         className: 'bg-teal-100 text-teal-800 border-teal-300 dark:bg-teal-950 dark:text-teal-200',
@@ -42,9 +50,14 @@ const statusConfig = {
     },
 };
 
+const defaultConfig = {
+    icon: Clock,
+    className: 'bg-gray-100 text-gray-600 border-gray-300 dark:bg-gray-800 dark:text-gray-300',
+};
+
 export function OrderStatusBadge({ status, className }: OrderStatusBadgeProps) {
     const { t } = useTranslation();
-    const config = statusConfig[status];
+    const config = statusConfig[status] ?? defaultConfig;
     const Icon = config.icon;
 
     return (

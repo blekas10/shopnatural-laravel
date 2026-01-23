@@ -15,6 +15,7 @@ interface CartContextType {
     clearCart: () => void;
     isInCart: (productId: number, variantId: number | null) => boolean;
     getItemQuantity: (productId: number, variantId: number | null) => number;
+    restoreCart: (items: CartItem[]) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -193,6 +194,17 @@ export function CartProvider({ children }: CartProviderProps) {
         setItems([]);
     }, []);
 
+    // Restore cart from saved items (used for continuing abandoned checkouts)
+    const restoreCart = useCallback((newItems: CartItem[]) => {
+        setItems(newItems);
+        // Also persist to localStorage immediately
+        try {
+            localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(newItems));
+        } catch (error) {
+            console.error('Failed to save restored cart to localStorage:', error);
+        }
+    }, []);
+
     // Check if item is in cart
     const isInCart = useCallback((productId: number, variantId: number | null): boolean => {
         const itemId = generateItemId(productId, variantId);
@@ -229,8 +241,9 @@ export function CartProvider({ children }: CartProviderProps) {
             clearCart,
             isInCart,
             getItemQuantity,
+            restoreCart,
         }),
-        [items, itemCount, totalPrice, addItem, removeItem, updateQuantity, clearCart, isInCart, getItemQuantity]
+        [items, itemCount, totalPrice, addItem, removeItem, updateQuantity, clearCart, isInCart, getItemQuantity, restoreCart]
     );
 
     return (
