@@ -93,7 +93,7 @@ export default function CookieConsentBanner() {
     return (
         <div
             className={cn(
-                'fixed bottom-4 left-4 right-4 z-[9999] mx-auto max-w-md',
+                'fixed bottom-4 left-4 right-4 z-40 mx-auto max-w-md',
                 'animate-in slide-in-from-bottom-5 fade-in duration-300'
             )}
         >
