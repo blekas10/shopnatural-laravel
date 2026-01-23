@@ -88,10 +88,10 @@ class OrderController extends Controller
             abort(403, 'Unauthorized access to order');
         }
 
-        // Calculate VAT values with fallbacks for old orders (VAT is 21% of total)
+        // Calculate VAT values with fallbacks for old orders
         $subtotal = (float) $order->subtotal;
-        $vatAmount = $order->vat_amount ?? ($subtotal * 0.21);
-        $subtotalExclVat = $order->subtotal_excl_vat ?? ($subtotal - $vatAmount);
+        $subtotalExclVat = $order->subtotal_excl_vat ?? ($subtotal / 1.21);
+        $vatAmount = $order->vat_amount ?? ($subtotal - $subtotalExclVat);
 
         return Inertia::render('order-confirmation', [
             'order' => [

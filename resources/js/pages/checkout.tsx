@@ -324,9 +324,9 @@ export default function Checkout({
     // Product discount = difference between original and current prices
     const productDiscount = originalSubtotal - subtotal;
 
-    // Calculate VAT breakdown from subtotal (VAT is 21% of total)
-    const vatAmount = subtotal * VAT_RATE;
-    const subtotalExclVat = subtotal - vatAmount;
+    // Calculate VAT breakdown from subtotal (prices include VAT)
+    const subtotalExclVat = subtotal / (1 + VAT_RATE);
+    const vatAmount = subtotal - subtotalExclVat;
 
     // Shipping cost
     const shipping = calculateShippingCost(

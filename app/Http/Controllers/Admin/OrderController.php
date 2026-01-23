@@ -158,8 +158,8 @@ class OrderController extends Controller
                 'original_subtotal' => $order->original_subtotal ?? $order->subtotal,
                 'product_discount' => $order->product_discount ?? '0.00',
                 'subtotal' => $order->subtotal,
-                'vat_amount' => $order->vat_amount ?? number_format((float) $order->subtotal * 0.21, 2, '.', ''),
-                'subtotal_excl_vat' => $order->subtotal_excl_vat ?? number_format((float) $order->subtotal - ((float) $order->subtotal * 0.21), 2, '.', ''),
+                'subtotal_excl_vat' => $order->subtotal_excl_vat ?? number_format((float) $order->subtotal / 1.21, 2, '.', ''),
+                'vat_amount' => $order->vat_amount ?? number_format((float) $order->subtotal - ((float) $order->subtotal / 1.21), 2, '.', ''),
                 'shipping_cost' => $order->shipping_cost,
                 'promo_code' => $order->promoCode ? [
                     'code' => $order->promoCode->code,
