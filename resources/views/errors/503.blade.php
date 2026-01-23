@@ -239,7 +239,7 @@
 
     <div class="container">
         <div class="logo">
-            <img src="/logo.svg" alt="{{ config('app.name', 'Shop Natural') }}">
+            <img src="/images/shop-natural-logo.png" alt="{{ config('app.name', 'Shop Natural') }}">
         </div>
 
         <div class="icon-wrapper">

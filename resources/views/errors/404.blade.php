@@ -186,7 +186,7 @@
     <div class="container">
         <div class="logo">
             <a href="/">
-                <img src="/logo.svg" alt="{{ config('app.name', 'Shop Natural') }}">
+                <img src="/images/shop-natural-logo.png" alt="{{ config('app.name', 'Shop Natural') }}">
             </a>
         </div>
 
