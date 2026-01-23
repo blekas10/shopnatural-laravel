@@ -581,7 +581,7 @@ export default function OrderConfirmation({ order }: OrderConfirmationProps) {
                                     <p className="text-sm text-muted-foreground">
                                         {t('order.need_help', 'Need help?')}{' '}
                                         <Link
-                                            href="/contact"
+                                            href={route('contact')}
                                             className="font-medium text-gold hover:underline"
                                         >
                                             {t(
