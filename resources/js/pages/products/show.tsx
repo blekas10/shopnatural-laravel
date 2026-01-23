@@ -719,23 +719,10 @@ export default function ProductShow({ product, relatedProducts }: ProductShowPro
                 {/* Mobile Bottom Bar */}
                 <div className="fixed bottom-0 left-0 right-0 z-10 border-t border-border bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-lg supports-[backdrop-filter]:bg-background/80 lg:hidden">
                     <div className="container mx-auto px-4 py-3">
-                        <div className="flex items-center gap-3">
-                            {/* Wishlist Button */}
-                            <button
-                                onClick={handleWishlistToggle}
-                                className={cn(
-                                    "flex size-12 shrink-0 items-center justify-center rounded-lg border-2 transition-all duration-300",
-                                    inWishlist
-                                        ? "border-gold bg-gold/10 text-gold"
-                                        : "border-border text-foreground hover:border-gold hover:text-gold"
-                                )}
-                            >
-                                <Heart className={cn("size-5", inWishlist && "fill-current")} />
-                            </button>
-
-                            {/* Variant Selector - Mobile Compact */}
+                        <div className="flex flex-col gap-2">
+                            {/* Variant Selector Row - Only shown when variants exist */}
                             {hasVariants && product.variants && (
-                                <div className="flex shrink-0 gap-2">
+                                <div className="flex flex-wrap gap-2">
                                     {product.variants.map((variant) => (
                                         <button
                                             key={variant.id}
@@ -756,20 +743,31 @@ export default function ProductShow({ product, relatedProducts }: ProductShowPro
                                 </div>
                             )}
 
-                            {/* Add to Cart Button */}
-                            <button
-                                disabled={!currentInStock || isAdding}
-                                onClick={handleAddToCart}
-                                className="flex flex-1 items-center justify-center gap-2 rounded-lg border-2 border-gold bg-gold px-4 py-3 text-sm font-bold uppercase tracking-wide text-white transition-all duration-300 hover:bg-transparent hover:text-gold disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                                <ShoppingCart className="size-4" />
-                                <span className="hidden xs:inline">
+                            {/* Action Buttons Row */}
+                            <div className="flex items-center gap-3">
+                                {/* Wishlist Button */}
+                                <button
+                                    onClick={handleWishlistToggle}
+                                    className={cn(
+                                        "flex size-12 shrink-0 items-center justify-center rounded-lg border-2 transition-all duration-300",
+                                        inWishlist
+                                            ? "border-gold bg-gold/10 text-gold"
+                                            : "border-border text-foreground hover:border-gold hover:text-gold"
+                                    )}
+                                >
+                                    <Heart className={cn("size-5", inWishlist && "fill-current")} />
+                                </button>
+
+                                {/* Add to Cart Button */}
+                                <button
+                                    disabled={!currentInStock || isAdding}
+                                    onClick={handleAddToCart}
+                                    className="flex flex-1 items-center justify-center gap-2 rounded-lg border-2 border-gold bg-gold px-4 py-3 text-sm font-bold uppercase tracking-wide text-white transition-all duration-300 hover:bg-transparent hover:text-gold disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    <ShoppingCart className="size-4" />
                                     {isAdding ? t('shop.adding', 'Adding...') : t('shop.add_to_cart', 'Add to Cart')}
-                                </span>
-                                <span className="xs:hidden">
-                                    {isAdding ? '...' : t('shop.add', 'Add')}
-                                </span>
-                            </button>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
