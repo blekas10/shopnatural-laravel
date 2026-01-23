@@ -457,6 +457,7 @@ class CheckoutController extends Controller
                     'locale' => $locale,
                     'metadata' => [
                         'order_id' => $order->id,
+                        'order_number' => $order->order_number,
                     ],
                 ];
 
@@ -503,7 +504,7 @@ class CheckoutController extends Controller
                 $payseraData = [
                     'projectid' => config('paysera.project_id'),
                     'sign_password' => config('paysera.sign_password'),
-                    'orderid' => (string) $order->id,
+                    'orderid' => $order->order_number,
                     'amount' => (int)($order->total * 100), // Convert to cents
                     'currency' => config('paysera.currency'),
                     'country' => 'LT',

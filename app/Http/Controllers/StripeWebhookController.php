@@ -79,17 +79,25 @@ class StripeWebhookController extends Controller
             'metadata' => $session->metadata,
         ]);
 
+        // Try order_number first (preferred), fallback to order_id for backward compatibility
+        $orderNumber = $session->metadata->order_number ?? null;
         $orderId = $session->metadata->order_id ?? null;
 
-        if (!$orderId) {
-            Log::error('Stripe webhook: No order_id in metadata');
+        if (!$orderNumber && !$orderId) {
+            Log::error('Stripe webhook: No order_number or order_id in metadata');
             return;
         }
 
-        $order = Order::find($orderId);
+        // Find by order_number (preferred) or fallback to ID
+        $order = $orderNumber
+            ? Order::where('order_number', $orderNumber)->first()
+            : Order::find($orderId);
 
         if (!$order) {
-            Log::error('Stripe webhook: Order not found', ['order_id' => $orderId]);
+            Log::error('Stripe webhook: Order not found', [
+                'order_number' => $orderNumber,
+                'order_id' => $orderId,
+            ]);
             return;
         }
 
