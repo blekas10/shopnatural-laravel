@@ -83,16 +83,32 @@ class PayseraController extends Controller
 
                 // Venipak shipment is created manually via admin panel
             } elseif ($response['status'] == '0') {
-                // Payment pending
-                Log::info('Paysera payment pending', [
+                // Payment not executed yet
+                Log::info('Paysera payment not executed', [
                     'order_id' => $order->id,
                     'order_number' => $order->order_number,
                 ]);
+            } elseif ($response['status'] == '2') {
+                // Payment accepted but needs additional confirmation - keep as pending
+                Log::info('Paysera payment awaiting confirmation', [
+                    'order_id' => $order->id,
+                    'order_number' => $order->order_number,
+                ]);
+            } elseif ($response['status'] == '3') {
+                // Additional information received - don't change status, just log
+                // This callback just provides buyer info, payment may already be confirmed
+                Log::info('Paysera additional info received', [
+                    'order_id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'current_status' => $order->payment_status,
+                ]);
             } else {
-                // Payment failed
-                $order->update(['payment_status' => 'failed']);
+                // Unknown status - only mark as failed if not already paid
+                if ($order->payment_status !== 'paid') {
+                    $order->update(['payment_status' => 'failed']);
+                }
 
-                Log::warning('Paysera payment failed', [
+                Log::warning('Paysera unknown status', [
                     'order_id' => $order->id,
                     'order_number' => $order->order_number,
                     'status' => $response['status'],
