@@ -84,7 +84,7 @@ export default function Checkout({
 }: CheckoutPageProps) {
     const { items, totalPrice } = useCart();
     const { t, route } = useTranslation();
-    const { auth } = usePage<SharedData>().props;
+    const { auth, locale } = usePage<SharedData>().props;
 
     // Initialize validator
     const validator = useMemo(() => new CheckoutValidator(t), [t]);
@@ -362,6 +362,7 @@ export default function Checkout({
                     code: promoCodeInput.trim(),
                     cart_total: subtotal,
                     email: contact.email || undefined,
+                    locale: locale,
                 }),
             });
 
