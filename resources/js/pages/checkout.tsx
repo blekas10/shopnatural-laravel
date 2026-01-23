@@ -1136,16 +1136,18 @@ export default function Checkout({
                                                     >
                                                         {t('checkout.agree_to_terms_prefix', 'I agree to the')}{' '}
                                                         <Link
-                                                            href="/terms"
+                                                            href={route('return-policy')}
                                                             className="font-medium text-gold hover:underline"
+                                                            target="_blank"
                                                         >
                                                             {t('checkout.terms_and_conditions', 'Terms and Conditions')}
                                                         </Link>
                                                         {' '}
                                                         {t('checkout.and', 'and')}{' '}
                                                         <Link
-                                                            href="/privacy"
+                                                            href={route('privacy-policy')}
                                                             className="font-medium text-gold hover:underline"
+                                                            target="_blank"
                                                         >
                                                             {t('checkout.privacy_policy', 'Privacy Policy')}
                                                         </Link>

@@ -1,4 +1,4 @@
-import { useForm } from '@inertiajs/react';
+import { useForm, Link } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -243,13 +243,13 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
                     className="text-sm font-normal cursor-pointer leading-relaxed"
                 >
                     {t('checkout.agree_to_terms_prefix', 'I agree to the')}{' '}
-                    <span className="text-gold hover:text-gold/80 cursor-pointer">
+                    <Link href={route('return-policy')} className="text-gold hover:text-gold/80 underline" target="_blank">
                         {t('checkout.terms_and_conditions', 'Terms and Conditions')}
-                    </span>{' '}
+                    </Link>{' '}
                     {t('checkout.and', 'and')}{' '}
-                    <span className="text-gold hover:text-gold/80 cursor-pointer">
+                    <Link href={route('privacy-policy')} className="text-gold hover:text-gold/80 underline" target="_blank">
                         {t('checkout.privacy_policy', 'Privacy Policy')}
-                    </span>
+                    </Link>
                 </Label>
             </div>
 
