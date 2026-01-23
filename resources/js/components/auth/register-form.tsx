@@ -243,11 +243,11 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
                     className="text-sm font-normal cursor-pointer leading-relaxed"
                 >
                     {t('checkout.agree_to_terms_prefix', 'I agree to the')}{' '}
-                    <Link href={route('return-policy')} className="text-gold hover:text-gold/80 underline" target="_blank">
+                    <Link href={route('return-policy')} className="text-gold hover:text-gold/80 underline" target="_blank" rel="noopener noreferrer">
                         {t('checkout.terms_and_conditions', 'Terms and Conditions')}
                     </Link>{' '}
                     {t('checkout.and', 'and')}{' '}
-                    <Link href={route('privacy-policy')} className="text-gold hover:text-gold/80 underline" target="_blank">
+                    <Link href={route('privacy-policy')} className="text-gold hover:text-gold/80 underline" target="_blank" rel="noopener noreferrer">
                         {t('checkout.privacy_policy', 'Privacy Policy')}
                     </Link>
                 </Label>

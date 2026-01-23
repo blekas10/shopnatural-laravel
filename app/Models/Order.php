@@ -320,27 +320,45 @@ class Order extends Model
     }
 
     /**
-     * Generate unique sequential order number (format: 6002, 6003, etc.)
-     * Called at checkout creation to assign order number immediately.
+     * Generate a secure, non-sequential order number
+     * SECURITY: Uses cryptographically random strings to prevent enumeration attacks
+     * Format: SN-XXXX-XXXX-XX (e.g., SN-K7M2-R9P4-XB)
      */
     public static function generateOrderNumber(): string
     {
-        // Get the highest numeric order number
-        $lastOrder = static::withTrashed()
-            ->whereNotNull('order_number')
-            ->whereRaw("order_number REGEXP '^[0-9]+$'")
-            ->orderByRaw("CAST(order_number AS UNSIGNED) DESC")
-            ->first();
+        // Characters that are unambiguous (no 0/O, 1/I/L confusion)
+        $chars = '23456789ABCDEFGHJKMNPQRSTUVWXYZ';
+        $maxAttempts = 10;
 
-        if ($lastOrder && is_numeric($lastOrder->order_number)) {
-            // Increment the last number
-            $nextNumber = (int) $lastOrder->order_number + 1;
-        } else {
-            // Start from 6057
-            $nextNumber = 6057;
+        for ($attempt = 0; $attempt < $maxAttempts; $attempt++) {
+            // Generate random segments
+            $segment1 = '';
+            $segment2 = '';
+            $segment3 = '';
+
+            for ($i = 0; $i < 4; $i++) {
+                $segment1 .= $chars[random_int(0, strlen($chars) - 1)];
+                $segment2 .= $chars[random_int(0, strlen($chars) - 1)];
+            }
+            for ($i = 0; $i < 2; $i++) {
+                $segment3 .= $chars[random_int(0, strlen($chars) - 1)];
+            }
+
+            $orderNumber = "SN-{$segment1}-{$segment2}-{$segment3}";
+
+            // Check uniqueness (including soft-deleted orders)
+            $exists = static::withTrashed()
+                ->where('order_number', $orderNumber)
+                ->exists();
+
+            if (!$exists) {
+                return $orderNumber;
+            }
         }
 
-        return (string) $nextNumber;
+        // Fallback: add timestamp to ensure uniqueness
+        $timestamp = now()->format('ymdHis');
+        return "SN-{$timestamp}-" . strtoupper(\Illuminate\Support\Str::random(4));
     }
 
     /**

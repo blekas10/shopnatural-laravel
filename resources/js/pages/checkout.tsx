@@ -1138,7 +1138,7 @@ export default function Checkout({
                                                         <Link
                                                             href={route('return-policy')}
                                                             className="font-medium text-gold hover:underline"
-                                                            target="_blank"
+                                                            target="_blank" rel="noopener noreferrer"
                                                         >
                                                             {t('checkout.terms_and_conditions', 'Terms and Conditions')}
                                                         </Link>
@@ -1147,7 +1147,7 @@ export default function Checkout({
                                                         <Link
                                                             href={route('privacy-policy')}
                                                             className="font-medium text-gold hover:underline"
-                                                            target="_blank"
+                                                            target="_blank" rel="noopener noreferrer"
                                                         >
                                                             {t('checkout.privacy_policy', 'Privacy Policy')}
                                                         </Link>

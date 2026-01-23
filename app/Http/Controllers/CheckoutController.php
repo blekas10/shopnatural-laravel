@@ -215,14 +215,14 @@ class CheckoutController extends Controller
         $validated = $request->validate([
             'draftOrderId' => 'required|integer|exists:orders,id',
             'contact.fullName' => 'required|string',
-            'contact.email' => 'required|email:rfc',
+            'contact.email' => 'required|email:strict,dns|max:255',
             'contact.phone' => 'nullable|string',
             'shippingAddress.addressLine1' => 'required|string',
             'shippingAddress.addressLine2' => 'nullable|string',
             'shippingAddress.city' => 'required|string',
             'shippingAddress.state' => 'nullable|string',
             'shippingAddress.postalCode' => 'required|string',
-            'shippingAddress.country' => 'required|string',
+            'shippingAddress.country' => 'required|string|size:2', // ISO country code
             'billingSameAsShipping' => 'required|boolean',
             'billingAddress.addressLine1' => 'required_if:billingSameAsShipping,false|nullable|string',
             'billingAddress.addressLine2' => 'nullable|string',
@@ -230,57 +230,48 @@ class CheckoutController extends Controller
             'billingAddress.state' => 'nullable|string',
             'billingAddress.postalCode' => 'required_if:billingSameAsShipping,false|nullable|string',
             'billingAddress.country' => 'required_if:billingSameAsShipping,false|nullable|string',
-            'shippingMethod' => 'required|string',
+            'shippingMethod' => 'required|string|in:venipak-courier,venipak-pickup,fedex-courier',
             'venipakPickupPoint' => 'nullable|array',
             'venipakPickupPoint.id' => 'nullable|integer',
-            'venipakPickupPoint.code' => 'nullable|string', // Venipak pickup point code (required for shipment)
+            'venipakPickupPoint.code' => 'nullable|string',
             'venipakPickupPoint.name' => 'nullable|string',
             'venipakPickupPoint.address' => 'nullable|string',
             'venipakPickupPoint.city' => 'nullable|string',
             'venipakPickupPoint.zip' => 'nullable|string',
             'venipakPickupPoint.country' => 'nullable|string',
             'paymentMethod' => 'required|string|in:stripe,paysera',
+            // SECURITY: Only accept item IDs and quantities - prices calculated server-side
             'items' => 'required|array|min:1',
             'items.*.productId' => 'required|integer|exists:products,id',
-            'items.*.variantId' => 'nullable|integer|exists:product_variants,id',
-            'items.*.quantity' => 'required|integer|min:1',
-            'items.*.price' => 'required|numeric|min:0',
-            'items.*.originalPrice' => 'nullable|numeric|min:0',
-            'originalSubtotal' => 'required|numeric|min:0',
-            'productDiscount' => 'required|numeric|min:0',
-            'subtotal' => 'required|numeric|min:0',
-            'subtotalExclVat' => 'required|numeric|min:0',
-            'vatAmount' => 'required|numeric|min:0',
-            'shipping' => 'required|numeric|min:0',
+            'items.*.variantId' => 'required|integer|exists:product_variants,id',
+            'items.*.quantity' => 'required|integer|min:1|max:100',
             'promoCode' => 'nullable|string|max:50',
-            'promoCodeDiscount' => 'required|numeric|min:0',
-            'total' => 'required|numeric|min:0',
             'agreeToTerms' => 'required|accepted',
         ]);
 
-        // Validate promo code if provided
-        $promoCode = null;
-        $promoCodeService = app(PromoCodeService::class);
+        // SECURITY: Calculate ALL prices server-side - never trust client prices
+        $calculatedPricing = $this->calculateOrderPricing(
+            $validated['items'],
+            $validated['shippingAddress']['country'],
+            $validated['shippingMethod'],
+            $validated['promoCode'] ?? null,
+            $validated['contact']['email']
+        );
 
-        if (!empty($validated['promoCode'])) {
-            $promoCode = $promoCodeService->validate(
-                $validated['promoCode'],
-                $validated['subtotal'],
-                auth()->id(),
-                $validated['contact']['email']
-            );
-
-            if (!$promoCode) {
-                return back()->withErrors([
-                    'promoCode' => $promoCodeService->getError() ?? __('promo_code.invalid'),
-                ]);
-            }
+        if (isset($calculatedPricing['error'])) {
+            return back()->withErrors(['error' => $calculatedPricing['error']]);
         }
 
-        Log::info('Checkout: Validation passed', [
+        // Promo code is already validated in calculateOrderPricing
+        $promoCode = $calculatedPricing['promoCode'];
+
+        Log::info('Checkout: Server-side pricing calculated', [
             'customer_email' => $validated['contact']['email'],
             'shipping_method' => $validated['shippingMethod'],
-            'total' => $validated['total'],
+            'subtotal' => $calculatedPricing['subtotal'],
+            'shipping_cost' => $calculatedPricing['shippingCost'],
+            'promo_discount' => $calculatedPricing['promoCodeDiscount'],
+            'total' => $calculatedPricing['total'],
         ]);
 
         DB::beginTransaction();
@@ -304,24 +295,25 @@ class CheckoutController extends Controller
                 : $validated['billingAddress'];
 
             // Update the draft order to pending status with all details
+            // SECURITY: ALL prices are server-calculated, never from client
             $order->update([
                 'user_id' => auth()->id(), // null for guests
                 'status' => 'pending',
                 'payment_status' => 'pending',
                 'payment_method' => $validated['paymentMethod'],
-                // Price breakdown
-                'original_subtotal' => $validated['originalSubtotal'],
-                'product_discount' => $validated['productDiscount'],
-                'subtotal' => $validated['subtotal'],
-                'subtotal_excl_vat' => $validated['subtotalExclVat'],
-                'vat_amount' => $validated['vatAmount'],
-                'shipping_cost' => $validated['shipping'],
+                // Price breakdown - ALL from server calculations
+                'original_subtotal' => $calculatedPricing['originalSubtotal'],
+                'product_discount' => $calculatedPricing['productDiscount'],
+                'subtotal' => $calculatedPricing['subtotal'],
+                'subtotal_excl_vat' => $calculatedPricing['subtotalExclVat'],
+                'vat_amount' => $calculatedPricing['vatAmount'],
+                'shipping_cost' => $calculatedPricing['shippingCost'],
                 'shipping_method' => $validated['shippingMethod'],
                 'venipak_pickup_point' => $validated['venipakPickupPoint'] ?? null,
-                'discount' => $validated['promoCodeDiscount'],
+                'discount' => $calculatedPricing['promoCodeDiscount'],
                 'promo_code_id' => $promoCode?->id,
                 'promo_code_value' => $promoCode ? $promoCode->getFormattedValue() : null,
-                'total' => $validated['total'],
+                'total' => $calculatedPricing['total'],
                 'currency' => 'EUR',
 
                 // Shipping address
@@ -360,62 +352,52 @@ class CheckoutController extends Controller
             // Delete any existing order items (in case of re-submission)
             $order->items()->delete();
 
-            // Create order items with historical product data
-            foreach ($validated['items'] as $item) {
-                // Fetch product and variant for historical data
-                $product = Product::find($item['productId']);
-                $variant = ProductVariant::find($item['variantId']);
-
-                if (!$product || !$variant) {
-                    throw new \Exception('Product or variant not found');
-                }
-
-                $unitPrice = $item['price'];
-                $quantity = $item['quantity'];
-                $subtotal = $unitPrice * $quantity;
-
+            // Create order items with SERVER-CALCULATED prices
+            foreach ($calculatedPricing['items'] as $calculatedItem) {
                 OrderItem::create([
                     'order_id' => $order->id,
-                    'product_id' => $item['productId'],
-                    'product_variant_id' => $item['variantId'],
+                    'product_id' => $calculatedItem['productId'],
+                    'product_variant_id' => $calculatedItem['variantId'],
 
                     // Store product details at time of order
-                    'product_name' => $product->getTranslation('name', app()->getLocale()),
-                    'product_sku' => $variant->sku,
-                    'variant_size' => $variant->size,
+                    'product_name' => $calculatedItem['productName'],
+                    'product_sku' => $calculatedItem['sku'],
+                    'variant_size' => $calculatedItem['size'],
 
-                    // Pricing - store original price if discounted
-                    'original_unit_price' => isset($item['originalPrice']) && $item['originalPrice'] > $unitPrice
-                        ? $item['originalPrice']
+                    // Pricing - ALL from server calculations
+                    'original_unit_price' => $calculatedItem['originalPrice'] > $calculatedItem['price']
+                        ? $calculatedItem['originalPrice']
                         : null,
-                    'unit_price' => $unitPrice,
-                    'quantity' => $quantity,
-                    'subtotal' => $subtotal,
-                    'tax' => 0, // Calculate if needed
-                    'total' => $subtotal,
+                    'unit_price' => $calculatedItem['price'],
+                    'quantity' => $calculatedItem['quantity'],
+                    'subtotal' => $calculatedItem['subtotal'],
+                    'tax' => 0,
+                    'total' => $calculatedItem['subtotal'],
                 ]);
 
-                Log::debug('Checkout: Order item created', [
+                Log::debug('Checkout: Order item created with server-calculated price', [
                     'order_id' => $order->id,
-                    'product_id' => $item['productId'],
-                    'variant_id' => $item['variantId'],
-                    'quantity' => $quantity,
+                    'product_id' => $calculatedItem['productId'],
+                    'variant_id' => $calculatedItem['variantId'],
+                    'quantity' => $calculatedItem['quantity'],
+                    'unit_price' => $calculatedItem['price'],
                 ]);
             }
 
             // Apply promo code usage tracking
             if ($promoCode) {
-                $promoCodeService->applyToOrder($order, $promoCode, $validated['promoCodeDiscount']);
+                $promoCodeService = app(PromoCodeService::class);
+                $promoCodeService->applyToOrder($order, $promoCode, $calculatedPricing['promoCodeDiscount']);
                 Log::info('Checkout: Promo code applied', [
                     'order_id' => $order->id,
                     'promo_code' => $promoCode->code,
-                    'discount_amount' => $validated['promoCodeDiscount'],
+                    'discount_amount' => $calculatedPricing['promoCodeDiscount'],
                 ]);
             }
 
             Log::info('Checkout: All order items created, committing transaction', [
                 'order_id' => $order->id,
-                'items_count' => count($validated['items']),
+                'items_count' => count($calculatedPricing['items']),
             ]);
 
             DB::commit();
@@ -573,6 +555,164 @@ class CheckoutController extends Controller
                 'error' => __('checkout.error'),
             ]);
         }
+    }
+
+    /**
+     * Calculate all order pricing server-side
+     * SECURITY: This is critical - never trust client-provided prices
+     */
+    protected function calculateOrderPricing(
+        array $items,
+        string $countryCode,
+        string $shippingMethod,
+        ?string $promoCodeString,
+        string $customerEmail
+    ): array {
+        // Shipping pricing by region
+        $balticCountries = ['LT', 'LV', 'EE'];
+        $internationalCountries = ['PL', 'FI'];
+        $euCountries = [
+            'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'FR', 'DE', 'GR',
+            'HU', 'IE', 'IT', 'LU', 'MT', 'NL', 'PT', 'RO', 'SK', 'SI',
+            'ES', 'SE', 'GB', 'NO', 'CH'
+        ];
+        $northAmericaCountries = ['US', 'CA'];
+        $freeShippingThreshold = 50; // €50 for Lithuania
+
+        $calculatedItems = [];
+        $originalSubtotal = 0;
+        $subtotal = 0;
+
+        // Calculate item prices from database
+        foreach ($items as $item) {
+            $product = Product::with('primaryImage')->find($item['productId']);
+            $variant = ProductVariant::find($item['variantId']);
+
+            if (!$product || !$variant) {
+                return ['error' => __('checkout.product_not_found')];
+            }
+
+            // Verify variant belongs to product
+            if ($variant->product_id !== $product->id) {
+                Log::warning('Checkout: Variant/product mismatch attempt', [
+                    'product_id' => $item['productId'],
+                    'variant_id' => $item['variantId'],
+                ]);
+                return ['error' => __('checkout.invalid_product')];
+            }
+
+            // Get prices from DATABASE - never from client
+            $originalPrice = (float) $variant->price;
+            $currentPrice = $variant->sale_price && $variant->sale_price < $variant->price
+                ? (float) $variant->sale_price
+                : $originalPrice;
+
+            $quantity = (int) $item['quantity'];
+            $itemOriginalSubtotal = $originalPrice * $quantity;
+            $itemSubtotal = $currentPrice * $quantity;
+
+            $originalSubtotal += $itemOriginalSubtotal;
+            $subtotal += $itemSubtotal;
+
+            $calculatedItems[] = [
+                'productId' => $product->id,
+                'variantId' => $variant->id,
+                'productName' => $product->getTranslation('name', app()->getLocale()),
+                'sku' => $variant->sku,
+                'size' => $variant->size,
+                'originalPrice' => $originalPrice,
+                'price' => $currentPrice,
+                'quantity' => $quantity,
+                'subtotal' => $itemSubtotal,
+            ];
+        }
+
+        $productDiscount = $originalSubtotal - $subtotal;
+
+        // Calculate shipping cost server-side
+        $isLithuania = $countryCode === 'LT';
+        $isBaltic = in_array($countryCode, $balticCountries);
+        $isInternational = in_array($countryCode, $internationalCountries);
+        $isEU = in_array($countryCode, $euCountries);
+        $isNorthAmerica = in_array($countryCode, $northAmericaCountries);
+
+        // Validate shipping method is valid for the country
+        if (($isBaltic || $isInternational) && !in_array($shippingMethod, ['venipak-courier', 'venipak-pickup'])) {
+            if ($isBaltic && $shippingMethod !== 'venipak-pickup') {
+                // Allow venipak-courier for Baltic
+            } elseif ($isInternational && $shippingMethod !== 'venipak-courier') {
+                return ['error' => __('checkout.invalid_shipping_method')];
+            }
+        }
+        if (($isEU || $isNorthAmerica) && $shippingMethod !== 'fedex-courier') {
+            return ['error' => __('checkout.invalid_shipping_method')];
+        }
+
+        // Calculate shipping cost
+        $shippingCost = 0;
+        if ($isBaltic) {
+            // Lithuania gets free shipping for orders over €50
+            $hasFreeShipping = $isLithuania && $subtotal >= $freeShippingThreshold;
+            $shippingCost = $hasFreeShipping ? 0 : 4;
+        } elseif ($isInternational) {
+            $shippingCost = 4;
+        } elseif ($isEU || $isNorthAmerica) {
+            $shippingCost = 20;
+        } else {
+            return ['error' => __('checkout.shipping_not_available')];
+        }
+
+        // Validate and calculate promo code discount server-side
+        $promoCode = null;
+        $promoCodeDiscount = 0;
+
+        if (!empty($promoCodeString)) {
+            $promoCodeService = app(PromoCodeService::class);
+            $promoCode = $promoCodeService->validate(
+                $promoCodeString,
+                $subtotal,
+                auth()->id(),
+                $customerEmail
+            );
+
+            if (!$promoCode) {
+                return ['error' => $promoCodeService->getError() ?? __('promo_code.invalid')];
+            }
+
+            // Calculate discount server-side
+            $promoCodeDiscount = $promoCodeService->calculateDiscount($promoCode, $subtotal);
+        }
+
+        // Calculate VAT (Lithuania: 21% included in price)
+        $subtotalAfterPromo = $subtotal - $promoCodeDiscount;
+        $subtotalExclVat = round($subtotalAfterPromo / 1.21, 2);
+        $vatAmount = round($subtotalAfterPromo - $subtotalExclVat, 2);
+
+        // Calculate final total
+        $total = $subtotal + $shippingCost - $promoCodeDiscount;
+
+        Log::info('Checkout: Server-side price calculation complete', [
+            'items_count' => count($calculatedItems),
+            'original_subtotal' => $originalSubtotal,
+            'product_discount' => $productDiscount,
+            'subtotal' => $subtotal,
+            'shipping_cost' => $shippingCost,
+            'promo_discount' => $promoCodeDiscount,
+            'total' => $total,
+        ]);
+
+        return [
+            'items' => $calculatedItems,
+            'originalSubtotal' => $originalSubtotal,
+            'productDiscount' => $productDiscount,
+            'subtotal' => $subtotal,
+            'subtotalExclVat' => $subtotalExclVat,
+            'vatAmount' => $vatAmount,
+            'shippingCost' => $shippingCost,
+            'promoCode' => $promoCode,
+            'promoCodeDiscount' => $promoCodeDiscount,
+            'total' => $total,
+        ];
     }
 
     /**

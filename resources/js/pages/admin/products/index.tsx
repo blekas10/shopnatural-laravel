@@ -555,7 +555,7 @@ export default function AdminProducts({ products, categories, brands, filters }:
                                                                 return (
                                                                     <Link
                                                                         href={route('products.show', { slug })}
-                                                                        target="_blank"
+                                                                        target="_blank" rel="noopener noreferrer"
                                                                     >
                                                                         <Button
                                                                             variant="outline"
