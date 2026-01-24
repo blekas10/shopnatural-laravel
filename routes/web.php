@@ -243,7 +243,6 @@ Route::group(['prefix' => 'lt'], function () {
             // User management
             Route::get('users', [AdminUserController::class, 'index'])->name('lt.admin.users.index');
             Route::get('users/{user}', [AdminUserController::class, 'show'])->name('lt.admin.users.show');
-            Route::post('users/{user}/toggle-role', [AdminUserController::class, 'toggleRole'])->name('lt.admin.users.toggle-role');
 
             // Admin dashboard
             Route::get('dashboard', [DashboardController::class, 'adminIndex'])->name('lt.admin.dashboard');
@@ -320,11 +319,28 @@ Route::middleware(['auth'])->group(function () {
         // User management
         Route::get('users', [AdminUserController::class, 'index'])->name('admin.users.index');
         Route::get('users/{user}', [AdminUserController::class, 'show'])->name('admin.users.show');
-        Route::post('users/{user}/toggle-role', [AdminUserController::class, 'toggleRole'])->name('admin.users.toggle-role');
 
         // Admin dashboard
         Route::get('dashboard', [DashboardController::class, 'adminIndex'])->name('admin.dashboard');
     });
 });
+
+// =============================================================================
+// Deprecated WooCommerce URLs - Return 410 Gone
+// These URLs existed on the old WordPress site and are now permanently removed.
+// 410 tells search engines to stop indexing these pages.
+// =============================================================================
+Route::any('product/{any}', fn() => abort(410))->where('any', '.*');
+Route::any('product-category/{any}', fn() => abort(410))->where('any', '.*');
+Route::any('cosmetics-type/{any}', fn() => abort(410))->where('any', '.*');
+Route::any('shop/{any}', fn() => abort(410))->where('any', '.*');
+Route::any('size/{any}', fn() => abort(410))->where('any', '.*');
+Route::any('naturalmente/{any?}', fn() => abort(410))->where('any', '.*');
+
+// Deprecated Lithuanian WooCommerce URLs
+Route::any('lt/produktas/{any}', fn() => abort(410))->where('any', '.*');
+Route::any('lt/parduotuve/{any?}', fn() => abort(410))->where('any', '.*');
+Route::any('lt/cosmetics-type/{any}', fn() => abort(410))->where('any', '.*');
+Route::any('lt/produktu-kategorija/{any}', fn() => abort(410))->where('any', '.*');
 
 require __DIR__.'/settings.php';

@@ -63,7 +63,6 @@ const routeMap: Record<string, Record<string, string>> = {
     'admin.orders.venipak.label': { en: 'admin/orders', lt: 'admin/orders' },
     'admin.users.index': { en: 'admin/users', lt: 'admin/users' },
     'admin.users.show': { en: 'admin/users', lt: 'admin/users' },
-    'admin.users.toggle-role': { en: 'admin/users', lt: 'admin/users' },
     'admin.dashboard': { en: 'admin/dashboard', lt: 'admin/dashboard' },
     // Admin Product Discounts routes
     'admin.product-discounts.index': { en: 'admin/product-discounts', lt: 'admin/product-discounts' },
@@ -177,11 +176,6 @@ export function route(name: string, params: Record<string, string | number | boo
     // Add /payment-status suffix for payment status update routes
     if (name.endsWith('.update-payment-status')) {
         path += '/payment-status';
-    }
-
-    // Add /toggle-role suffix for user role toggle routes
-    if (name.endsWith('.toggle-role')) {
-        path += '/toggle-role';
     }
 
     // Add /venipak/create suffix for Venipak shipment creation routes

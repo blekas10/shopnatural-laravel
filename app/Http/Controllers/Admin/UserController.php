@@ -154,22 +154,4 @@ class UserController extends Controller
         ]);
     }
 
-    /**
-     * Toggle user role (admin/customer)
-     */
-    public function toggleRole(Request $request, User $user)
-    {
-        // Prevent removing admin from self
-        if ($user->id === auth()->id() && $request->action === 'remove') {
-            return redirect()->back()->with('error', __('users.cannot_remove_own_admin'));
-        }
-
-        if ($request->action === 'add') {
-            $user->assignRole('admin');
-        } else {
-            $user->removeRole('admin');
-        }
-
-        return redirect()->back()->with('success', __('users.role_updated'));
-    }
 }
