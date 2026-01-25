@@ -17,6 +17,7 @@ class Product extends Model
     protected $fillable = [
         'brand_id',
         'slug',
+        'old_slugs',
         'name',
         'title',
         'short_description',
@@ -46,6 +47,7 @@ class Product extends Model
     protected $casts = [
         'is_active' => 'boolean',
         'is_featured' => 'boolean',
+        'old_slugs' => 'array',
     ];
 
     /**
