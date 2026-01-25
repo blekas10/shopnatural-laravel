@@ -161,6 +161,7 @@ class PromoCode extends Model
 
     /**
      * Check if per-user limit is reached
+     * Only counts confirmed usages (completed payments)
      */
     public function isPerUserLimitReached(?int $userId, string $email): bool
     {
@@ -169,6 +170,7 @@ class PromoCode extends Model
         }
 
         $usageCount = $this->usages()
+            ->where('status', 'confirmed')
             ->where(function ($q) use ($userId, $email) {
                 if ($userId) {
                     $q->where('user_id', $userId);

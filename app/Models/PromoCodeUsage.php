@@ -13,6 +13,7 @@ class PromoCodeUsage extends Model
         'user_id',
         'email',
         'discount_amount',
+        'status',
     ];
 
     protected function casts(): array
@@ -20,6 +21,22 @@ class PromoCodeUsage extends Model
         return [
             'discount_amount' => 'decimal:2',
         ];
+    }
+
+    /**
+     * Check if this usage is confirmed (payment completed)
+     */
+    public function isConfirmed(): bool
+    {
+        return $this->status === 'confirmed';
+    }
+
+    /**
+     * Mark this usage as confirmed
+     */
+    public function markAsConfirmed(): void
+    {
+        $this->update(['status' => 'confirmed']);
     }
 
     /**

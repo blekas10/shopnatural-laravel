@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Services\InvoiceService;
+use App\Services\PromoCodeService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use WebToPay;
@@ -59,6 +60,10 @@ class PayseraController extends Controller
                 // Generate and store invoice PDFs for both locales
                 $invoiceService = app(InvoiceService::class);
                 $invoiceService->generateBothLocales($order);
+
+                // Confirm promo code usage now that payment is complete
+                $promoCodeService = app(PromoCodeService::class);
+                $promoCodeService->confirmUsage($order);
 
                 Log::info('Paysera payment successful', [
                     'order_id' => $order->id,

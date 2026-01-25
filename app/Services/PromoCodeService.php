@@ -112,23 +112,44 @@ class PromoCodeService
     }
 
     /**
-     * Apply promo code to an order (record usage)
+     * Apply promo code to an order (record usage as pending)
+     * Usage is not counted until payment is confirmed
      */
     public function applyToOrder(Order $order, PromoCode $promoCode, float $discountAmount): PromoCodeUsage
     {
-        // Create usage record
+        // Create usage record with pending status
         $usage = PromoCodeUsage::create([
             'promo_code_id' => $promoCode->id,
             'order_id' => $order->id,
             'user_id' => $order->user_id,
             'email' => $order->customer_email,
             'discount_amount' => $discountAmount,
+            'status' => 'pending',
         ]);
 
-        // Increment usage count
-        $promoCode->incrementUsage();
+        // Don't increment usage count yet - wait for payment confirmation
 
         return $usage;
+    }
+
+    /**
+     * Confirm promo code usage after payment is completed
+     */
+    public function confirmUsage(Order $order): void
+    {
+        $usage = PromoCodeUsage::where('order_id', $order->id)->first();
+
+        if ($usage && !$usage->isConfirmed()) {
+            $usage->markAsConfirmed();
+
+            // Now increment the usage count
+            $usage->promoCode->incrementUsage();
+
+            \Log::info('PromoCode: Usage confirmed after payment', [
+                'order_id' => $order->id,
+                'promo_code_id' => $usage->promo_code_id,
+            ]);
+        }
     }
 
     /**
