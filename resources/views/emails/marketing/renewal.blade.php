@@ -30,7 +30,7 @@
         </p>
 
         <div class="button-container">
-            <a href="{{ config('app.url') }}/lt/registracija" class="button">
+            <a href="{{ config('app.url') }}/lt?auth=register" class="button">
                 Registruotis dabar
             </a>
         </div>
@@ -68,7 +68,7 @@
         </p>
 
         <div class="button-container">
-            <a href="{{ config('app.url') }}/register" class="button">
+            <a href="{{ config('app.url') }}/?auth=register" class="button">
                 Register Now
             </a>
         </div>
