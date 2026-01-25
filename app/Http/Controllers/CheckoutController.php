@@ -461,11 +461,11 @@ class CheckoutController extends Controller
                     ],
                 ];
 
-                // Apply promo code discount if present
-                if ($promoCode && ($validated['promoCodeDiscount'] ?? 0) > 0) {
+                // Apply promo code discount if present (use server-calculated value, not request)
+                if ($promoCode && ($calculatedPricing['promoCodeDiscount'] ?? 0) > 0) {
                     // Create a one-time Stripe coupon for this order
                     $coupon = \Stripe\Coupon::create([
-                        'amount_off' => (int)($validated['promoCodeDiscount'] * 100),
+                        'amount_off' => (int)($calculatedPricing['promoCodeDiscount'] * 100),
                         'currency' => config('stripe.currency'),
                         'duration' => 'once',
                         'name' => $promoCode->code,
@@ -480,7 +480,7 @@ class CheckoutController extends Controller
                         'order_id' => $order->id,
                         'promo_code' => $promoCode->code,
                         'coupon_id' => $coupon->id,
-                        'discount_amount' => $validated['promoCodeDiscount'],
+                        'discount_amount' => $calculatedPricing['promoCodeDiscount'],
                     ]);
                 }
 
