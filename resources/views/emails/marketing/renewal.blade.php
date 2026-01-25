@@ -6,18 +6,18 @@
         <p class="greeting">Sveiki! 👋</p>
 
         <p class="message">
-            Džiaugiamės galėdami pranešti, kad <strong>Shop Natural</strong> parduotuvė buvo visiškai atnaujinta!
+            Džiaugiamės galėdami pranešti, kad <strong>Shop Natural</strong> parduotuvė atsinaujino!
         </p>
 
         <p class="message">
-            Sukūrėme naują, modernesnę ir patogesnę svetainę, kad jūsų apsipirkimo patirtis būtų dar malonesnė.
-            Visi jūsų mėgstami natūralūs produktai laukia jūsų naujoje platformoje.
+            Sukūrėme modernesnę ir patogesnę svetainę, kad jūsų apsipirkimo patirtis būtų dar malonesnė.
+            Visi jūsų mėgstami produktai laukia jūsų naujoje platformoje.
         </p>
 
         <div class="highlight-box">
             <p class="highlight-title">Specialus pasiūlymas jums</p>
             <p class="highlight-value">
-                Kaip padėką už jūsų lojalumą, siūlome <strong>{{ $discountPercent }}% nuolaidą</strong> jūsų pirmam
+                Kaip padėką Jums, siūlome <strong>{{ $discountPercent }}% nuolaidą</strong> jūsų pirmam
                 užsakymui naujoje svetainėje! Tiesiog užsiregistruokite ir naudokite kodą:
             </p>
             <p style="text-align: center; margin-top: 16px;">
