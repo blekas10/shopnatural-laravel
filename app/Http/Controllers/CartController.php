@@ -181,7 +181,7 @@ class CartController extends Controller
     }
 
     /**
-     * Restore cart from a draft order
+     * Restore cart from a draft or pending order
      * Allows users to continue abandoned checkouts
      */
     public function restoreFromDraftOrder(Request $request): JsonResponse
@@ -190,9 +190,9 @@ class CartController extends Controller
             'order_id' => 'required|integer|exists:orders,id',
         ]);
 
-        // Find the draft order belonging to this user
+        // Find the draft or pending order belonging to this user
         $order = Order::where('id', $validated['order_id'])
-            ->where('status', 'draft')
+            ->whereIn('status', ['draft', 'pending'])
             ->where('user_id', auth()->id())
             ->with(['items.product.primaryImage', 'items.variant'])
             ->first();
@@ -200,7 +200,7 @@ class CartController extends Controller
         if (!$order) {
             return response()->json([
                 'success' => false,
-                'message' => 'Draft order not found or does not belong to you.',
+                'message' => 'Order not found, already completed, or does not belong to you.',
             ], 404);
         }
 

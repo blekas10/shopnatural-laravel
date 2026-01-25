@@ -326,7 +326,7 @@ export default function OrdersIndex({ orders: ordersData }: OrdersIndexProps) {
 
                                     {/* Order Actions */}
                                     <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-end md:mt-6">
-                                        {order.status === 'draft' ? (
+                                        {(order.status === 'draft' || order.status === 'pending') && (
                                             <Button
                                                 variant="default"
                                                 className="h-11 w-full bg-gold font-bold uppercase tracking-wide text-white hover:bg-gold/90 sm:w-auto md:px-8"
@@ -341,23 +341,27 @@ export default function OrdersIndex({ orders: ordersData }: OrdersIndexProps) {
                                                 ) : (
                                                     <>
                                                         <ShoppingCart className="mr-2 size-4" />
-                                                        {t('orders.continue_checkout', 'Continue Checkout')}
+                                                        {t('orders.continue_order', 'Continue Order')}
                                                     </>
                                                 )}
                                             </Button>
-                                        ) : (
-                                            <Link
-                                                href={route('orders.show', { orderNumber: order.orderNumber })}
-                                                className="w-full sm:w-auto"
-                                            >
-                                                <Button
-                                                    variant="default"
-                                                    className="h-11 w-full bg-gold font-bold uppercase tracking-wide text-white hover:bg-gold/90 sm:w-auto md:px-8"
-                                                >
-                                                    {t('orders.view_order', 'View Order')}
-                                                </Button>
-                                            </Link>
                                         )}
+                                        <Link
+                                            href={route('orders.show', { orderNumber: order.orderNumber })}
+                                            className="w-full sm:w-auto"
+                                        >
+                                            <Button
+                                                variant={order.status === 'draft' || order.status === 'pending' ? 'outline' : 'default'}
+                                                className={cn(
+                                                    "h-11 w-full font-bold uppercase tracking-wide sm:w-auto md:px-8",
+                                                    order.status === 'draft' || order.status === 'pending'
+                                                        ? "border-gold/50 text-gold hover:bg-gold/10"
+                                                        : "bg-gold text-white hover:bg-gold/90"
+                                                )}
+                                            >
+                                                {t('orders.view_order', 'View Order')}
+                                            </Button>
+                                        </Link>
                                     </div>
                                 </div>
                             </motion.div>

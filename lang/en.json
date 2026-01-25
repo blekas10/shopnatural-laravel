@@ -444,6 +444,7 @@
     "orders.tracking_status": "Tracking Status",
     "orders.notes": "Notes",
     "orders.continue_checkout": "Continue Checkout",
+    "orders.continue_order": "Continue Order",
     "orders.cart_restored": "Cart restored successfully",
     "orders.restore_failed": "Failed to restore cart",
     "orders.restoring": "Restoring...",

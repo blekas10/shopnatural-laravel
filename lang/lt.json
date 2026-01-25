@@ -451,6 +451,7 @@
     "orders.tracking_status": "Sekimo būsena",
     "orders.notes": "Pastabos",
     "orders.continue_checkout": "Tęsti apmokėjimą",
+    "orders.continue_order": "Tęsti užsakymą",
     "orders.cart_restored": "Krepšelis sėkmingai atkurtas",
     "orders.restore_failed": "Nepavyko atkurti krepšelio",
     "orders.restoring": "Atkuriama...",

@@ -1,8 +1,9 @@
-import { Link, usePage } from '@inertiajs/react';
+import { Link, usePage, router } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import SEO from '@/components/seo';
-import { type BreadcrumbItem } from '@/types';
+import { type BreadcrumbItem, type CartItem } from '@/types';
 import { useTranslation } from '@/hooks/use-translation';
+import { useCartContext } from '@/contexts/cart-context';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -22,9 +23,13 @@ import {
     Calendar,
     CreditCard,
     FileDown,
+    ShoppingCart,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { useState } from 'react';
+import { toast } from 'sonner';
+import axios from 'axios';
 
 interface PageProps {
     locale: string;
@@ -121,9 +126,50 @@ interface OrderShowProps {
 export default function OrderShow({ order: orderData }: OrderShowProps) {
     const { t, route } = useTranslation();
     const { locale } = usePage<PageProps>().props;
+    const { restoreCart } = useCartContext();
+    const [isRestoring, setIsRestoring] = useState(false);
 
     // Normalize order data - handle both direct Order and ResourceCollection format
     const order = 'data' in orderData ? orderData.data : orderData;
+
+    // Check if this order can be continued (draft or pending payment)
+    const canContinueOrder = order.status === 'draft' || order.status === 'pending';
+
+    const handleContinueOrder = async () => {
+        setIsRestoring(true);
+        try {
+            const response = await axios.post('/cart/restore-from-order', {
+                order_id: order.id,
+            });
+
+            if (response.data.success) {
+                const cartItems: CartItem[] = response.data.items.map((item: {
+                    id: string;
+                    productId: number;
+                    variantId: number | null;
+                    quantity: number;
+                    product: { id: number; name: string; slug: string; price: number; image: string | null } | null;
+                    variant: { id: number; size: string; price: number; sku: string } | null;
+                }) => ({
+                    id: item.id,
+                    productId: item.productId,
+                    variantId: item.variantId,
+                    quantity: item.quantity,
+                    product: item.product,
+                    variant: item.variant,
+                }));
+
+                restoreCart(cartItems);
+                toast.success(t('orders.cart_restored', 'Cart restored successfully'));
+                router.visit(route('checkout'));
+            }
+        } catch (error) {
+            console.error('Failed to restore cart from order:', error);
+            toast.error(t('orders.restore_failed', 'Failed to restore cart'));
+        } finally {
+            setIsRestoring(false);
+        }
+    };
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -205,6 +251,27 @@ export default function OrderShow({ order: orderData }: OrderShowProps) {
                             <Badge className={cn("text-sm px-3 py-1", getStatusBadgeColor(order.status))}>
                                 {t(`orders.status.${order.status}`, order.status)}
                             </Badge>
+                            {canContinueOrder && (
+                                <Button
+                                    variant="default"
+                                    size="sm"
+                                    className="w-full bg-gold font-bold uppercase tracking-wide text-white hover:bg-gold/90 sm:w-auto"
+                                    onClick={handleContinueOrder}
+                                    disabled={isRestoring}
+                                >
+                                    {isRestoring ? (
+                                        <>
+                                            <span className="mr-2 size-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                                            {t('orders.restoring', 'Restoring...')}
+                                        </>
+                                    ) : (
+                                        <>
+                                            <ShoppingCart className="mr-2 h-4 w-4" />
+                                            {t('orders.continue_order', 'Continue Order')}
+                                        </>
+                                    )}
+                                </Button>
+                            )}
                             <a
                                 href={route('orders.invoice.download', { orderNumber: order.orderNumber })}
                                 target="_blank"
