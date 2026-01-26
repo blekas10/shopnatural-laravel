@@ -184,7 +184,6 @@ class VenipakShipmentService
         }
 
         $weight = $this->calculateOrderWeight($order);
-        $orderNumber = $this->escapeXml($order->order_number);
 
         // Build attribute block based on shipment type (includes shipment_code for reference)
         $attributeBlock = $this->buildAttributeBlock($shipmentType, $order->order_number, $order);
@@ -192,9 +191,12 @@ class VenipakShipmentService
         // Build pack block (with dimensions for international >30kg or global)
         $packBlock = $this->buildPackBlock($packNo, $weight, $shipmentType);
 
+        // Generate shipment name (SN siuntimas 1, SN siuntimas 2, etc.)
+        $shipmentName = $this->escapeXml($this->generateShipmentName());
+
         // Build XML - no <shipper> block needed for type="1" (data import)
         return <<<XML
-<?xml version="1.0" encoding="UTF-8"?><description type="1"><manifest title="{$manifestTitle}" name="Shop Natural {$orderNumber}"><shipment>{$consignee}{$attributeBlock}{$packBlock}</shipment></manifest></description>
+<?xml version="1.0" encoding="UTF-8"?><description type="1"><manifest title="{$manifestTitle}" name="{$shipmentName}"><shipment>{$consignee}{$attributeBlock}{$packBlock}</shipment></manifest></description>
 XML;
     }
 
@@ -409,6 +411,17 @@ XML;
     {
         $date = now()->format('ymd');
         return $this->userId . $date . '001';
+    }
+
+    /**
+     * Generate shipment name for Venipak manifest
+     * Format: SN siuntimas {sequential number}
+     */
+    private function generateShipmentName(): string
+    {
+        $count = Order::whereNotNull('venipak_shipment_created_at')->count();
+        $nextNumber = $count + 1;
+        return "SN siuntimas {$nextNumber}";
     }
 
     /**
