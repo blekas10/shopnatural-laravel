@@ -191,12 +191,12 @@ class VenipakShipmentService
         // Build pack block (with dimensions for international >30kg or global)
         $packBlock = $this->buildPackBlock($packNo, $weight, $shipmentType);
 
-        // Generate shipment name (SN siuntimas 1, SN siuntimas 2, etc.)
-        $shipmentName = $this->escapeXml($this->generateShipmentName());
+        // Generate manifest name (legacy format today, new format from tomorrow)
+        $manifestName = $this->escapeXml($this->generateManifestName($order));
 
         // Build XML - no <shipper> block needed for type="1" (data import)
         return <<<XML
-<?xml version="1.0" encoding="UTF-8"?><description type="1"><manifest title="{$manifestTitle}" name="{$shipmentName}"><shipment>{$consignee}{$attributeBlock}{$packBlock}</shipment></manifest></description>
+<?xml version="1.0" encoding="UTF-8"?><description type="1"><manifest title="{$manifestTitle}" name="{$manifestName}"><shipment>{$consignee}{$attributeBlock}{$packBlock}</shipment></manifest></description>
 XML;
     }
 
@@ -414,14 +414,35 @@ XML;
     }
 
     /**
-     * Generate shipment name for Venipak manifest
-     * Format: SN siuntimas {sequential number}
+     * Generate manifest name for Venipak
+     * - Before 2026-01-27: "Shop Natural {order_number}" (legacy format)
+     * - From 2026-01-27: "SN siuntimas {number}" (one number per day)
      */
-    private function generateShipmentName(): string
+    private function generateManifestName(Order $order): string
     {
-        $count = Order::whereNotNull('venipak_shipment_created_at')->count();
-        $nextNumber = $count + 1;
-        return "SN siuntimas {$nextNumber}";
+        $cutoverDate = '2026-01-27';
+
+        // Before cutover date, use legacy format
+        if (now()->toDateString() < $cutoverDate) {
+            return "Shop Natural {$order->order_number}";
+        }
+
+        // Count unique days that have had shipments since cutover
+        $uniqueDays = Order::whereNotNull('venipak_shipment_created_at')
+            ->whereDate('venipak_shipment_created_at', '>=', $cutoverDate)
+            ->selectRaw('DATE(venipak_shipment_created_at) as ship_date')
+            ->distinct()
+            ->count();
+
+        // Check if today already has shipments
+        $todayHasShipments = Order::whereNotNull('venipak_shipment_created_at')
+            ->whereDate('venipak_shipment_created_at', now()->toDateString())
+            ->exists();
+
+        // If today already has shipments, use the same number; otherwise increment
+        $manifestNumber = $todayHasShipments ? $uniqueDays : $uniqueDays + 1;
+
+        return "SN siuntimas {$manifestNumber}";
     }
 
     /**
