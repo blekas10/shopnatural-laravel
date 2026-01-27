@@ -43,23 +43,29 @@ import {
 import { useState } from 'react';
 import { toast } from 'sonner';
 
-// Map Venipak statuses to Lithuanian
-const venipakStatusMap: Record<string, string> = {
-    'At sender': 'Pas siuntėją',
-    'In transit': 'Kelyje',
-    'In transit to pickup point': 'Kelyje į atsiėmimo punktą',
-    'Arrived at pickup point': 'Atvyko į atsiėmimo punktą',
-    'Ready for pickup': 'Paruošta atsiėmimui',
-    'Out for delivery': 'Pristatoma',
-    'Delivered': 'Pristatyta',
-    'Returned': 'Grąžinta',
-    'Failed delivery': 'Nepavykęs pristatymas',
-    'Awaiting pickup': 'Laukia atsiėmimo',
-};
-
-const translateVenipakStatus = (status: string | null): string => {
-    if (!status) return '';
-    return venipakStatusMap[status] || status;
+// Map Venipak statuses to translation keys
+// These will be translated using the t() function based on locale
+const VENIPAK_STATUS_KEYS: Record<string, string> = {
+    // English statuses from Venipak API
+    'Shipment created': 'venipak.status.shipment_created',
+    'On route to terminal': 'venipak.status.on_route_to_terminal',
+    'At terminal': 'venipak.status.at_terminal',
+    'Out for delivery': 'venipak.status.out_for_delivery',
+    'At weighting': 'venipak.status.at_weighting',
+    'At pickup waiting for courier': 'venipak.status.at_pickup_waiting_courier',
+    'At pickup waiting for receiver': 'venipak.status.at_pickup_waiting_receiver',
+    'At pickup point waiting for receiver': 'venipak.status.at_pickup_waiting_receiver',
+    'In transit': 'venipak.status.in_transit',
+    'Delivered': 'venipak.status.delivered',
+    'Returned': 'venipak.status.returned',
+    'Forwarding': 'venipak.status.forwarding',
+    'LDG created': 'venipak.status.ldg_created',
+    'Receiver not found': 'venipak.status.receiver_not_found',
+    'Tare package created': 'venipak.status.tare_package_created',
+    // Legacy statuses
+    'At sender': 'venipak.status.at_sender',
+    'Picked up': 'venipak.status.picked_up',
+    'On route to receiver': 'venipak.status.on_route_to_receiver',
 };
 
 interface OrderItem {
@@ -140,12 +146,22 @@ interface OrderShowProps {
 }
 
 export default function OrderShow({ order, statuses, paymentStatuses }: OrderShowProps) {
-    const { t, route } = useTranslation();
+    const { t, route, locale } = useTranslation();
     const [selectedStatus, setSelectedStatus] = useState(order.status);
     const [selectedPaymentStatus, setSelectedPaymentStatus] = useState(order.payment_status);
     const [trackingNumber, setTrackingNumber] = useState(order.tracking_number || '');
     const [saving, setSaving] = useState(false);
     const [venipakLoading, setVenipakLoading] = useState(false);
+
+    // Translate Venipak status using translation keys
+    const translateVenipakStatus = (status: string | null): string => {
+        if (!status) return '';
+        const translationKey = VENIPAK_STATUS_KEYS[status];
+        if (translationKey) {
+            return t(translationKey, status);
+        }
+        return status;
+    };
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -163,7 +179,7 @@ export default function OrderShow({ order, statuses, paymentStatuses }: OrderSho
     ];
 
     const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('en-US', {
+        return new Date(dateString).toLocaleDateString(locale === 'lt' ? 'lt-LT' : 'en-US', {
             year: 'numeric',
             month: 'long',
             day: 'numeric',

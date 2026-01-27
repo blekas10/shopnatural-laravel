@@ -1125,5 +1125,22 @@
     "pagination.next": "Pirmyn",
     "Phone number is required": "Telefono numeris yra privalomas",
     "Please enter a valid phone number": "Įveskite teisingą telefono numerį",
-    "Invalid postal code format": "Neteisingas pašto kodo formatas"
+    "Invalid postal code format": "Neteisingas pašto kodo formatas",
+    "venipak.status.shipment_created": "Sukurta siunta",
+    "venipak.status.on_route_to_terminal": "Pakeliui į terminalą",
+    "venipak.status.at_terminal": "Terminale",
+    "venipak.status.out_for_delivery": "Išvežta pristatymui",
+    "venipak.status.at_weighting": "Svėrimas terminale",
+    "venipak.status.at_pickup_waiting_courier": "Atsiėmimo punkte laukia kurjerio",
+    "venipak.status.at_pickup_waiting_receiver": "Atsiėmimo punkte laukia gavėjo",
+    "venipak.status.in_transit": "Tranzite",
+    "venipak.status.delivered": "Pristatyta",
+    "venipak.status.returned": "Grąžinta",
+    "venipak.status.forwarding": "Peradresuota",
+    "venipak.status.ldg_created": "LDG siunta sukurta",
+    "venipak.status.receiver_not_found": "Nerastas gavėjas",
+    "venipak.status.tare_package_created": "Sukurta tare pakuotė",
+    "venipak.status.at_sender": "Pas siuntėją",
+    "venipak.status.picked_up": "Paimta",
+    "venipak.status.on_route_to_receiver": "Pakeliui pas gavėją"
 }

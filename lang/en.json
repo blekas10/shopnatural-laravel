@@ -1088,5 +1088,22 @@
     "pagination.next": "Next",
     "Phone number is required": "Phone number is required",
     "Please enter a valid phone number": "Please enter a valid phone number",
-    "Invalid postal code format": "Invalid postal code format"
+    "Invalid postal code format": "Invalid postal code format",
+    "venipak.status.shipment_created": "Shipment created",
+    "venipak.status.on_route_to_terminal": "On route to terminal",
+    "venipak.status.at_terminal": "At terminal",
+    "venipak.status.out_for_delivery": "Out for delivery",
+    "venipak.status.at_weighting": "At weighting",
+    "venipak.status.at_pickup_waiting_courier": "At pickup waiting for courier",
+    "venipak.status.at_pickup_waiting_receiver": "At pickup waiting for receiver",
+    "venipak.status.in_transit": "In transit",
+    "venipak.status.delivered": "Delivered",
+    "venipak.status.returned": "Returned",
+    "venipak.status.forwarding": "Forwarding",
+    "venipak.status.ldg_created": "LDG created",
+    "venipak.status.receiver_not_found": "Receiver not found",
+    "venipak.status.tare_package_created": "Tare package created",
+    "venipak.status.at_sender": "At sender",
+    "venipak.status.picked_up": "Picked up",
+    "venipak.status.on_route_to_receiver": "On route to receiver"
 }
