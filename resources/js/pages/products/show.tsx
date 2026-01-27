@@ -5,9 +5,10 @@ import SEO from '@/components/seo';
 import { useTranslation } from '@/hooks/use-translation';
 import { useCart } from '@/hooks/use-cart';
 import { useWishlist } from '@/contexts/wishlist-context';
+import { useGTM } from '@/hooks/use-gtm';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, ShoppingCart, Check, X, Heart } from 'lucide-react';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
@@ -44,6 +45,7 @@ export default function ProductShow({ product, relatedProducts }: ProductShowPro
     const { seo, locale, availableLocales } = usePage<PageProps>().props;
     const { addItem } = useCart();
     const { toggleItem, isInWishlist } = useWishlist();
+    const { viewContent } = useGTM();
     const [activeTab, setActiveTab] = useState<'description' | 'additional' | 'ingredients'>('description');
     const [isAdding, setIsAdding] = useState(false);
 
@@ -264,6 +266,17 @@ export default function ProductShow({ product, relatedProducts }: ProductShowPro
 
         return schemas;
     }, [product, productSEO, locale, selectedVariant]);
+
+    // Track ViewContent event for Facebook CAPI
+    useEffect(() => {
+        viewContent(
+            product.id,
+            currentSku,
+            product.name,
+            currentPrice
+        );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [product.id]); // Only fire once on initial mount
 
     return (
         <>

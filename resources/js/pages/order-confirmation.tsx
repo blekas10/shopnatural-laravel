@@ -4,6 +4,7 @@ import { OrderStatusBadge } from '@/components/order-status-badge';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/use-cart';
 import { useTranslation } from '@/hooks/use-translation';
+import { useGTM } from '@/hooks/use-gtm';
 import { cn } from '@/lib/utils';
 import type { SharedData } from '@/types';
 import type { OrderConfirmationProps } from '@/types/checkout';
@@ -29,6 +30,7 @@ const CHECKOUT_DATA_KEY = 'shop-natural-checkout-data';
 export default function OrderConfirmation({ order }: OrderConfirmationProps) {
     const { t, route } = useTranslation();
     const { clearCart } = useCart();
+    const { purchase } = useGTM();
     const { auth } = usePage<SharedData>().props;
     const [copied, setCopied] = useState(false);
 
@@ -46,8 +48,29 @@ export default function OrderConfirmation({ order }: OrderConfirmationProps) {
             localStorage.removeItem(CHECKOUT_DATA_KEY);
             console.log('Cleared saved checkout data');
 
+            // Track Purchase event for Facebook CAPI with user data for higher EMQ
+            const skus = order.items.map(item => item.variant?.sku || `product-${item.productId}`);
+            const names = order.items.map(item => item.product.name);
+            const numItems = order.items.reduce((sum, item) => sum + item.quantity, 0);
+
+            // Parse full name into first/last name for Facebook matching
+            const nameParts = order.shippingAddress.fullName?.split(' ') || [];
+            const firstName = nameParts[0];
+            const lastName = nameParts.slice(1).join(' ');
+
+            purchase(order.orderNumber, skus, names, order.total, numItems, 'EUR', {
+                email: order.contact.email,
+                phone: order.contact.phone,
+                firstName,
+                lastName,
+                city: order.shippingAddress.city,
+                postalCode: order.shippingAddress.postalCode,
+                country: order.shippingAddress.country,
+            });
+
             sessionStorage.setItem(`cart_cleared_${order.orderNumber}`, 'true');
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [order.orderNumber, clearCart]);
 
     // Determine icon and colors based on order status

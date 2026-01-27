@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/hooks/use-translation';
+import { useGTM } from '@/hooks/use-gtm';
 
 const COOKIE_NAME = 'shop_natural_cookie_consent';
 const COOKIE_EXPIRY_DAYS = 365;
@@ -22,6 +23,7 @@ function getCookie(name: string): string | null {
 
 export default function CookieConsentBanner() {
     const { t, route } = useTranslation();
+    const { updateConsent } = useGTM();
     const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {
@@ -40,25 +42,13 @@ export default function CookieConsentBanner() {
     const handleAccept = () => {
         setCookie(COOKIE_NAME, 'accepted', COOKIE_EXPIRY_DAYS);
         setIsVisible(false);
-
-        // Enable analytics
-        if (typeof window !== 'undefined' && (window as any).gtag) {
-            (window as any).gtag('consent', 'update', {
-                analytics_storage: 'granted',
-            });
-        }
+        updateConsent(true);
     };
 
     const handleDecline = () => {
         setCookie(COOKIE_NAME, 'declined', COOKIE_EXPIRY_DAYS);
         setIsVisible(false);
-
-        // Disable analytics
-        if (typeof window !== 'undefined' && (window as any).gtag) {
-            (window as any).gtag('consent', 'update', {
-                analytics_storage: 'denied',
-            });
-        }
+        updateConsent(false);
     };
 
     const handleClose = () => {

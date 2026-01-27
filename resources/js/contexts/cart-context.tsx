@@ -4,6 +4,7 @@ import React, { createContext, useCallback, useEffect, useMemo, useState } from 
 import axios from 'axios';
 import type { CartItem } from '@/types';
 import type { ProductListItem, ProductVariant } from '@/types/product';
+import { pushToDataLayer } from '@/hooks/use-gtm';
 
 interface CartContextType {
     items: CartItem[];
@@ -123,6 +124,17 @@ export function CartProvider({ children }: CartProviderProps) {
                 };
                 return [...currentItems, newItem];
             }
+        });
+
+        // Track AddToCart event for Facebook CAPI
+        pushToDataLayer({
+            event: 'add_to_cart',
+            content_ids: [variant.sku],
+            content_name: product.name,
+            content_type: 'product',
+            value: variant.price * quantity,
+            currency: 'EUR',
+            quantity,
         });
 
         // Save to database in background using axios

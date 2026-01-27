@@ -2,12 +2,13 @@ import { Link, router, usePage } from '@inertiajs/react';
 import SEO from '@/components/seo';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowLeft, Lock, Check, ChevronRight } from 'lucide-react';
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useFormStatus } from 'react-dom';
 import MainHeader from '@/components/main-header';
 import Footer from '@/components/footer';
 import { useCart } from '@/hooks/use-cart';
 import { useTranslation } from '@/hooks/use-translation';
+import { useGTM } from '@/hooks/use-gtm';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -85,6 +86,10 @@ export default function Checkout({
     const { items, totalPrice } = useCart();
     const { t, route } = useTranslation();
     const { auth, locale } = usePage<SharedData>().props;
+    const { initiateCheckout, addPaymentInfo } = useGTM();
+
+    // Track if InitiateCheckout has been fired
+    const hasTrackedInitiateCheckout = useRef(false);
 
     // Initialize validator
     const validator = useMemo(() => new CheckoutValidator(t), [t]);
@@ -329,6 +334,18 @@ export default function Checkout({
         }
     }, [auth, t]);
 
+    // Track InitiateCheckout event for Facebook CAPI (once on mount)
+    useEffect(() => {
+        if (items.length > 0 && !hasTrackedInitiateCheckout.current) {
+            const skus = items.map(item => item.variant?.sku || `product-${item.productId}`);
+            const names = items.map(item => item.product.name);
+            const numItems = items.reduce((sum, item) => sum + item.quantity, 0);
+            initiateCheckout(skus, names, totalPrice, numItems);
+            hasTrackedInitiateCheckout.current = true;
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [items.length]); // Only fire once when items are available
+
     // Redirect to cart if empty
     if (items.length === 0) {
         router.visit(route('cart'));
@@ -514,6 +531,12 @@ export default function Checkout({
                     }
                 }
                 isValid = true;
+
+                // Track AddPaymentInfo when entering payment step
+                if (items.length > 0) {
+                    const skus = items.map(item => item.variant?.sku || `product-${item.productId}`);
+                    addPaymentInfo(skus, totalPrice);
+                }
                 break;
         }
 
