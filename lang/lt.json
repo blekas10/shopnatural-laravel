@@ -1122,5 +1122,8 @@
     "home.meta_keywords": "natūrali kosmetika Lietuva, ekologiška kosmetika, organinė odos priežiūra, neišbandyta ant gyvūnų, tvari kosmetika, pirkti kosmetiką internetu",
     "pagination.showing": "Rodomi {from}-{to} iš {total} produktų",
     "pagination.previous": "Atgal",
-    "pagination.next": "Pirmyn"
+    "pagination.next": "Pirmyn",
+    "Phone number is required": "Telefono numeris yra privalomas",
+    "Please enter a valid phone number": "Įveskite teisingą telefono numerį",
+    "Invalid postal code format": "Neteisingas pašto kodo formatas"
 }

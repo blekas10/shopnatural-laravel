@@ -10,16 +10,16 @@ interface AddressFormProps {
     prefix?: string;
 }
 
-const COUNTRIES = [
-    { code: 'LT', nameKey: 'countries.lithuania', postalPattern: /^\d{5}$/, format: '12345' },
-    { code: 'LV', nameKey: 'countries.latvia', postalPattern: /^LV-\d{4}$/, format: 'LV-1234' },
-    { code: 'EE', nameKey: 'countries.estonia', postalPattern: /^\d{5}$/, format: '12345' },
-    { code: 'PL', nameKey: 'countries.poland', postalPattern: /^\d{2}-\d{3}$/, format: '12-345' },
+export const COUNTRIES = [
+    { code: 'LT', nameKey: 'countries.lithuania', postalPattern: /^(LT[-\s]?)?\d{5}$/i, format: '12345' },
+    { code: 'LV', nameKey: 'countries.latvia', postalPattern: /^(LV[-\s]?)?\d{4}$/i, format: 'LV-1234' },
+    { code: 'EE', nameKey: 'countries.estonia', postalPattern: /^(EE[-\s]?)?\d{5}$/i, format: '12345' },
+    { code: 'PL', nameKey: 'countries.poland', postalPattern: /^\d{2}[-\s]?\d{3}$/, format: '12-345' },
     { code: 'DE', nameKey: 'countries.germany', postalPattern: /^\d{5}$/, format: '12345' },
     { code: 'FR', nameKey: 'countries.france', postalPattern: /^\d{5}$/, format: '12345' },
     { code: 'ES', nameKey: 'countries.spain', postalPattern: /^\d{5}$/, format: '12345' },
     { code: 'IT', nameKey: 'countries.italy', postalPattern: /^\d{5}$/, format: '12345' },
-    { code: 'NL', nameKey: 'countries.netherlands', postalPattern: /^\d{4}\s?[A-Z]{2}$/, format: '1234 AB' },
+    { code: 'NL', nameKey: 'countries.netherlands', postalPattern: /^\d{4}\s?[A-Za-z]{2}$/i, format: '1234 AB' },
     { code: 'BE', nameKey: 'countries.belgium', postalPattern: /^\d{4}$/, format: '1234' },
 ];
 

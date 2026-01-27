@@ -1,5 +1,6 @@
 import type { ContactInformation, ShippingAddress, CardDetails } from '@/types/checkout';
 import { isValidPhoneNumber } from 'react-phone-number-input';
+import { COUNTRIES } from '@/components/address-form';
 
 interface ValidationErrors {
     [key: string]: string | undefined;
@@ -51,6 +52,16 @@ export class CheckoutValidator {
         } catch {
             return false;
         }
+    }
+
+    // Postal code validation using country-specific patterns
+    private isValidPostalCode(postalCode: string, countryCode: string): boolean {
+        const country = COUNTRIES.find(c => c.code === countryCode);
+        if (!country) {
+            // If country not found in our list, accept any non-empty postal code
+            return postalCode.trim().length > 0;
+        }
+        return country.postalPattern.test(postalCode);
     }
 
     // Validate contact information
@@ -108,6 +119,10 @@ export class CheckoutValidator {
         // Postal Code validation
         if (!address.postalCode || !address.postalCode.trim()) {
             errors.postalCode = this.t('checkout.postal_code', 'Postal Code') + ' ' + this.t('validation.required', 'is required');
+        } else if (address.country && !this.isValidPostalCode(address.postalCode, address.country)) {
+            const country = COUNTRIES.find(c => c.code === address.country);
+            const formatHint = country ? ` (${this.t('checkout.postal_code_format', 'Format')}: ${country.format})` : '';
+            errors.postalCode = this.t('validation.invalid_postal_code', 'Please enter a valid postal code') + formatHint;
         }
 
         return errors;

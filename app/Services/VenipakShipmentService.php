@@ -124,6 +124,8 @@ class VenipakShipmentService
                 'venipak_carrier_code' => $result['carrier'] ?? null,
                 'venipak_carrier_tracking' => $result['external_tracking'] ?? null,
                 'venipak_shipment_id' => $result['shipment_id'] ?? null,
+                // Set order status to processing when shipment is created
+                'status' => 'processing',
             ]);
 
             Log::info('Venipak: Shipment response details', [
@@ -318,17 +320,30 @@ XML;
     }
 
     /**
-     * Normalize postal code for Venipak (remove hyphens/spaces for certain countries)
+     * Normalize postal code for Venipak
+     * Different countries require different formats
      */
     private function normalizePostalCode(string $postalCode, string $countryCode): string
     {
-        // Poland uses XX-XXX format but Venipak wants XXXXX (digits only)
+        $postalCode = trim($postalCode);
+
+        // Lithuania/Estonia: strip country prefix (LT-12345 → 12345)
+        if (in_array($countryCode, ['LT', 'EE'])) {
+            if (preg_match('/^(LT|EE)[-\s]?(\d{5})$/i', $postalCode, $m)) {
+                return $m[2];
+            }
+        }
+
+        // Latvia: ensure LV- prefix (1234 → LV-1234)
+        if ($countryCode === 'LV') {
+            $digits = preg_replace('/[^0-9]/', '', $postalCode);
+            return 'LV-' . $digits;
+        }
+
+        // Poland: digits only (12-345 → 12345)
         if ($countryCode === 'PL') {
             return preg_replace('/[^0-9]/', '', $postalCode);
         }
-
-        // Finland uses XXXXX format (5 digits) - already correct
-        // Baltic countries use XXXXX or LXXXX format - already correct
 
         return $postalCode;
     }
@@ -639,18 +654,27 @@ XML;
     }
 
     /**
-     * Get tracking information
+     * Get tracking information using Venipak Tracking API v1
+     * @see https://tracking.venipak.com/api/v1/events
      */
     public function getTracking(string $packNo): array
     {
         try {
-            $response = Http::get("{$this->baseUrl}/ws/tracking.php", [
-                'type' => 1,
-                'output' => 'json',
-                'code' => $packNo,
+            // Use the new Venipak Tracking API
+            $response = Http::withHeaders([
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json',
+            ])->get('https://tracking.venipak.com/api/v1/events', [
+                'pack_no' => $packNo,
+                'lang' => 'EN',
             ]);
 
             if (!$response->successful()) {
+                Log::warning('Venipak: Tracking API failed', [
+                    'pack_no' => $packNo,
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
                 return ['success' => false, 'error' => 'Failed to get tracking info'];
             }
 
@@ -660,11 +684,17 @@ XML;
                 return ['success' => false, 'error' => 'No tracking data found'];
             }
 
-            $latest = is_array($data) ? ($data[0] ?? $data) : $data;
+            // Get the LAST (newest) event - API returns events in chronological order
+            $latest = is_array($data) ? end($data) : $data;
+            if ($latest === false) {
+                $latest = $data[0] ?? $data;
+            }
 
             return [
                 'success' => true,
-                'status' => $latest['status'] ?? null,
+                'status' => $latest['pack_status_text'] ?? $latest['event'] ?? null,
+                'status_code' => $latest['pack_status'] ?? null,
+                'event' => $latest['event'] ?? null,
                 'date' => $latest['date'] ?? null,
                 'tracking' => $data,
             ];
@@ -695,22 +725,27 @@ XML;
         }
 
         $status = $result['status'];
+        $statusCode = $result['status_code'] ?? null;
         $updateData = [
             'venipak_status' => $status,
             'venipak_status_updated_at' => now(),
         ];
 
-        if ($this->isDeliveredStatus($status)) {
+        // Check for delivered status (pack_status = 9)
+        if ($this->isDeliveredStatus($status, $statusCode)) {
             $updateData['venipak_delivered_at'] = now();
 
             if (!in_array($order->status, ['completed', 'cancelled'])) {
                 $updateData['status'] = 'completed';
                 $updateData['delivered_at'] = now();
             }
-        } elseif ($this->isInTransitStatus($status)) {
-            if ($order->status === 'processing') {
+        }
+        // Check for in-transit status (pack_status = 1,2,3,5,6,7)
+        elseif ($this->isInTransitStatus($status, $statusCode)) {
+            // Allow transition from both 'confirmed' and 'processing' to 'shipped'
+            if (in_array($order->status, ['confirmed', 'processing'])) {
                 $updateData['status'] = 'shipped';
-                $updateData['shipped_at'] = $updateData['shipped_at'] ?? now();
+                $updateData['shipped_at'] = $order->shipped_at ?? now();
             }
         }
 
@@ -720,6 +755,8 @@ XML;
             'order_id' => $order->id,
             'pack_no' => $order->venipak_pack_no,
             'status' => $status,
+            'status_code' => $statusCode,
+            'new_order_status' => $updateData['status'] ?? $order->status,
         ]);
 
         return true;
@@ -727,37 +764,67 @@ XML;
 
     /**
      * Check if status indicates delivered
+     * pack_status codes: 9 = Delivered
      */
-    private function isDeliveredStatus(?string $status): bool
+    private function isDeliveredStatus(?string $status, $statusCode = null): bool
     {
+        // Check by status code first (most reliable)
+        if ($statusCode !== null && (int) $statusCode === 9) {
+            return true;
+        }
+
         if (!$status) {
             return false;
         }
 
         $deliveredStatuses = [
             'Delivered',
-            'Pristatyta',
-            'Piegādāts',
-            'Kohale toimetatud',
+            'Pristatyta',      // Lithuanian
+            'Piegādāts',       // Latvian
+            'Kohale toimetatud', // Estonian
         ];
 
         return in_array($status, $deliveredStatuses) || stripos($status, 'deliver') !== false;
     }
 
     /**
-     * Check if status indicates in transit
+     * Check if status indicates in transit (picked up but not delivered)
+     * pack_status codes:
+     * - 1 = Picked up (collected by courier)
+     * - 2 = At terminal (in depot)
+     * - 3 = Out for delivery
+     * - 5,6 = At Venipak Pickup point (waiting for receiver)
+     * - 7 = In transit (with partner carrier)
      */
-    private function isInTransitStatus(?string $status): bool
+    private function isInTransitStatus(?string $status, $statusCode = null): bool
     {
+        // Check by status code first (most reliable)
+        if ($statusCode !== null && in_array((int) $statusCode, [1, 2, 3, 5, 6, 7])) {
+            return true;
+        }
+
         if (!$status) {
             return false;
         }
 
         $transitStatuses = [
-            'In transit',
-            'Out for delivery',
+            'Picked up',
             'At terminal',
+            'Out for delivery',
+            'On route to receiver',
+            'In transit',
             'Sorting',
+            'Venipak Pickup point',
+            // Lithuanian
+            'Paimta',
+            'Terminale',
+            'Pristatomas',
+            // Latvian
+            'Saņemta',
+            'Terminālī',
+            // Estonian
+            'Korjatud',
+            'Terminalis',
         ];
 
         foreach ($transitStatuses as $transitStatus) {

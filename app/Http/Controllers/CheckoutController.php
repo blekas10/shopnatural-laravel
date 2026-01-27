@@ -216,7 +216,7 @@ class CheckoutController extends Controller
             'draftOrderId' => 'required|integer|exists:orders,id',
             'contact.fullName' => 'required|string',
             'contact.email' => 'required|email:strict,dns|max:255',
-            'contact.phone' => 'nullable|string',
+            'contact.phone' => ['required', 'string', 'min:7', 'regex:/^\+?[0-9\s\-\(\)]{7,20}$/'],
             'shippingAddress.addressLine1' => 'required|string',
             'shippingAddress.addressLine2' => 'nullable|string',
             'shippingAddress.city' => 'required|string',

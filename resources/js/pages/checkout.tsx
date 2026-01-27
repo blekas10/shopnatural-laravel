@@ -285,9 +285,38 @@ export default function Checkout({
                     }
                     setAgreeToTerms(parsed.agreeToTerms || false);
 
-                    // Mark all previous steps as completed and go to payment
-                    setCompletedSteps([1, 2, 3]);
-                    setCurrentStep(4);
+                    // Validate contact info before marking steps complete
+                    const contactErrors = validator.validateContact(parsed.contact);
+                    const shippingErrors = validator.validateAddress(parsed.shippingAddress);
+                    const billingErrors = parsed.billingSameAsShipping
+                        ? {}
+                        : validator.validateAddress(parsed.billingAddress);
+
+                    const hasContactErrors = validator.hasErrors(contactErrors);
+                    const hasAddressErrors = validator.hasErrors(shippingErrors) || validator.hasErrors(billingErrors);
+                    const hasShippingMethod = !!parsed.selectedShippingMethod;
+
+                    // Determine which step to restore to based on validation
+                    const completedSteps: number[] = [];
+                    let targetStep = 1;
+
+                    if (!hasContactErrors) {
+                        completedSteps.push(1);
+                        targetStep = 2;
+
+                        if (!hasAddressErrors) {
+                            completedSteps.push(2);
+                            targetStep = 3;
+
+                            if (hasShippingMethod) {
+                                completedSteps.push(3);
+                                targetStep = 4;
+                            }
+                        }
+                    }
+
+                    setCompletedSteps(completedSteps);
+                    setCurrentStep(targetStep);
 
                     toast.success(t('checkout.data_restored', 'Your checkout information has been restored'));
                 }
@@ -451,7 +480,7 @@ export default function Checkout({
 
         const invalidCard = cardFields.find(field => !field.value?.trim() || (field.minLength && field.value.replace(/\D/g, '').length < field.minLength));
         if (invalidCard) {
-            toast.error(t('checkout.invalid_field', 'Invalid {field}', { field: invalidCard.name }));
+            toast.error(t('checkout.please_fill_out', 'Please fill out') + ' ' + invalidCard.name.toLowerCase());
             return false;
         }
         return true;
@@ -547,10 +576,10 @@ export default function Checkout({
         const checkoutData: CheckoutFormData = {
             draftOrderId,
             contact,
-            shippingAddress,
+            shippingAddress: shippingAddress as ShippingAddress,
             billingAddress: billingSameAsShipping
-                ? shippingAddress
-                : billingAddress,
+                ? (shippingAddress as ShippingAddress)
+                : (billingAddress as ShippingAddress | undefined),
             billingSameAsShipping,
             shippingMethod: selectedShippingMethod,
             venipakPickupPoint: selectedVenipakPoint || undefined,

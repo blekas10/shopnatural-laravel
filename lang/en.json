@@ -1085,5 +1085,8 @@
     "home.meta_keywords": "natural cosmetics Lithuania, eco-friendly beauty, organic skincare, cruelty-free products, sustainable beauty, buy cosmetics online",
     "pagination.showing": "Showing {from}-{to} of {total} products",
     "pagination.previous": "Previous",
-    "pagination.next": "Next"
+    "pagination.next": "Next",
+    "Phone number is required": "Phone number is required",
+    "Please enter a valid phone number": "Please enter a valid phone number",
+    "Invalid postal code format": "Invalid postal code format"
 }
