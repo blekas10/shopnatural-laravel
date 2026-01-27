@@ -31,6 +31,28 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import axios from 'axios';
 
+// Map Venipak statuses to translation keys
+const VENIPAK_STATUS_KEYS: Record<string, string> = {
+    'Shipment created': 'venipak.status.shipment_created',
+    'On route to terminal': 'venipak.status.on_route_to_terminal',
+    'At terminal': 'venipak.status.at_terminal',
+    'Out for delivery': 'venipak.status.out_for_delivery',
+    'At weighting': 'venipak.status.at_weighting',
+    'At pickup waiting for courier': 'venipak.status.at_pickup_waiting_courier',
+    'At pickup waiting for receiver': 'venipak.status.at_pickup_waiting_receiver',
+    'At pickup point waiting for receiver': 'venipak.status.at_pickup_waiting_receiver',
+    'In transit': 'venipak.status.in_transit',
+    'Delivered': 'venipak.status.delivered',
+    'Returned': 'venipak.status.returned',
+    'Forwarding': 'venipak.status.forwarding',
+    'LDG created': 'venipak.status.ldg_created',
+    'Receiver not found': 'venipak.status.receiver_not_found',
+    'Tare package created': 'venipak.status.tare_package_created',
+    'At sender': 'venipak.status.at_sender',
+    'Picked up': 'venipak.status.picked_up',
+    'On route to receiver': 'venipak.status.on_route_to_receiver',
+};
+
 interface PageProps {
     locale: string;
 }
@@ -94,6 +116,8 @@ interface Order {
     venipakPackNo: string | null;
     venipakTrackingUrl: string | null;
     venipakShipmentCreatedAt: string | null;
+    venipakStatus: string | null;
+    venipakStatusUpdatedAt: string | null;
     // Secondary carrier (for global shipments)
     venipakCarrierCode: string | null;
     venipakCarrierTracking: string | null;
@@ -201,6 +225,16 @@ export default function OrderShow({ order: orderData }: OrderShowProps) {
             style: 'currency',
             currency: order.currency || 'EUR',
         }).format(price);
+    };
+
+    // Translate Venipak status using translation keys
+    const translateVenipakStatus = (status: string | null): string => {
+        if (!status) return '';
+        const translationKey = VENIPAK_STATUS_KEYS[status];
+        if (translationKey) {
+            return t(translationKey, status);
+        }
+        return status;
     };
 
     const getStatusBadgeColor = (status: string) => {
@@ -626,32 +660,36 @@ export default function OrderShow({ order: orderData }: OrderShowProps) {
                                         </div>
                                     )}
 
-                                    {/* Venipak tracking iframe */}
-                                    {order.venipakTrackingUrl && (
-                                        <div className="space-y-2">
-                                            <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                                    {/* Venipak tracking status */}
+                                    {order.venipakStatus && (
+                                        <div className="rounded-lg border border-gold/20 bg-gold/5 p-4">
+                                            <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground mb-2">
                                                 {t('orders.tracking_status', 'Tracking Status')}
                                             </p>
-                                            <div className="rounded-lg border border-border overflow-hidden bg-white">
-                                                <iframe
-                                                    src={order.venipakTrackingUrl}
-                                                    className="w-full min-h-[200px]"
-                                                    title="Venipak Tracking"
-                                                    sandbox="allow-same-origin"
-                                                />
-                                            </div>
-                                            <a
-                                                href={order.venipakTrackingUrl}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-xs text-gold hover:underline inline-flex items-center gap-1"
-                                            >
-                                                {t('orders.view_full_tracking', 'View full tracking page')}
-                                                <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                                                </svg>
-                                            </a>
+                                            <p className="text-base font-bold text-foreground">
+                                                {translateVenipakStatus(order.venipakStatus)}
+                                            </p>
+                                            {order.venipakStatusUpdatedAt && (
+                                                <p className="text-xs text-muted-foreground mt-1">
+                                                    {t('orders.last_updated', 'Last updated')}: {formatDate(order.venipakStatusUpdatedAt)}
+                                                </p>
+                                            )}
                                         </div>
+                                    )}
+
+                                    {/* Tracking links */}
+                                    {order.venipakTrackingUrl && (
+                                        <a
+                                            href={order.venipakTrackingUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-flex items-center gap-1 text-sm text-gold hover:underline"
+                                        >
+                                            {t('orders.view_full_tracking', 'View full tracking page')}
+                                            <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                            </svg>
+                                        </a>
                                     )}
                                 </CardContent>
                             </Card>
