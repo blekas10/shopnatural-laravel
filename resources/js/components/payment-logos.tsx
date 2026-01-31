@@ -92,3 +92,99 @@ export function CardLogos({ className }: LogoProps) {
         </div>
     );
 }
+
+// Lithuanian Bank Logos for Paysera
+export function SwedbankLogo({ className }: LogoProps) {
+    return (
+        <img
+            src="/images/logos/hanza.png"
+            alt="Swedbank"
+            className={cn('h-4 w-auto', className)}
+        />
+    );
+}
+
+export function SebLogo({ className }: LogoProps) {
+    return (
+        <img
+            src="/images/logos/sb.png"
+            alt="SEB"
+            className={cn('h-4 w-auto', className)}
+        />
+    );
+}
+
+export function LuminorLogo({ className }: LogoProps) {
+    return (
+        <img
+            src="/images/logos/nord.png"
+            alt="Luminor"
+            className={cn('h-4 w-auto', className)}
+        />
+    );
+}
+
+export function CitadeleLogo({ className }: LogoProps) {
+    return (
+        <img
+            src="/images/logos/parex.png"
+            alt="Citadele"
+            className={cn('h-4 w-auto', className)}
+        />
+    );
+}
+
+export function MedicBankLogo({ className }: LogoProps) {
+    return (
+        <img
+            src="/images/logos/mb.png"
+            alt="Medicinos Bankas"
+            className={cn('h-4 w-auto', className)}
+        />
+    );
+}
+
+export function SiauliuBankLogo({ className }: LogoProps) {
+    return (
+        <img
+            src="/images/logos/vb2.png"
+            alt="Šiaulių Bankas"
+            className={cn('h-4 w-auto', className)}
+        />
+    );
+}
+
+export function RevolutLogo({ className }: LogoProps) {
+    return (
+        <img
+            src="/images/logos/revolut.png"
+            alt="Revolut"
+            className={cn('h-4 w-auto', className)}
+        />
+    );
+}
+
+export function WalletLogo({ className }: LogoProps) {
+    return (
+        <img
+            src="/images/logos/wallet.png"
+            alt="Wallet"
+            className={cn('h-4 w-auto', className)}
+        />
+    );
+}
+
+export function PayseraBankLogos({ className }: LogoProps) {
+    return (
+        <div className={cn('flex flex-wrap items-center gap-1.5', className)}>
+            <SwedbankLogo />
+            <SebLogo />
+            <LuminorLogo />
+            <CitadeleLogo />
+            <MedicBankLogo />
+            <SiauliuBankLogo />
+            <RevolutLogo />
+            <WalletLogo />
+        </div>
+    );
+}

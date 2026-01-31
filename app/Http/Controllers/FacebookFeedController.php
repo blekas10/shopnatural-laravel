@@ -72,7 +72,7 @@ class FacebookFeedController extends Controller
         $imageUrl = $image ? URL::to('/storage/' . $image->path) : '';
 
         // Get product URL (Lithuanian locale for now)
-        $productUrl = URL::to('/produktai/' . $product->getTranslation('slug', 'lt'));
+        $productUrl = URL::to('/lt/produktai/' . $product->getTranslation('slug', 'lt'));
 
         // Get category for product type
         $category = $product->categories->first();

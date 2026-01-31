@@ -98,6 +98,7 @@ class OrderController extends Controller
                 'id' => $order->id,
                 'orderNumber' => $order->order_number,
                 'status' => $order->status,
+                'paymentStatus' => $order->payment_status,
                 'items' => $order->items->map(function ($item) {
                     return [
                         'id' => $item->id,

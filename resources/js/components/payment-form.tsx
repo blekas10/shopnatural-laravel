@@ -6,7 +6,7 @@ import { useTranslation } from '@/hooks/use-translation';
 import { CreditCard, Wallet, Building2, Banknote } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import { StripeLogo, PayseraLogo, ApplePayLogo, GooglePayLogo, VisaLogo, MastercardLogo } from './payment-logos';
+import { StripeLogo, PayseraLogo, ApplePayLogo, GooglePayLogo, VisaLogo, MastercardLogo, PayseraBankLogos } from './payment-logos';
 
 interface PaymentFormProps {
     selectedMethod: string;
@@ -159,6 +159,12 @@ export function PaymentForm({
                                             <div className="mt-2 flex items-center gap-2">
                                                 <VisaLogo className="h-4" />
                                                 <MastercardLogo className="h-4" />
+                                            </div>
+                                        )}
+                                        {/* Show bank logos for Paysera */}
+                                        {method.id === 'paysera' && (
+                                            <div className="mt-2">
+                                                <PayseraBankLogos />
                                             </div>
                                         )}
                                     </div>
