@@ -49,6 +49,9 @@ Route::any('paysera/callback', [PayseraController::class, 'callback'])->name('pa
 // SEO - Sitemap (accessible without locale prefix)
 Route::get('sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
 
+// Facebook Product Catalog Feed
+Route::get('feeds/facebook.csv', [\App\Http\Controllers\FacebookFeedController::class, 'index'])->name('feeds.facebook');
+
 // API routes for Venipak (accessible without locale prefix)
 Route::prefix('api')->group(function () {
     Route::get('venipak/pickup-points', [VenipakController::class, 'getPickupPoints'])->name('api.venipak.pickup-points');

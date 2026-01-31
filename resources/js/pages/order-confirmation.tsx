@@ -34,7 +34,7 @@ export default function OrderConfirmation({ order }: OrderConfirmationProps) {
     const { auth } = usePage<SharedData>().props;
     const [copied, setCopied] = useState(false);
 
-    // Clear cart and saved checkout data when order confirmation page loads (after successful payment)
+    // Clear cart and saved checkout data when order confirmation page loads
     useEffect(() => {
         // Only clear once per order
         const cleared = sessionStorage.getItem(
@@ -48,30 +48,51 @@ export default function OrderConfirmation({ order }: OrderConfirmationProps) {
             localStorage.removeItem(CHECKOUT_DATA_KEY);
             console.log('Cleared saved checkout data');
 
-            // Track Purchase event for Facebook CAPI with user data for higher EMQ
-            const skus = order.items.map(item => item.variant?.sku || `product-${item.productId}`);
-            const names = order.items.map(item => item.product.name);
-            const numItems = order.items.reduce((sum, item) => sum + item.quantity, 0);
-
-            // Parse full name into first/last name for Facebook matching
-            const nameParts = order.shippingAddress.fullName?.split(' ') || [];
-            const firstName = nameParts[0];
-            const lastName = nameParts.slice(1).join(' ');
-
-            purchase(order.orderNumber, skus, names, order.total, numItems, 'EUR', {
-                email: order.contact.email,
-                phone: order.contact.phone,
-                firstName,
-                lastName,
-                city: order.shippingAddress.city,
-                postalCode: order.shippingAddress.postalCode,
-                country: order.shippingAddress.country,
-            });
-
             sessionStorage.setItem(`cart_cleared_${order.orderNumber}`, 'true');
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [order.orderNumber, clearCart]);
+
+    // Track Purchase event for Facebook CAPI - ONLY when payment is confirmed
+    useEffect(() => {
+        // Only track purchase when payment is confirmed (not pending/failed)
+        if (order.paymentStatus !== 'paid') {
+            console.log('Skipping purchase tracking - payment status:', order.paymentStatus);
+            return;
+        }
+
+        // Only track once per order
+        const tracked = sessionStorage.getItem(
+            `purchase_tracked_${order.orderNumber}`,
+        );
+        if (tracked) {
+            return;
+        }
+
+        console.log('Tracking purchase for order:', order.orderNumber);
+
+        const skus = order.items.map(item => item.variant?.sku || `product-${item.productId}`);
+        const names = order.items.map(item => item.product.name);
+        const numItems = order.items.reduce((sum, item) => sum + item.quantity, 0);
+
+        // Parse full name into first/last name for Facebook matching
+        const nameParts = order.shippingAddress.fullName?.split(' ') || [];
+        const firstName = nameParts[0];
+        const lastName = nameParts.slice(1).join(' ');
+
+        purchase(order.orderNumber, skus, names, order.total, numItems, 'EUR', {
+            email: order.contact.email,
+            phone: order.contact.phone,
+            firstName,
+            lastName,
+            city: order.shippingAddress.city,
+            postalCode: order.shippingAddress.postalCode,
+            country: order.shippingAddress.country,
+        });
+
+        sessionStorage.setItem(`purchase_tracked_${order.orderNumber}`, 'true');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [order.orderNumber, order.paymentStatus]);
 
     // Determine icon and colors based on order status
     const getStatusDisplay = () => {
