@@ -22,13 +22,9 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <meta name="verify-paysera" content="44b366b9787063b1e776e58588479c1e">
 
-        {{-- Google Tag Manager --}}
+        {{-- Google Tag Manager (Stape Custom Loader) --}}
         @production
-        <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-        })(window,document,'script','dataLayer','GTM-W3G523XK');</script>
+        <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s);j.async=true;j.src="https://sst.shop-natural.com/exrvcthee.js?"+i;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','2l0=DAFVMzc7Xy9WIl1GUC45XhNYWlpSUBYWWBYAGxNbHBkREBoVD1gRFwg%3D');</script>
         @endproduction
 
         <link rel="icon" href="/favicon.ico" sizes="any">
@@ -44,10 +40,9 @@
         @inertiaHead
     </head>
     <body class="font-sans antialiased">
-        {{-- Google Tag Manager (noscript) --}}
+        {{-- Google Tag Manager (noscript) - Stape Custom Loader --}}
         @production
-        <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-W3G523XK"
-        height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+        <noscript><iframe src="https://sst.shop-natural.com/ns.html?id=GTM-W3G523XK" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         @endproduction
         @inertia
 
