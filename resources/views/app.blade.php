@@ -24,7 +24,7 @@
 
         {{-- Google Tag Manager (Stape Custom Loader) --}}
         @production
-        <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s);j.async=true;j.src="https://sst.shop-natural.com/exrvcthee.js?"+i;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','2l0=DAFVMzc7Xy9WIl1GUC45XhNYWlpSUBYWWBYAGxNbHBkREBoVD1gRFwg%3D');</script>
+        <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s);j.async=true;j.src="https://sst.shop-natural.com/b1sebbclxt.js?"+i;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','bmk3u=HRxRJDYvSEY%2BOiBbOFVSVQJFXk1TRAEdSQsEDBJPCxIADR4CDkwGHBk%3D');</script>
         @endproduction
 
         <link rel="icon" href="/favicon.ico" sizes="any">
@@ -42,7 +42,7 @@
     <body class="font-sans antialiased">
         {{-- Google Tag Manager (noscript) - Stape Custom Loader --}}
         @production
-        <noscript><iframe src="https://sst.shop-natural.com/ns.html?id=GTM-W3G523XK" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+        <noscript><iframe src="https://sst.shop-natural.com/ns.html?id=GTM-5JBL8Z77" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         @endproduction
         @inertia
 
