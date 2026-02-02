@@ -128,7 +128,7 @@ export function CartProvider({ children }: CartProviderProps) {
 
         // Track AddToCart event for Facebook CAPI
         pushToDataLayer({
-            event: 'add_to_cart',
+            event: 'AddToCart',
             content_ids: [variant.sku],
             content_name: product.name,
             content_type: 'product',
