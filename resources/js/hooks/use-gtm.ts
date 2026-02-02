@@ -98,7 +98,7 @@ export function useGTM() {
         // Facebook CAPI: ViewContent - Product page view
         viewContent: (_productId: number, sku: string, name: string, price: number, currency = 'EUR') => {
             push({
-                event: 'view_content',
+                event: 'ViewContent',
                 event_id: generateEventId(),  // For deduplication
                 content_ids: [sku],
                 content_name: name,
@@ -112,7 +112,7 @@ export function useGTM() {
         // Facebook CAPI: AddToCart
         addToCart: (_productId: number, sku: string, name: string, price: number, quantity: number, currency = 'EUR') => {
             push({
-                event: 'add_to_cart',
+                event: 'AddToCart',
                 event_id: generateEventId(),
                 content_ids: [sku],
                 content_name: name,
@@ -127,7 +127,7 @@ export function useGTM() {
         // Facebook CAPI: InitiateCheckout
         initiateCheckout: (skus: string[], names: string[], value: number, numItems: number, currency = 'EUR') => {
             push({
-                event: 'initiate_checkout',
+                event: 'InitiateCheckout',
                 event_id: generateEventId(),
                 content_ids: skus,
                 content_name: names.join(', '),
@@ -142,7 +142,7 @@ export function useGTM() {
         // Facebook CAPI: AddPaymentInfo
         addPaymentInfo: (skus: string[], value: number, currency = 'EUR') => {
             push({
-                event: 'add_payment_info',
+                event: 'AddPaymentInfo',
                 event_id: generateEventId(),
                 content_ids: skus,
                 content_type: 'product',
@@ -172,7 +172,7 @@ export function useGTM() {
             }
         ) => {
             push({
-                event: 'purchase',
+                event: 'Purchase',
                 event_id: generateEventId(),
                 order_id: orderId,
                 content_ids: skus,
