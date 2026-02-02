@@ -22,12 +22,12 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <meta name="verify-paysera" content="44b366b9787063b1e776e58588479c1e">
 
-        {{-- Google Tag Manager (Standard Server-Side) --}}
+        {{-- Google Tag Manager --}}
         @production
         <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
         new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
         j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-        'https://sst.shop-natural.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
         })(window,document,'script','dataLayer','GTM-5JBL8Z77');</script>
         @endproduction
 
