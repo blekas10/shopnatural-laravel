@@ -340,7 +340,9 @@ export default function Checkout({
             const skus = items.map(item => item.variant?.sku || `product-${item.productId}`);
             const names = items.map(item => item.product.name);
             const numItems = items.reduce((sum, item) => sum + item.quantity, 0);
-            initiateCheckout(skus, names, totalPrice, numItems);
+            initiateCheckout(skus, names, totalPrice, numItems, 'EUR',
+                contact.email ? { email: contact.email, phone: contact.phone || undefined } : undefined,
+            );
             hasTrackedInitiateCheckout.current = true;
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -535,7 +537,16 @@ export default function Checkout({
                 // Track AddPaymentInfo when entering payment step
                 if (items.length > 0) {
                     const skus = items.map(item => item.variant?.sku || `product-${item.productId}`);
-                    addPaymentInfo(skus, totalPrice);
+                    const nameParts = contact.fullName?.split(' ') || [];
+                    addPaymentInfo(skus, totalPrice, 'EUR', {
+                        email: contact.email,
+                        phone: contact.phone || undefined,
+                        firstName: nameParts[0] || undefined,
+                        lastName: nameParts.slice(1).join(' ') || undefined,
+                        city: shippingAddress.city || undefined,
+                        postalCode: shippingAddress.postalCode || undefined,
+                        country: shippingAddress.country || undefined,
+                    });
                 }
                 break;
         }

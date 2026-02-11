@@ -1,10 +1,23 @@
 // Google Tag Manager DataLayer helper hook
 // Used for Facebook CAPI events via Stape.io server-side GTM
 
+import { usePage } from '@inertiajs/react';
+import type { SharedData } from '@/types';
+
 declare global {
     interface Window {
         dataLayer: Record<string, unknown>[];
     }
+}
+
+export interface UserTrackingData {
+    email?: string;
+    phone?: string;
+    firstName?: string;
+    lastName?: string;
+    city?: string;
+    postalCode?: string;
+    country?: string;
 }
 
 /**
@@ -75,7 +88,54 @@ function getUserAgent(): string {
     return navigator.userAgent;
 }
 
+/**
+ * Build user_data and external_id fields for Facebook CAPI Event Match Quality.
+ * Combines auth user data (for external_id + email) with extra user data
+ * (phone, address) when available.
+ */
+function buildUserFields(
+    authUser: { id: number; email: string } | null,
+    extraUserData?: UserTrackingData,
+): Record<string, unknown> {
+    const result: Record<string, unknown> = {};
+    const userData: Record<string, unknown> = {};
+
+    // Auth user provides external_id and base email
+    if (authUser) {
+        result.external_id = String(authUser.id);
+        userData.email_address = authUser.email;
+    }
+
+    // Extra user data supplements/overrides auth data
+    if (extraUserData) {
+        if (extraUserData.email) userData.email_address = extraUserData.email;
+        if (extraUserData.phone) userData.phone_number = extraUserData.phone;
+
+        const hasAddress = extraUserData.firstName || extraUserData.lastName ||
+            extraUserData.city || extraUserData.postalCode || extraUserData.country;
+        if (hasAddress) {
+            const address: Record<string, string> = {};
+            if (extraUserData.firstName) address.first_name = extraUserData.firstName;
+            if (extraUserData.lastName) address.last_name = extraUserData.lastName;
+            if (extraUserData.city) address.city = extraUserData.city;
+            if (extraUserData.postalCode) address.postal_code = extraUserData.postalCode;
+            if (extraUserData.country) address.country = extraUserData.country;
+            userData.address = address;
+        }
+    }
+
+    if (Object.keys(userData).length > 0) {
+        result.user_data = userData;
+    }
+
+    return result;
+}
+
 export function useGTM() {
+    // Get auth user from Inertia shared props for automatic user tracking
+    const { auth } = usePage<SharedData>().props;
+    const authUser = auth?.user ? { id: auth.user.id, email: auth.user.email } : null;
+
     const push = (data: Record<string, unknown>) => {
         if (typeof window !== 'undefined') {
             window.dataLayer = window.dataLayer || [];
@@ -99,13 +159,16 @@ export function useGTM() {
         viewContent: (_productId: number, sku: string, name: string, price: number, currency = 'EUR') => {
             push({
                 event: 'ViewContent',
-                event_id: generateEventId(),  // For deduplication
+                event_id: generateEventId(),
+                first_party_collection: true,
                 content_ids: [sku],
                 content_name: name,
                 content_type: 'product',
                 value: price,
                 currency,
+                items: [{ item_id: sku, item_name: name, price, quantity: 1 }],
                 ...getFacebookParams(),
+                ...buildUserFields(authUser),
             });
         },
 
@@ -114,41 +177,69 @@ export function useGTM() {
             push({
                 event: 'AddToCart',
                 event_id: generateEventId(),
+                first_party_collection: true,
                 content_ids: [sku],
                 content_name: name,
                 content_type: 'product',
                 value: price * quantity,
                 currency,
                 quantity,
+                items: [{ item_id: sku, item_name: name, price, quantity }],
                 ...getFacebookParams(),
+                ...buildUserFields(authUser),
             });
         },
 
         // Facebook CAPI: InitiateCheckout
-        initiateCheckout: (skus: string[], names: string[], value: number, numItems: number, currency = 'EUR') => {
+        initiateCheckout: (
+            skus: string[],
+            names: string[],
+            value: number,
+            numItems: number,
+            currency = 'EUR',
+            userData?: UserTrackingData,
+        ) => {
             push({
                 event: 'InitiateCheckout',
                 event_id: generateEventId(),
+                first_party_collection: true,
                 content_ids: skus,
                 content_name: names.join(', '),
                 content_type: 'product',
                 value,
                 currency,
                 num_items: numItems,
+                items: skus.map((sku, i) => ({
+                    item_id: sku,
+                    item_name: names[i] || '',
+                    quantity: 1,
+                })),
                 ...getFacebookParams(),
+                ...buildUserFields(authUser, userData),
             });
         },
 
         // Facebook CAPI: AddPaymentInfo
-        addPaymentInfo: (skus: string[], value: number, currency = 'EUR') => {
+        addPaymentInfo: (
+            skus: string[],
+            value: number,
+            currency = 'EUR',
+            userData?: UserTrackingData,
+        ) => {
             push({
                 event: 'AddPaymentInfo',
                 event_id: generateEventId(),
+                first_party_collection: true,
                 content_ids: skus,
                 content_type: 'product',
                 value,
                 currency,
+                items: skus.map(sku => ({
+                    item_id: sku,
+                    quantity: 1,
+                })),
                 ...getFacebookParams(),
+                ...buildUserFields(authUser, userData),
             });
         },
 
@@ -161,19 +252,12 @@ export function useGTM() {
             value: number,
             numItems: number,
             currency = 'EUR',
-            userData?: {
-                email?: string;
-                phone?: string;
-                firstName?: string;
-                lastName?: string;
-                city?: string;
-                postalCode?: string;
-                country?: string;
-            }
+            userData?: UserTrackingData,
         ) => {
             push({
                 event: 'Purchase',
                 event_id: generateEventId(),
+                first_party_collection: true,
                 order_id: orderId,
                 content_ids: skus,
                 content_name: names.join(', '),
@@ -181,20 +265,13 @@ export function useGTM() {
                 value,
                 currency,
                 num_items: numItems,
+                items: skus.map((sku, i) => ({
+                    item_id: sku,
+                    item_name: names[i] || '',
+                    quantity: 1,
+                })),
                 ...getFacebookParams(),
-                // User data for higher Event Match Quality
-                // Server-side GTM will hash these before sending to Facebook
-                ...(userData && {
-                    user_data: {
-                        email: userData.email,
-                        phone: userData.phone,
-                        first_name: userData.firstName,
-                        last_name: userData.lastName,
-                        city: userData.city,
-                        postal_code: userData.postalCode,
-                        country: userData.country,
-                    },
-                }),
+                ...buildUserFields(authUser, userData),
             });
         },
 
@@ -212,16 +289,21 @@ export function useGTM() {
 }
 
 // Standalone function for use outside of React components (e.g., in context)
-export function pushToDataLayer(data: Record<string, unknown>) {
+export function pushToDataLayer(
+    data: Record<string, unknown>,
+    authUser?: { id: number; email: string } | null,
+) {
     if (typeof window !== 'undefined') {
         window.dataLayer = window.dataLayer || [];
         window.dataLayer.push({
             ...data,
             event_id: generateEventId(),
+            first_party_collection: true,
             fbp: getFbp(),
             fbc: getFbc(),
             user_agent: getUserAgent(),
             event_source_url: window.location.href,
+            ...buildUserFields(authUser ?? null),
         });
     }
 }
