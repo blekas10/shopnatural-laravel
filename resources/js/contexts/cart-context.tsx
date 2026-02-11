@@ -1,9 +1,9 @@
 'use client';
 
 import React, { createContext, useCallback, useEffect, useMemo, useState } from 'react';
-import { usePage } from '@inertiajs/react';
+import { router } from '@inertiajs/react';
 import axios from 'axios';
-import type { CartItem, SharedData } from '@/types';
+import type { CartItem } from '@/types';
 import type { ProductListItem, ProductVariant } from '@/types/product';
 import { pushToDataLayer } from '@/hooks/use-gtm';
 
@@ -29,7 +29,6 @@ interface CartProviderProps {
 }
 
 export function CartProvider({ children }: CartProviderProps) {
-    const { auth } = usePage<SharedData>().props;
     const [items, setItems] = useState<CartItem[]>([]);
     const [isInitialized, setIsInitialized] = useState(false);
 
@@ -129,7 +128,9 @@ export function CartProvider({ children }: CartProviderProps) {
         });
 
         // Track AddToCart event for Facebook CAPI
-        const authUserData = auth?.user ? { id: auth.user.id, email: auth.user.email } : null;
+        // Get auth user lazily from Inertia router (CartProvider is outside Inertia page context)
+        const page = router.page as { props?: { auth?: { user?: { id: number; email: string } } } } | null;
+        const authUser = page?.props?.auth?.user ?? null;
         pushToDataLayer({
             event: 'AddToCart',
             content_ids: [variant.sku],
@@ -139,7 +140,7 @@ export function CartProvider({ children }: CartProviderProps) {
             currency: 'EUR',
             quantity,
             items: [{ item_id: variant.sku, item_name: product.name, price: variant.price, quantity }],
-        }, authUserData);
+        }, authUser);
 
         // Save to database in background using axios
         axios.post('/cart/add', {
@@ -149,7 +150,7 @@ export function CartProvider({ children }: CartProviderProps) {
         }).catch(error => {
             console.error('Failed to sync cart to database:', error);
         });
-    }, [generateItemId, auth]);
+    }, [generateItemId]);
 
     // Remove item from cart
     const removeItem = useCallback((itemId: string) => {
