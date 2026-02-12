@@ -329,21 +329,60 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // =============================================================================
-// Deprecated WooCommerce URLs - Return 410 Gone
-// These URLs existed on the old WordPress site and are now permanently removed.
-// 410 tells search engines to stop indexing these pages.
+// Deprecated WooCommerce URLs - Smart redirect or 410 Gone
+// Try to match old product slugs to current products (301 redirect).
+// If no match found, return 410 so search engines stop indexing.
 // =============================================================================
-Route::any('product/{any}', fn() => abort(410))->where('any', '.*');
-Route::any('product-category/{any}', fn() => abort(410))->where('any', '.*');
-Route::any('cosmetics-type/{any}', fn() => abort(410))->where('any', '.*');
-Route::any('shop/{any}', fn() => abort(410))->where('any', '.*');
-Route::any('size/{any}', fn() => abort(410))->where('any', '.*');
-Route::any('naturalmente/{any?}', fn() => abort(410))->where('any', '.*');
+Route::any('product/{any}', function (string $any) {
+    $slug = rtrim(explode('/', $any)[0], '/');
+    $slug = strtok($slug, '?');
+
+    // Try current slug
+    $product = \App\Models\Product::where('slug->en', $slug)->first();
+    if ($product) {
+        return redirect("/products/{$product->getTranslation('slug', 'en')}", 301);
+    }
+
+    // Try old slugs
+    $product = \App\Models\Product::whereRaw("JSON_CONTAINS(old_slugs->'$.en', ?)", ['"' . $slug . '"'])->first();
+    if ($product) {
+        return redirect("/products/{$product->getTranslation('slug', 'en')}", 301);
+    }
+
+    abort(410);
+})->where('any', '.*');
+
+Route::any('product-category/{any}', fn() => redirect('/products', 301))->where('any', '.*');
+Route::any('cosmetics-type/{any}', fn() => redirect('/products', 301))->where('any', '.*');
+Route::any('shop/{any}', fn() => redirect('/products', 301))->where('any', '.*');
+Route::any('size/{any}', fn() => redirect('/products', 301))->where('any', '.*');
+
+// Brand pages - redirect to brand page or products
+Route::any('naturalmente/{any?}', fn() => redirect('/brands/naturalmente', 301))->where('any', '.*');
+Route::any('breathe/{any?}', fn() => redirect('/brands/breathe', 301))->where('any', '.*');
 
 // Deprecated Lithuanian WooCommerce URLs
-Route::any('lt/produktas/{any}', fn() => abort(410))->where('any', '.*');
-Route::any('lt/parduotuve/{any?}', fn() => abort(410))->where('any', '.*');
-Route::any('lt/cosmetics-type/{any}', fn() => abort(410))->where('any', '.*');
-Route::any('lt/produktu-kategorija/{any}', fn() => abort(410))->where('any', '.*');
+Route::any('lt/produktas/{any}', function (string $any) {
+    $slug = rtrim(explode('/', $any)[0], '/');
+    $slug = strtok($slug, '?');
+
+    // Try current slug
+    $product = \App\Models\Product::where('slug->lt', $slug)->first();
+    if ($product) {
+        return redirect("/lt/produktai/{$product->getTranslation('slug', 'lt')}", 301);
+    }
+
+    // Try old slugs
+    $product = \App\Models\Product::whereRaw("JSON_CONTAINS(old_slugs->'$.lt', ?)", ['"' . $slug . '"'])->first();
+    if ($product) {
+        return redirect("/lt/produktai/{$product->getTranslation('slug', 'lt')}", 301);
+    }
+
+    abort(410);
+})->where('any', '.*');
+
+Route::any('lt/parduotuve/{any?}', fn() => redirect('/lt/produktai', 301))->where('any', '.*');
+Route::any('lt/cosmetics-type/{any}', fn() => redirect('/lt/produktai', 301))->where('any', '.*');
+Route::any('lt/produktu-kategorija/{any}', fn() => redirect('/lt/produktai', 301))->where('any', '.*');
 
 require __DIR__.'/settings.php';
