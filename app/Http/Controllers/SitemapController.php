@@ -131,15 +131,21 @@ class SitemapController extends Controller
 
         return $products->map(function ($product) {
             $enSlug = $product->getTranslation('slug', 'en');
-            $ltSlug = $product->getTranslation('slug', 'lt');
+            $hasLtSlug = $product->hasTranslation('slug', 'lt');
+            $ltSlug = $hasLtSlug ? $product->getTranslation('slug', 'lt') : null;
+
+            $alternates = [
+                ['hreflang' => 'en', 'href' => "{$this->baseUrl}/products/{$enSlug}"],
+            ];
+
+            if ($ltSlug && $ltSlug !== $enSlug) {
+                $alternates[] = ['hreflang' => 'lt', 'href' => "{$this->baseUrl}/lt/produktai/{$ltSlug}"];
+            }
 
             return [
                 'loc' => "{$this->baseUrl}/products/{$enSlug}",
                 'lastmod' => $product->updated_at->toW3cString(),
-                'alternates' => [
-                    ['hreflang' => 'en', 'href' => "{$this->baseUrl}/products/{$enSlug}"],
-                    ['hreflang' => 'lt', 'href' => "{$this->baseUrl}/lt/produktai/{$ltSlug}"],
-                ],
+                'alternates' => $alternates,
                 'priority' => '0.8',
                 'changefreq' => 'weekly',
             ];
