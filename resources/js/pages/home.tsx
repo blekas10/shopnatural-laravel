@@ -93,6 +93,7 @@ export default function Home({ products }: HomeProps) {
         name: siteName,
         url: siteUrl,
         logo: `${siteUrl}/images/logo.svg`,
+        image: `${siteUrl}/images/og-image.jpg`,
         description: t('home.meta_description', 'Shop Natural offers eco-friendly, natural cosmetics and beauty products. Family-run business committed to sustainability.'),
         email: 'info@naturalmente.lt',
         phone: '+37060117017',

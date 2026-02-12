@@ -205,6 +205,7 @@ export function createLocalBusinessSchema(business: {
     name: string;
     url: string;
     logo: string;
+    image?: string;
     description?: string;
     email?: string;
     phone?: string;
@@ -228,6 +229,7 @@ export function createLocalBusinessSchema(business: {
         name: business.name,
         url: business.url,
         logo: business.logo,
+        image: business.image || business.logo,
         description: business.description,
         telephone: business.phone,
         email: business.email,
