@@ -516,7 +516,7 @@ export default function ProductsIndex({ products, pagination, appliedFilters, br
     const canonicalUrl = generateCanonicalUrl(siteUrl, currentPath);
     const alternateUrls = generateAlternateUrls(siteUrl, currentPath, availableLocales, locale);
 
-    // Collection schema for product listing
+    // Collection schema for product listing with full product data
     const collectionSchema = createCollectionSchema(
         t('products.title', 'Products'),
         t('products.meta_description', 'Browse our collection of natural, eco-friendly cosmetics and beauty products.'),
@@ -524,6 +524,9 @@ export default function ProductsIndex({ products, pagination, appliedFilters, br
         products.slice(0, 10).map(p => ({
             name: p.name,
             url: `${siteUrl}/${locale === 'lt' ? 'lt/produktai' : 'products'}/${p.slug}`,
+            image: p.image,
+            price: p.price,
+            currency: 'EUR',
         }))
     );
 

@@ -5,7 +5,7 @@ import SEO from '@/components/seo';
 import { useTranslation } from '@/hooks/use-translation';
 import { Button } from '@/components/ui/button';
 import { ChevronRight } from 'lucide-react';
-import { type BreadcrumbItem } from '@/lib/seo';
+import { type BreadcrumbItem, createBrandSchema, createCollectionSchema } from '@/lib/seo';
 
 interface BrandChild {
     id: number;
@@ -61,6 +61,36 @@ export default function BrandShow({ brand }: BrandShowProps) {
         { name: brand.name, url: canonicalUrl },
     ];
 
+    // Brand schema for structured data
+    const productsPath = locale === 'lt' ? 'lt/produktai' : 'products';
+    const brandSchema = createBrandSchema({
+        name: brand.name,
+        url: canonicalUrl,
+        logo: brand.logo,
+        description: brand.description,
+        children: brand.children.map(child => ({
+            name: child.name,
+            url: `${siteUrl}/${productsPath}?brands=${child.id}`,
+            logo: child.logo,
+            description: child.description,
+        })),
+    });
+
+    // ItemList of sub-brand collections
+    const additionalSchemas: object[] = [brandSchema];
+    if (brand.children.length > 0) {
+        additionalSchemas.push(createCollectionSchema(
+            brand.name,
+            brand.description || metaDescription,
+            canonicalUrl,
+            brand.children.map(child => ({
+                name: child.name,
+                url: `${siteUrl}/${productsPath}?brands=${child.id}`,
+                image: child.logo || undefined,
+            }))
+        ));
+    }
+
     return (
         <>
             <SEO
@@ -69,6 +99,7 @@ export default function BrandShow({ brand }: BrandShowProps) {
                 canonical={canonicalUrl}
                 alternateUrls={alternateUrls}
                 breadcrumbs={breadcrumbs}
+                additionalSchemas={additionalSchemas}
             />
 
             <div className="min-h-screen bg-background">

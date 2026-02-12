@@ -67,7 +67,7 @@ export default function Home({ products }: HomeProps) {
     const siteUrl = seo?.siteUrl || '';
     const siteName = seo?.siteName || 'Shop Natural';
 
-    // Organization schema for homepage
+    // Organization schema for homepage with social profiles
     const organizationSchema = createOrganizationSchema({
         name: siteName,
         url: siteUrl,
@@ -81,6 +81,10 @@ export default function Home({ products }: HomeProps) {
             postalCode: '45387',
             addressCountry: 'LT',
         },
+        socialProfiles: [
+            'https://www.facebook.com/shopnatural.eu',
+            'https://www.instagram.com/shopnatural.eu',
+        ],
     });
 
     // LocalBusiness schema for homepage (for local SEO)
@@ -129,6 +133,7 @@ export default function Home({ products }: HomeProps) {
             <SEO
                 title={t('home.meta_title', 'Natural & Eco-Friendly Cosmetics')}
                 description={t('home.meta_description', 'Shop Natural offers eco-friendly, natural cosmetics and beauty products. Family-run business committed to sustainability.')}
+                image={`${siteUrl}/images/og-image.jpg`}
                 canonical={locale === 'lt' ? `${siteUrl}/lt` : siteUrl}
                 alternateUrls={alternateUrls}
                 additionalSchemas={[organizationSchema, localBusinessSchema, websiteSchema]}

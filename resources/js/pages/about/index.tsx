@@ -4,7 +4,7 @@ import Footer from '@/components/footer';
 import { useTranslation } from '@/hooks/use-translation';
 import { ChevronRight, Leaf, Package, Heart, Sprout, Droplet, Trees, Sparkles } from 'lucide-react';
 import SEO from '@/components/seo';
-import { generateCanonicalUrl, type BreadcrumbItem } from '@/lib/seo';
+import { generateCanonicalUrl, createOrganizationSchema, type BreadcrumbItem } from '@/lib/seo';
 
 interface PageProps {
     seo: {
@@ -71,6 +71,27 @@ export default function About() {
         { locale: 'lt', url: `${siteUrl}/lt/apie-mus` },
     ];
 
+    // Organization schema for about page (reinforces business identity)
+    const siteName = seo?.siteName || 'Shop Natural';
+    const organizationSchema = createOrganizationSchema({
+        name: siteName,
+        url: siteUrl,
+        logo: `${siteUrl}/images/logo.svg`,
+        description: t('about.meta_description', 'Learn about Shop Natural - a family-run business dedicated to eco-friendly, natural products. Committed to sustainability and cruelty-free practices.'),
+        email: 'info@naturalmente.lt',
+        phone: '+37060117017',
+        address: {
+            streetAddress: 'Vaidoto g. 1',
+            addressLocality: 'Kaunas',
+            postalCode: '45387',
+            addressCountry: 'LT',
+        },
+        socialProfiles: [
+            'https://www.facebook.com/shopnatural.eu',
+            'https://www.instagram.com/shopnatural.eu',
+        ],
+    });
+
     return (
         <>
             <SEO
@@ -79,6 +100,7 @@ export default function About() {
                 canonical={canonicalUrl}
                 alternateUrls={alternateUrls}
                 breadcrumbs={breadcrumbs}
+                additionalSchemas={[organizationSchema]}
             />
 
             <div className="min-h-screen bg-background">

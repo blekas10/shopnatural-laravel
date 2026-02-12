@@ -32,6 +32,14 @@ export interface ProductSEO {
     url: string;
 }
 
+export interface ProductVariantSEO {
+    sku: string;
+    name: string;
+    price: number;
+    availability: 'InStock' | 'OutOfStock';
+    url: string;
+}
+
 export interface BreadcrumbItem {
     name: string;
     url: string;
@@ -83,6 +91,56 @@ export function createProductSchema(product: ProductSEO): object {
             priceValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
             availability: `https://schema.org/${product.availability}`,
             itemCondition: 'https://schema.org/NewCondition',
+        },
+    };
+}
+
+/**
+ * Generate Product schema with AggregateOffer for products with multiple variants
+ * Uses individual Offer entries per variant with lowPrice/highPrice range
+ */
+export function createProductSchemaWithVariants(
+    product: ProductSEO,
+    variants: ProductVariantSEO[]
+): object {
+    const prices = variants.map(v => v.price);
+    const lowPrice = Math.min(...prices);
+    const highPrice = Math.max(...prices);
+    const hasStock = variants.some(v => v.availability === 'InStock');
+
+    return {
+        '@context': 'https://schema.org',
+        '@type': 'Product',
+        name: product.name,
+        description: product.description,
+        image: product.images && product.images.length > 0 ? product.images : product.image,
+        sku: product.sku,
+        brand: product.brand
+            ? {
+                  '@type': 'Brand',
+                  name: product.brand,
+              }
+            : undefined,
+        category: product.category,
+        offers: {
+            '@type': 'AggregateOffer',
+            url: product.url,
+            priceCurrency: product.currency || 'EUR',
+            lowPrice: lowPrice.toFixed(2),
+            highPrice: highPrice.toFixed(2),
+            offerCount: variants.length,
+            availability: `https://schema.org/${hasStock ? 'InStock' : 'OutOfStock'}`,
+            offers: variants.map(variant => ({
+                '@type': 'Offer',
+                url: product.url,
+                priceCurrency: product.currency || 'EUR',
+                price: variant.price.toFixed(2),
+                priceValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                availability: `https://schema.org/${variant.availability}`,
+                itemCondition: 'https://schema.org/NewCondition',
+                sku: variant.sku,
+                name: variant.name,
+            })),
         },
     };
 }
@@ -240,7 +298,7 @@ export function createCollectionSchema(
     name: string,
     description: string,
     url: string,
-    items?: { name: string; url: string }[]
+    items?: { name: string; url: string; image?: string; price?: number; currency?: string }[]
 ): object {
     const schema: Record<string, unknown> = {
         '@context': 'https://schema.org',
@@ -253,13 +311,70 @@ export function createCollectionSchema(
     if (items && items.length > 0) {
         schema.mainEntity = {
             '@type': 'ItemList',
-            itemListElement: items.map((item, index) => ({
-                '@type': 'ListItem',
-                position: index + 1,
-                name: item.name,
-                url: item.url,
-            })),
+            itemListElement: items.map((item, index) => {
+                const listItem: Record<string, unknown> = {
+                    '@type': 'ListItem',
+                    position: index + 1,
+                    name: item.name,
+                    url: item.url,
+                };
+                if (item.image || item.price) {
+                    listItem.item = {
+                        '@type': 'Product',
+                        name: item.name,
+                        url: item.url,
+                        ...(item.image && { image: item.image }),
+                        ...(item.price && {
+                            offers: {
+                                '@type': 'Offer',
+                                priceCurrency: item.currency || 'EUR',
+                                price: item.price.toFixed(2),
+                                availability: 'https://schema.org/InStock',
+                            },
+                        }),
+                    };
+                }
+                return listItem;
+            }),
         };
+    }
+
+    return schema;
+}
+
+/**
+ * Generate Brand schema for brand pages
+ */
+export function createBrandSchema(brand: {
+    name: string;
+    url: string;
+    logo?: string | null;
+    description?: string | null;
+    children?: { name: string; url: string; logo?: string | null; description?: string | null }[];
+}): object {
+    const schema: Record<string, unknown> = {
+        '@context': 'https://schema.org',
+        '@type': 'Brand',
+        name: brand.name,
+        url: brand.url,
+    };
+
+    if (brand.logo) {
+        schema.logo = brand.logo;
+    }
+
+    if (brand.description) {
+        schema.description = brand.description;
+    }
+
+    if (brand.children && brand.children.length > 0) {
+        schema.subOrganization = brand.children.map(child => ({
+            '@type': 'Brand',
+            name: child.name,
+            url: child.url,
+            ...(child.logo && { logo: child.logo }),
+            ...(child.description && { description: child.description }),
+        }));
     }
 
     return schema;

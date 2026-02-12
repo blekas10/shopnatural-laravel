@@ -4,7 +4,7 @@ import Footer from '@/components/footer';
 import { useTranslation } from '@/hooks/use-translation';
 import { ChevronRight, Truck, Clock, DollarSign, Globe, AlertCircle, MapPin, Package } from 'lucide-react';
 import SEO from '@/components/seo';
-import { generateCanonicalUrl, type BreadcrumbItem } from '@/lib/seo';
+import { generateCanonicalUrl, createFAQSchema, type BreadcrumbItem, type FAQItem } from '@/lib/seo';
 import { VenipakLogo, FedExLogo } from '@/components/payment-logos';
 
 interface PageProps {
@@ -104,6 +104,27 @@ export default function ShippingPolicy() {
         { locale: 'lt', url: `${siteUrl}/lt/pristatymo-politika` },
     ];
 
+    // FAQ schema from shipping policy sections
+    const shippingFAQs: FAQItem[] = [
+        {
+            question: t('shipping_policy.faq_q_methods', 'What shipping methods do you offer?'),
+            answer: t('shipping_policy.faq_a_methods', 'We offer Venipak Courier and Venipak Pickup Location for Baltic countries (Lithuania, Latvia, Estonia) and Poland/Finland. For the rest of the EU, USA, and Canada, we ship via FedEx International.'),
+        },
+        {
+            question: t('shipping_policy.faq_q_cost', 'How much does shipping cost?'),
+            answer: t('shipping_policy.faq_a_cost', 'Shipping to Baltic countries and Poland/Finland is €4 via Venipak. Free shipping in Lithuania for orders over €50. FedEx International shipping to the EU, USA, and Canada is €20.'),
+        },
+        {
+            question: t('shipping_policy.faq_q_time', 'How long does delivery take?'),
+            answer: t('shipping_policy.faq_a_time', 'Venipak delivery to Baltic countries takes 1-5 business days. FedEx delivery within the EU takes 2-10 business days. FedEx delivery to North America takes 5-14 business days.'),
+        },
+        {
+            question: t('shipping_policy.faq_q_tracking', 'Can I track my order?'),
+            answer: t('shipping_policy.faq_a_tracking', 'Yes! Once your order ships, you will receive a confirmation email with tracking information. You can monitor your delivery status in real-time through your account or the provided tracking link.'),
+        },
+    ];
+    const faqSchema = createFAQSchema(shippingFAQs);
+
     return (
         <>
             <SEO
@@ -112,6 +133,7 @@ export default function ShippingPolicy() {
                 canonical={canonicalUrl}
                 alternateUrls={alternateUrls}
                 breadcrumbs={breadcrumbs}
+                additionalSchemas={[faqSchema]}
             />
 
             <div className="min-h-screen bg-background">

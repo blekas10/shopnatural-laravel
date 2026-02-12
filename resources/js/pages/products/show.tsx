@@ -20,7 +20,9 @@ import {
     createFAQSchema,
     createHowToSchema,
     createEnhancedProductSchema,
+    createProductSchemaWithVariants,
     type ProductSEO,
+    type ProductVariantSEO,
     type BreadcrumbItem
 } from '@/lib/seo';
 import type { ProductDetail, ProductVariant, BaseProduct, ProductListItem } from '@/types/product';
@@ -238,10 +240,27 @@ export default function ProductShow({ product, relatedProducts }: ProductShowPro
         url: canonicalUrl,
     }), [product, currentPrice, currentCompareAtPrice, currentInStock, currentSku, brandName, canonicalUrl]);
 
+    // Build variant SEO data for AggregateOffer schema
+    const variantsSEO: ProductVariantSEO[] = useMemo(() => {
+        if (!hasVariants || !product.variants?.length) return [];
+        return product.variants.map(v => ({
+            sku: v.sku,
+            name: `${product.name} - ${v.size}`,
+            price: v.price,
+            availability: v.inStock ? 'InStock' as const : 'OutOfStock' as const,
+            url: canonicalUrl,
+        }));
+    }, [product.variants, product.name, hasVariants, canonicalUrl]);
+
     // Generate GEO/AEO schemas for AI search optimization
     const additionalSchemas: object[] = useMemo(() => {
         const schemas: object[] = [];
         const currentLocale = locale as 'en' | 'lt';
+
+        // AggregateOffer schema when product has multiple variants (price range)
+        if (variantsSEO.length > 1) {
+            schemas.push(createProductSchemaWithVariants(productSEO, variantsSEO));
+        }
 
         // Parse FAQ from product description (Features, Suitable For, Application sections)
         const faqs = parseProductDescriptionForFAQ(product.description, product.name, currentLocale);
@@ -265,7 +284,7 @@ export default function ProductShow({ product, relatedProducts }: ProductShowPro
         }
 
         return schemas;
-    }, [product, productSEO, locale, selectedVariant]);
+    }, [product, productSEO, variantsSEO, locale, selectedVariant]);
 
     // Track ViewContent event for Facebook CAPI
     useEffect(() => {

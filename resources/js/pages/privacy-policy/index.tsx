@@ -4,7 +4,7 @@ import Footer from '@/components/footer';
 import { useTranslation } from '@/hooks/use-translation';
 import { ChevronRight, Shield, Database, Cookie, Share2, Clock, UserCheck, Mail } from 'lucide-react';
 import SEO from '@/components/seo';
-import { generateCanonicalUrl, type BreadcrumbItem } from '@/lib/seo';
+import { generateCanonicalUrl, createFAQSchema, type BreadcrumbItem, type FAQItem } from '@/lib/seo';
 
 interface PageProps {
     seo: {
@@ -35,6 +35,27 @@ export default function PrivacyPolicy() {
         { locale: 'lt', url: `${siteUrl}/lt/privatumo-politika` },
     ];
 
+    // FAQ schema from privacy policy sections
+    const privacyFAQs: FAQItem[] = [
+        {
+            question: t('privacy_policy.faq_q_collect', 'What personal data does Shop Natural collect?'),
+            answer: t('privacy_policy.faq_a_collect', 'We collect personal information (name, email, phone, addresses) when you place an order or create an account, usage data (IP address, browser type, pages visited), and may supplement data from third-party sources.'),
+        },
+        {
+            question: t('privacy_policy.faq_q_cookies', 'Does Shop Natural use cookies?'),
+            answer: t('privacy_policy.faq_a_cookies', 'Yes, we use cookies and similar technologies to improve your browsing experience. Cookies are stored on your device only with your consent and can be disabled in your browser settings at any time.'),
+        },
+        {
+            question: t('privacy_policy.faq_q_rights', 'What are my data rights under GDPR?'),
+            answer: t('privacy_policy.faq_a_rights', 'Under GDPR, you can access your personal data, request corrections, request deletion, object to direct marketing, and withdraw consent for data processing. Contact info@naturalmente.lt to exercise your rights.'),
+        },
+        {
+            question: t('privacy_policy.faq_q_retention', 'How long is my data retained?'),
+            answer: t('privacy_policy.faq_a_retention', 'We retain your personal data for a maximum of 5 years from your last interaction with us, unless a longer retention period is required by law for accounting or tax purposes.'),
+        },
+    ];
+    const faqSchema = createFAQSchema(privacyFAQs);
+
     return (
         <>
             <SEO
@@ -43,6 +64,7 @@ export default function PrivacyPolicy() {
                 canonical={canonicalUrl}
                 alternateUrls={alternateUrls}
                 breadcrumbs={breadcrumbs}
+                additionalSchemas={[faqSchema]}
             />
 
             <div className="min-h-screen bg-background">

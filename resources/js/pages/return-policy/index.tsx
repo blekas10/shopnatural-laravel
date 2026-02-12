@@ -4,7 +4,7 @@ import Footer from '@/components/footer';
 import { useTranslation } from '@/hooks/use-translation';
 import { ChevronRight, RotateCcw, ShieldCheck, Mail, Package, Truck } from 'lucide-react';
 import SEO from '@/components/seo';
-import { generateCanonicalUrl, type BreadcrumbItem } from '@/lib/seo';
+import { generateCanonicalUrl, createFAQSchema, type BreadcrumbItem, type FAQItem } from '@/lib/seo';
 
 interface PageProps {
     seo: {
@@ -63,6 +63,31 @@ export default function ReturnPolicy() {
         { locale: 'lt', url: `${siteUrl}/lt/grazinimo-politika` },
     ];
 
+    // FAQ schema from return policy sections
+    const returnFAQs: FAQItem[] = [
+        {
+            question: t('return_policy.faq_q_period', 'What is the return period?'),
+            answer: t('return_policy.faq_a_period', 'Under European Union law, you have the right to return your purchase within 14 days of receiving your order, without needing to provide a reason.'),
+        },
+        {
+            question: t('return_policy.faq_q_conditions', 'What are the return conditions?'),
+            answer: t('return_policy.faq_a_conditions', 'The product must be unused, undamaged, and in its original packaging. All labels and seals must remain intact.'),
+        },
+        {
+            question: t('return_policy.faq_q_process', 'How do I initiate a return?'),
+            answer: t('return_policy.faq_a_process', 'Contact us via email at info@naturalmente.lt with your order number and reason for return. We will provide you with return instructions.'),
+        },
+        {
+            question: t('return_policy.faq_q_refund', 'How long does a refund take?'),
+            answer: t('return_policy.faq_a_refund', 'Once we receive and inspect your return, we will process your refund within 5-7 business days. The refund will be issued to your original payment method.'),
+        },
+        {
+            question: t('return_policy.faq_q_shipping', 'Who pays for return shipping?'),
+            answer: t('return_policy.faq_a_shipping', 'Return shipping costs are the responsibility of the customer unless the product is defective or we made an error in your order.'),
+        },
+    ];
+    const faqSchema = createFAQSchema(returnFAQs);
+
     return (
         <>
             <SEO
@@ -71,6 +96,7 @@ export default function ReturnPolicy() {
                 canonical={canonicalUrl}
                 alternateUrls={alternateUrls}
                 breadcrumbs={breadcrumbs}
+                additionalSchemas={[faqSchema]}
             />
 
             <div className="min-h-screen bg-background">
