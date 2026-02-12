@@ -9,21 +9,9 @@ Disallow: /api/
 Disallow: /storage/
 Disallow: /_debugbar/
 
-# Block deprecated WooCommerce URLs (migrated from WordPress)
-Disallow: /product/
-Disallow: /product-category/
-Disallow: /cosmetics-type/
-Disallow: /shop/
-Disallow: /size/
-Disallow: /naturalmente/
+# Block internal paths
 Disallow: /*?add-to-cart=
 Disallow: /*&add-to-cart=
-
-# Block deprecated Lithuanian WooCommerce URLs
-Disallow: /lt/produktas/
-Disallow: /lt/parduotuve/
-Disallow: /lt/cosmetics-type/
-Disallow: /lt/produktu-kategorija/
 
 # AI Crawlers - Welcome!
 User-agent: GPTBot

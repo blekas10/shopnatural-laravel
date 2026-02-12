@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
 use App\Models\Product;
 use App\Models\Brand;
 use Illuminate\Http\Response;
@@ -28,9 +27,6 @@ class SitemapController extends Controller
 
         // Add products
         $urls = $urls->merge($this->getProducts());
-
-        // Add categories
-        $urls = $urls->merge($this->getCategories());
 
         // Add brands
         $urls = $urls->merge($this->getBrands());
@@ -88,26 +84,6 @@ class SitemapController extends Controller
                 ],
                 'priority' => '0.9',
                 'changefreq' => 'daily',
-            ],
-            // Categories listing
-            [
-                'loc' => "{$this->baseUrl}/categories",
-                'alternates' => [
-                    ['hreflang' => 'en', 'href' => "{$this->baseUrl}/categories"],
-                    ['hreflang' => 'lt', 'href' => "{$this->baseUrl}/lt/kategorijos"],
-                ],
-                'priority' => '0.8',
-                'changefreq' => 'weekly',
-            ],
-            // Brands listing
-            [
-                'loc' => "{$this->baseUrl}/brands",
-                'alternates' => [
-                    ['hreflang' => 'en', 'href' => "{$this->baseUrl}/brands"],
-                    ['hreflang' => 'lt', 'href' => "{$this->baseUrl}/lt/prekiu-zenklai"],
-                ],
-                'priority' => '0.7',
-                'changefreq' => 'weekly',
             ],
             // Shipping Policy
             [
@@ -171,32 +147,6 @@ class SitemapController extends Controller
     }
 
     /**
-     * Get all active categories
-     */
-    private function getCategories(): array
-    {
-        $categories = Category::where('is_active', true)
-            ->select(['id', 'slug', 'updated_at'])
-            ->get();
-
-        return $categories->map(function ($category) {
-            $enSlug = $category->getTranslation('slug', 'en');
-            $ltSlug = $category->getTranslation('slug', 'lt');
-
-            return [
-                'loc' => "{$this->baseUrl}/categories/{$enSlug}",
-                'lastmod' => $category->updated_at->toW3cString(),
-                'alternates' => [
-                    ['hreflang' => 'en', 'href' => "{$this->baseUrl}/categories/{$enSlug}"],
-                    ['hreflang' => 'lt', 'href' => "{$this->baseUrl}/lt/kategorijos/{$ltSlug}"],
-                ],
-                'priority' => '0.7',
-                'changefreq' => 'weekly',
-            ];
-        })->toArray();
-    }
-
-    /**
      * Get all active brands
      */
     private function getBrands(): array
@@ -211,7 +161,7 @@ class SitemapController extends Controller
                 'lastmod' => $brand->updated_at->toW3cString(),
                 'alternates' => [
                     ['hreflang' => 'en', 'href' => "{$this->baseUrl}/brands/{$brand->slug}"],
-                    ['hreflang' => 'lt', 'href' => "{$this->baseUrl}/lt/prekiu-zenklai/{$brand->slug}"],
+                    ['hreflang' => 'lt', 'href' => "{$this->baseUrl}/lt/prekes-zenklai/{$brand->slug}"],
                 ],
                 'priority' => '0.6',
                 'changefreq' => 'monthly',
