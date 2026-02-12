@@ -77,6 +77,7 @@ export default function About() {
         name: siteName,
         url: siteUrl,
         logo: `${siteUrl}/images/logo.svg`,
+        image: `${siteUrl}/images/og-image.jpg`,
         description: t('about.meta_description', 'Learn about Shop Natural - a family-run business dedicated to eco-friendly, natural products. Committed to sustainability and cruelty-free practices.'),
         email: 'info@naturalmente.lt',
         phone: '+37060117017',

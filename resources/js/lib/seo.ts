@@ -49,6 +49,7 @@ export interface OrganizationData {
     name: string;
     url: string;
     logo: string;
+    image?: string;
     description?: string;
     email?: string;
     phone?: string;
@@ -171,6 +172,7 @@ export function createOrganizationSchema(org: OrganizationData): object {
         name: org.name,
         url: org.url,
         logo: org.logo,
+        image: org.image || org.logo,
         description: org.description,
     };
 
