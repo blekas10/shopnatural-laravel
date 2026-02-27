@@ -71,6 +71,13 @@ return [
     | 7. Copy Client ID and Client Secret to .env file
     |
     */
+    'facebook' => [
+        'pixel_id' => env('FACEBOOK_PIXEL_ID', ''),
+        'access_token' => env('FACEBOOK_ACCESS_TOKEN', ''),
+        'api_version' => env('FACEBOOK_API_VERSION', 'v24.0'),
+        'capi_enabled' => env('FACEBOOK_CAPI_ENABLED', false),
+    ],
+
     'google' => [
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),

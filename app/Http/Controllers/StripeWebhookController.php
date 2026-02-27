@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Services\FacebookConversionsService;
 use App\Services\InvoiceService;
 use App\Services\PromoCodeService;
 use Illuminate\Http\Request;
@@ -147,6 +148,19 @@ class StripeWebhookController extends Controller
         Log::info('Stripe webhook: Confirmation emails dispatched', [
             'order_id' => $order->id,
         ]);
+
+        // Send Facebook CAPI Purchase event (non-blocking)
+        try {
+            $fbCapi = app(FacebookConversionsService::class);
+            if ($fbCapi->isConfigured()) {
+                $fbCapi->sendPurchaseEvent($order);
+            }
+        } catch (\Exception $e) {
+            Log::error('Stripe webhook: Facebook CAPI failed (non-blocking)', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
 
         // Venipak shipment is created manually via admin panel
     }

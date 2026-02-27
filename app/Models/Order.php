@@ -75,6 +75,11 @@ class Order extends Model
         'venipak_carrier_code',
         'venipak_carrier_tracking',
         'venipak_shipment_id',
+        // Facebook CAPI tracking (captured at checkout)
+        'fb_fbp',
+        'fb_fbc',
+        'fb_client_ip',
+        'fb_user_agent',
     ];
 
     protected function casts(): array

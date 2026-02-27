@@ -340,6 +340,12 @@ class CheckoutController extends Controller
 
                 'customer_email' => $validated['contact']['email'],
                 'locale' => app()->getLocale(),
+
+                // Facebook CAPI: capture browser tracking data for server-side events
+                'fb_fbp' => $request->cookie('_fbp'),
+                'fb_fbc' => $request->cookie('_fbc'),
+                'fb_client_ip' => $request->ip(),
+                'fb_user_agent' => $request->userAgent(),
             ]);
 
             Log::info('Checkout: Draft order updated to pending', [

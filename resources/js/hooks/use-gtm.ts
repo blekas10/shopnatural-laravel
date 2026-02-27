@@ -245,6 +245,7 @@ export function useGTM() {
 
         // Facebook CAPI: Purchase - most important event for ad optimization
         // Include user data for higher Event Match Quality (EMQ)
+        // eventId: optional stable ID for server-side dedup (e.g. `purchase_${orderNumber}`)
         purchase: (
             orderId: string,
             skus: string[],
@@ -253,10 +254,11 @@ export function useGTM() {
             numItems: number,
             currency = 'EUR',
             userData?: UserTrackingData,
+            eventId?: string,
         ) => {
             push({
                 event: 'Purchase',
-                event_id: generateEventId(),
+                event_id: eventId || generateEventId(),
                 first_party_collection: true,
                 order_id: orderId,
                 content_ids: skus,

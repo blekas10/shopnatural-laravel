@@ -88,7 +88,7 @@ export default function OrderConfirmation({ order }: OrderConfirmationProps) {
             city: order.shippingAddress.city,
             postalCode: order.shippingAddress.postalCode,
             country: order.shippingAddress.country,
-        });
+        }, `purchase_${order.orderNumber}`);
 
         sessionStorage.setItem(`purchase_tracked_${order.orderNumber}`, 'true');
     // eslint-disable-next-line react-hooks/exhaustive-deps
