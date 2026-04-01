@@ -281,15 +281,15 @@
         <table class="products-table">
             <thead>
                 <tr>
-                    <th style="width: 24%;">{{ $locale === 'lt' ? 'PRODUKTAS' : 'PRODUCT' }}</th>
-                    <th style="width: 10%;" class="text-center">{{ $locale === 'lt' ? 'KODAS' : 'SKU' }}</th>
-                    <th style="width: 6%;" class="text-center">{{ $locale === 'lt' ? 'KIEKIS' : 'QTY' }}</th>
-                    <th style="width: 10%;" class="text-right">{{ $locale === 'lt' ? 'KAINA' : 'PRICE' }}</th>
-                    <th style="width: 10%;" class="text-right">{{ $locale === 'lt' ? 'NUOLAIDA' : 'DISCOUNT' }}</th>
-                    <th style="width: 12%;" class="text-right">{{ $locale === 'lt' ? 'BE PVM' : 'EX VAT' }}</th>
-                    <th style="width: 8%;" class="text-center">{{ $locale === 'lt' ? 'PVM %' : 'VAT %' }}</th>
-                    <th style="width: 10%;" class="text-right">{{ $locale === 'lt' ? 'PVM €' : 'VAT €' }}</th>
-                    <th style="width: 10%;" class="text-right">{{ $locale === 'lt' ? 'VISO' : 'TOTAL' }}</th>
+                    <th style="width: 40%;">{{ $locale === 'lt' ? 'PRODUKTAS' : 'PRODUCT' }}</th>
+                    <th style="width: 9%;" class="text-center">{{ $locale === 'lt' ? 'KODAS' : 'SKU' }}</th>
+                    <th style="width: 5%;" class="text-center">{{ $locale === 'lt' ? 'KIEKIS' : 'QTY' }}</th>
+                    <th style="width: 9%;" class="text-right">{{ $locale === 'lt' ? 'KAINA' : 'PRICE' }}</th>
+                    <th style="width: 9%;" class="text-right">{{ $locale === 'lt' ? 'NUOLAIDA' : 'DISCOUNT' }}</th>
+                    <th style="width: 10%;" class="text-right">{{ $locale === 'lt' ? 'BE PVM' : 'EX VAT' }}</th>
+                    <th style="width: 7%;" class="text-center">{{ $locale === 'lt' ? 'PVM %' : 'VAT %' }}</th>
+                    <th style="width: 9%;" class="text-right">{{ $locale === 'lt' ? 'PVM €' : 'VAT €' }}</th>
+                    <th style="width: 12%;" class="text-right">{{ $locale === 'lt' ? 'VISO' : 'TOTAL' }}</th>
                 </tr>
             </thead>
             <tbody>
