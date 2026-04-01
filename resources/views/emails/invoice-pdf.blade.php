@@ -119,23 +119,23 @@
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 25px;
-            font-size: 8.5pt;
+            font-size: 7.5pt;
         }
 
         .products-table th {
             background: #f5f5f5;
             border: 1px solid #e0e0e0;
-            padding: 10px 8px;
+            padding: 6px 5px;
             text-align: left;
             font-weight: bold;
             color: #333;
             text-transform: uppercase;
-            font-size: 8pt;
+            font-size: 7pt;
         }
 
         .products-table td {
             border: 1px solid #e0e0e0;
-            padding: 10px 8px;
+            padding: 5px 5px;
             vertical-align: top;
         }
 
@@ -170,11 +170,11 @@
         .summary-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 9pt;
+            font-size: 8pt;
         }
 
         .summary-table td {
-            padding: 8px 12px;
+            padding: 4px 8px;
             border: 1px solid #e0e0e0;
         }
 
@@ -196,7 +196,7 @@
 
         .summary-table .total-row td {
             font-weight: bold;
-            font-size: 10pt;
+            font-size: 9pt;
             background: #f5f5f5;
         }
 
