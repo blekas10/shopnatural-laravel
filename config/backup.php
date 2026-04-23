@@ -199,24 +199,24 @@ return [
             'keep_all_backups_for_days' => 7,
 
             /*
-             * After 7 days, keep one backup per day for 14 more days
+             * After 7 days, keep one backup per week for 4 weeks
              */
-            'keep_daily_backups_for_days' => 14,
+            'keep_daily_backups_for_days' => 7,
 
             /*
-             * After that, keep weekly backups for 4 weeks
+             * After that, keep one weekly backup for up to 1 month
              */
             'keep_weekly_backups_for_weeks' => 4,
 
             /*
-             * Then monthly backups for 3 months
+             * Then keep one monthly backup for up to 1 year
              */
-            'keep_monthly_backups_for_months' => 3,
+            'keep_monthly_backups_for_months' => 12,
 
             /*
-             * Then yearly backups for 1 year
+             * No yearly backups beyond that
              */
-            'keep_yearly_backups_for_years' => 1,
+            'keep_yearly_backups_for_years' => 0,
 
             /*
              * Delete oldest backups when exceeding 2GB
